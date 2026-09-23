@@ -109,7 +109,7 @@
 const KEY='thbudget-v1';
 const cats=['Housing','Utilities','Groceries','Transportation','Health','Dining','Personal','Savings','Other'];
 const now=new Date();
-const monthKey=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')};
+const monthKey=d=>{if(d instanceof Date)return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');const m=String(d).match(/^(\d{4})-(\d{2})/);return m?m[1]+'-'+m[2]:''};
 const fmt=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(Number(n)||0);
 const dateStr=d=>{const x=new Date(d+'T12:00:00');return x.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})};
 const today=now.toISOString().slice(0,10);
