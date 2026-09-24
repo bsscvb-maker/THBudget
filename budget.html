@@ -100,7 +100,7 @@ async function requestTabData(position){
 function showTabData(result){
   const t=tabs.find(x=>x.position===activePosition),status=document.getElementById('dataStatus'),live=document.getElementById('liveData');
   if(!t||!status||!live)return;
-  status.className='status';status.innerHTML='<i></i> Live · private';
+  status.className='status status-connected';status.innerHTML='<i></i> Live · private';
   const rows=Array.isArray(result.rows)?result.rows:[];
   const letters=n=>{let out='';for(;n;n=Math.floor((n-1)/26))out=String.fromCharCode(65+(n-1)%26)+out;return out};
   const colCount=Math.max(0,Math.min(Number(result.columnCount)||0,20));
