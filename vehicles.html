@@ -229,6 +229,8 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 .category-manager{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0;padding:15px;border:1px solid #38577e;border-radius:10px;background:#152b49;color:#f2f7ff}.category-manager label{font-size:15px;font-weight:700}.category-manager select,.category-manager button{min-height:42px;padding:8px 12px;border-radius:7px;font:inherit}.category-manager select{background:#e4ebf2;color:#182b3d}.category-manager button{border:1px solid #7da8df;background:#244d83;color:white;cursor:pointer}.category-manager button:disabled{opacity:.55;cursor:wait}.category-manager [role=status]{width:100%;font-size:14px;color:#c8ddf7}
 .card-photo .category-icon{width:100%;height:100%;display:grid;place-items:center}
 .card-photo .category-icon svg{width:42px;height:42px;color:#b4d4ff}
+.photo-summary{display:grid;gap:12px;min-width:190px;flex:1;max-width:400px}.photo-summary div{padding:10px 0;border-bottom:1px solid #344968}.photo-summary span{display:block;color:#a9bfdc;font-size:13px;font-weight:700;text-transform:uppercase}.photo-summary strong{display:block;margin-top:4px;color:#f3f7ff;font-size:17px;overflow-wrap:anywhere}
+.delete-asset{margin-left:auto!important;border-color:#a96666!important;background:#4d292e!important}.delete-asset:hover{background:#71343a!important}.delete-asset:disabled{opacity:.55;cursor:wait}
 /* Roomier vehicle cards preserve the full photo without cropping. */
 #assetGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
 #assetGrid .asset-card{min-height:218px;padding:16px;gap:20px}
@@ -296,10 +298,10 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <div class="workspace-view" id="assetView" hidden>
 <button type="button" class="back-link" id="backCategory">Back</button>
 <div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span></div>
-<div class="category-manager"><label for="moveAssetCategory">Section</label><select id="moveAssetCategory" aria-label="Move item to section"></select><button type="button" id="moveAssetButton">Move</button><button type="button" id="unfileAssetButton">Remove from section</button><span id="categoryMoveStatus" role="status"></span></div>
+<div class="category-manager"><label for="moveAssetCategory">Section</label><select id="moveAssetCategory" aria-label="Move item to section"></select><button type="button" id="moveAssetButton">Move</button><button type="button" id="unfileAssetButton">Remove from section</button><button type="button" class="delete-asset" id="deleteAssetButton">Delete vehicle</button><span id="categoryMoveStatus" role="status"></span></div>
 <div class="edit-bar"><button type="button" id="toggleAssetEdit" aria-pressed="false">Edit details</button><span>Fields are locked until you choose Edit.</span></div>
 <div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Maintenance</button><button type="button" data-asset-tab="schedules">Service Schedules</button></div>
-<section class="asset-tab-panel" id="assetDetails"><div class="photo-manager"><div id="assetPhoto"></div><label class="photo-upload">Add or replace photo<input id="assetPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><span id="photoUploadStatus" role="status"></span></div><div id="assetEditStatus" class="asset-edit-status" role="status"></div><div class="asset-facts" id="assetFacts"></div><details class="report-details"><summary>Full specification report</summary><p id="assetReport"></p></details></section>
+<section class="asset-tab-panel" id="assetDetails"><div class="photo-manager"><div id="assetPhoto"></div><div class="photo-summary" id="photoSummary"></div><label class="photo-upload">Add or replace photo<input id="assetPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><span id="photoUploadStatus" role="status"></span></div><div id="assetEditStatus" class="asset-edit-status" role="status"></div><div class="asset-facts" id="assetFacts"></div></section>
 <section class="asset-tab-panel" id="assetMileage" hidden></section>
 <section class="asset-tab-panel" id="assetMaintenance" hidden></section>
 <section class="asset-tab-panel" id="assetSchedules" hidden></section>
@@ -375,9 +377,9 @@ function matchingProfile(r){
   return clean(p.make)===clean(r.make)&&String(p.year)===String(r.year)&&[clean(r.model).slice(0,5),clean(p.model).slice(0,5)].some(t=>t.length>=4&&name.includes(t)&&pn.includes(t));
  });
 }
-const used=new Set();
-const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);return {...p,...r,category:p?.category?normalizeCategory(p):normalizeCategory(r),id:'r'+i,photo:p?.photo||''}});
-const extras=profiles.filter(p=>!used.has(p)).map((p,i)=>({...p,category:normalizeCategory(p),id:'p'+i}));
+const used=new Set(), deletedProfiles=profiles.filter(p=>clean(p.status)==='deleted');
+const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);if(p&&clean(p.status)==='deleted')return null;return {...p,...r,category:p?.category?normalizeCategory(p):normalizeCategory(r),id:'r'+i,photo:p?.photo||''}}).filter(Boolean);
+const extras=profiles.filter(p=>!used.has(p)&&clean(p.status)!=='deleted').map((p,i)=>({...p,category:normalizeCategory(p),id:'p'+i}));
 const listed=[...(D.activeFleet||[]),...(D.inactiveFleet||[])];
 function sameListedAsset(a,b){
  const am=clean(a.make),bm=clean(b.make),an=clean(a.model),bn=clean(b.model);
@@ -405,7 +407,7 @@ function listedCategory(a){const n=clean(a.make+' '+a.model);
  return 'Cars';
 }
 const assets=primary.concat(extras);
-for(const [i,item] of listed.entries())if(!assets.some(a=>sameListedAsset(a,item)))assets.push({...item,category:listedCategory(item),id:'f'+i});
+for(const [i,item] of listed.entries())if(!deletedProfiles.some(p=>sameListedAsset(p,item))&&!assets.some(a=>sameListedAsset(a,item)))assets.push({...item,category:listedCategory(item),id:'f'+i});
 const mileage=D.vehicles||[], services=D.services||[];
 const serviceKeys={'keystone':'331','ram3500':'3500','toyota4runner':'4Runner','chrysleraspen':'Aspen','hondacivic':'Civic','fordmustang':'Mustang','fordf150':'F150','harleydavidsonultra':'FLHTCUI','harleydavidsonroad':'FLTRK','makdaddy':'Legend','stirling':'Stirling','westbrook':'Stirling','trek':'trek','colemanb200':'B200','volpam':'SP03','coolster':'3050C','xpro':'Xpro'};
 function serviceFor(a){const name=clean(a.make+' '+a.model);const key=Object.entries(serviceKeys).find(([prefix])=>name.startsWith(prefix))?.[1];return key?services.filter(s=>clean(s.asset)===clean(key)):[]}
@@ -460,8 +462,7 @@ function renderAsset(tab='details'){
  const values=[['Year','year'],['Make','make'],['Model','model'],['VIN / serial number','vin'],['Tag / plate','tag'],['Engine','engine'],['Transmission','transmission'],['Tire size','tireSize'],['Color','color'],['Vehicle number','vehicleNumber'],['Registration renewal','renewal']];
  document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(asset[key]||'')+'" placeholder="Not recorded" readonly></label>').join('');
  document.getElementById('assetEditStatus').textContent='';
- const report=asset.reportText||'';
- document.getElementById('assetReport').textContent=report;
+  document.getElementById('photoSummary').innerHTML=[['Engine',asset.engine],['VIN / serial number',asset.vin]].map(([label,value])=>'<div><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>').join('');
  const photo=asset.photo||'';
  document.getElementById('assetPhoto').innerHTML=asset.photoFileId?'<div class="photo-empty">Loading photo…</div>':photo?'<img class="asset-photo" src="'+esc(photo)+'" alt="'+esc(asset.make+' '+asset.model)+'" referrerpolicy="no-referrer">':'<div class="photo-empty">No photo yet</div>';
  if(asset.photoObjectUrl){document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(asset.photoObjectUrl)+'" alt="'+esc(asset.make+' '+asset.model)+'">'}else if(asset.photoFileId)thPhotoObjectUrl(asset.photoFileId).then(src=>{if(document.getElementById('assetPhoto')&&asset===currentAsset()){asset.photoObjectUrl=src;document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(src)+'" alt="'+esc(asset.make+' '+asset.model)+'">';}}).catch(()=>{if(asset===currentAsset())document.getElementById('assetPhoto').innerHTML='<div class="photo-empty">Photo unavailable</div>'});
@@ -526,6 +527,19 @@ async function moveAssetTo(next){
 }
 document.getElementById('moveAssetButton').addEventListener('click',()=>moveAssetTo(document.getElementById('moveAssetCategory').value));
 document.getElementById('unfileAssetButton').addEventListener('click',()=>moveAssetTo('Unfiled'));
+document.getElementById('deleteAssetButton').addEventListener('click',async()=>{
+ const a=asset;if(!a)return;
+ const name=[a.year,a.make,a.model].filter(Boolean).join(' ');
+ if(!confirm('Delete '+name+' from the vehicle directory? This cannot be undone here. Service history will remain in the workbook.'))return;
+ const button=document.getElementById('deleteAssetButton'),message=document.getElementById('categoryMoveStatus');
+ button.disabled=true;message.textContent='Deleting vehicle…';
+ try{
+  await ensureProfileRow(a);
+  await thWriteCell('Portal Asset Profiles','I'+a.profileRow,'Deleted');
+  a.status='Deleted';assets.splice(assets.indexOf(a),1);
+  asset=null;renderCategories();renderCategory();show('categoryView');
+ }catch(error){message.textContent=error.message;button.disabled=false}
+});
 document.getElementById('assetFacts').addEventListener('change',async e=>{
  const input=e.target.closest('[data-asset-field]');if(!input||!asset||!editing)return;
  const a=asset,key=input.dataset.assetField,next=input.value,prior=a[key]||'',message=document.getElementById('assetEditStatus');
@@ -537,6 +551,7 @@ document.getElementById('assetFacts').addEventListener('change',async e=>{
   a[key]=next;
   message.textContent='Saved to your workbook.';
   if(['year','make','model'].includes(key)){document.getElementById('assetTitle').textContent=[a.year,a.make,a.model].filter(Boolean).join(' ');renderCategory()}
+   if(['engine','vin'].includes(key))document.getElementById('photoSummary').innerHTML=[['Engine',a.engine],['VIN / serial number',a.vin]].map(([label,value])=>'<div><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>').join('');
  }catch(error){input.value=prior;message.textContent=error.message;message.classList.add('error')}
  finally{input.disabled=false}
 });
