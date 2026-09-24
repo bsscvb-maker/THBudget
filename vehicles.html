@@ -436,7 +436,7 @@ document.getElementById('assetPhotoInput').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file||!asset)return;const current=asset;
  const statusEl=document.getElementById('photoUploadStatus'),label=document.querySelector('.photo-upload');
  label.style.pointerEvents='none';statusEl.textContent='Uploading photo…';
- try {const url=await thUploadAssetPhoto(file,current);current.photo=url;current.photoObjectUrl=await thPhotoObjectUrl(current.photoFileId);renderAsset();renderCategory();document.getElementById('photoUploadStatus').textContent='Photo saved to this item.'}
+ try {const url=await thUploadAssetPhoto(file,current);current.photo=url;current.photoObjectUrl=URL.createObjectURL(file);renderAsset();renderCategory();document.getElementById('photoUploadStatus').textContent='Photo saved to this item.'}
  catch(error){statusEl.textContent=error.message}
  finally {label.style.pointerEvents='';e.target.value=''}
 });
