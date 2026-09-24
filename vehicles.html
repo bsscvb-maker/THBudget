@@ -353,7 +353,20 @@ function renderCategory(){
  const items=assets.filter(a=>a.category===category).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);return (Number.isFinite(ay)?ay:Infinity)-(Number.isFinite(by)?by:Infinity)||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))}), shown=items.filter(a=>status==='all'||clean(a.status)===status);
  document.getElementById('categoryTitle').textContent=category;
  document.getElementById('statusFilters').innerHTML=['all','active','inactive'].map(s=>'<button type="button" class="filter-chip '+(status===s?'active':'')+'" data-status="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' · '+(s==='all'?items.length:items.filter(a=>clean(a.status)===s).length)+'</button>').join('');
- document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>'<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-photo">'+(a.photo?'<img src="'+esc(a.photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<span class="category-icon" aria-hidden="true">'+icon(category)+'</span>')+'</span><span class="card-copy"><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><small>Engine: '+esc(a.engine&&a.engine!=='N/A'?a.engine:'Not recorded')+'</small><small>'+esc(a.status||'Status to review')+'</small></span></button>').join(''):'<div class="asset-note">No items in this view yet.</div>';
+ document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>'<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-photo">'+(a.photoObjectUrl||a.photoFileId||a.photo?'<img src="'+esc(a.photoObjectUrl||(!a.photoFileId?a.photo:''))+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<span class="category-icon" aria-hidden="true">'+icon(category)+'</span>')+'</span><span class="card-copy"><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><small>Engine: '+esc(a.engine&&a.engine!=='N/A'?a.engine:'Not recorded')+'</small><small>'+esc(a.status||'Status to review')+'</small></span></button>').join(''):'<div class="asset-note">No items in this view yet.</div>';
+ for(const a of shown.filter(a=>a.photoFileId&&!a.photoObjectUrl)){
+  thPhotoObjectUrl(a.photoFileId).then(src=>{
+   a.photoObjectUrl=src;
+   const card=[...document.querySelectorAll('#assetGrid [data-asset]')].find(el=>el.dataset.asset===a.id);
+   const img=card?.querySelector('.card-photo img');
+   if(img){img.src=src;img.hidden=false}
+  }).catch(()=>{
+   const card=[...document.querySelectorAll('#assetGrid [data-asset]')].find(el=>el.dataset.asset===a.id);
+   const spot=card?.querySelector('.card-photo');
+   if(spot)spot.innerHTML='<span class="category-icon" aria-hidden="true">'+icon(category)+'</span>';
+  });
+ }
+
 }
 function renderAsset(tab='details'){
  editing=false;
