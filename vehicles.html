@@ -175,7 +175,7 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 .th-auth-mark{display:inline-grid;place-items:center;width:48px;height:48px;background:#20c3cc;color:#10252b;font-weight:900;border-radius:8px}
 #th-auth h1{color:#fff;font-size:32px;margin:15px 0}#th-auth p{color:#d0e3e6}#th-sign-in{padding:12px 22px;background:#24c5ce;color:#10252b;border:0;border-radius:6px;font:700 16px system-ui;cursor:pointer}#th-sign-in:focus-visible{outline:3px solid white;outline-offset:3px}
 #th-auth-message{font-size:13px;min-height:2em}
-</style><div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TH</span><span>THBudget<small>Personal command center</small></span></a><nav aria-label="THBudget pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link active" href="vehicles.html"><span class="th-nav-icon">▣</span>Vehicles</a><a class="th-nav-link " href="finance.html"><span class="th-nav-icon">◫</span>Finance</a></nav><div class="th-sidebar-foot">© 2026 THBudget<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Vehicles</strong><small>Vehicle dashboard and individual profiles</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="wrap">
+ .report-details{margin-top:18px;border:1px solid var(--line);padding:13px;border-radius:4px}.report-details summary{cursor:pointer;font-weight:700}.report-details p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;color:var(--muted)}.notes-cell{white-space:normal;min-width:180px;max-width:480px}#assetMaintenance table{min-width:700px} </style><div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TH</span><span>THBudget<small>Personal command center</small></span></a><nav aria-label="THBudget pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link active" href="vehicles.html"><span class="th-nav-icon">▣</span>Vehicles</a><a class="th-nav-link " href="finance.html"><span class="th-nav-icon">◫</span>Finance</a></nav><div class="th-sidebar-foot">© 2026 THBudget<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Vehicles</strong><small>Vehicle dashboard and individual profiles</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="wrap">
 <header>
 <a class="brand" id="homeLink" href="#"><span class="logo">TH</span><span>THBudget<small>VEHICLE WORKSPACE</small></span></a>
 <nav class="actions"><a class="link primary" id="allLink" href="#">FULL PORTAL ↗</a></nav>
@@ -197,11 +197,11 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 <button type="button" class="back-link" id="backCategory">← Back to category</button>
 <div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span></div>
 <div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Maintenance</button></div>
-<section class="asset-tab-panel" id="assetDetails"><div id="assetPhoto"></div><div class="asset-facts" id="assetFacts"></div></section>
+<section class="asset-tab-panel" id="assetDetails"><div id="assetPhoto"></div><div class="asset-facts" id="assetFacts"></div><details class="report-details"><summary>Full specification report</summary><p id="assetReport"></p></details></section>
 <section class="asset-tab-panel" id="assetMileage" hidden></section>
-<section class="asset-tab-panel" id="assetMaintenance" hidden><div class="asset-note"><strong>No maintenance records connected yet.</strong><br>Service history and upcoming work for this item will appear here when a maintenance log is added to your private Sheet.</div></section>
+<section class="asset-tab-panel" id="assetMaintenance" hidden></section>
 </div>
-<div class="privacy"><span><strong>Private workspace.</strong> These live records are read from your Google Sheet and stay out of the public GitHub files.</span><span>THB · VEHICLE OPERATIONS</span></div>
+<div class="privacy"><span><strong>Private workspace.</strong> Vehicle specifications and service history are read from your Google Sheet and stay out of the public GitHub files.</span><span>THB · VEHICLE OPERATIONS</span></div>
 <footer class="foot"><span>THBUDGET · VEHICLES</span><span>PRIVATE SHEET CONNECTION</span></footer>
 </main></div>
 </div></div></div>
@@ -233,7 +233,9 @@ const used=new Set();
 const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);return {...p,...r,category:r.category,id:'r'+i,photo:p?.photo||''}});
 const extras=profiles.filter(p=>!used.has(p)).map((p,i)=>({...p,category:normalizeCategory(p),id:'p'+i}));
 const assets=primary.concat(extras);
-const mileage=D.vehicles||[];
+const mileage=D.vehicles||[], services=D.services||[];
+const serviceKeys={'keystone':'331','ram3500':'3500','toyota4runner':'4Runner','chrysleraspen':'Aspen','hondacivic':'Civic','fordmustang':'Mustang','fordf150':'F150','harleydavidsonultra':'FLHTCUI','harleydavidsonroad':'FLTRK','makdaddy':'Legend','stirling':'Stirling','westbrook':'Stirling','trek':'trek','colemanb200':'B200','volpam':'SP03','coolster':'3050C','xpro':'Xpro'};
+function serviceFor(a){const name=clean(a.make+' '+a.model);const key=Object.entries(serviceKeys).find(([prefix])=>name.startsWith(prefix))?.[1];return key?services.filter(s=>clean(s.asset)===clean(key)):[]}
 const alias={'ram3500':'3500 DRW','fordmustang':'Mustang','hondacivic':'Civic','harleydavidsonroadglide':'FLTRK','harleydavidsonultra':'FLHTCUI','keystonebullet':'Bullet','makdaddylegend':'Legend','fordf150':'F150','stirlingtrailer':'Stirling'};
 function mileageFor(a){
  const name=clean(a.make+' '+a.model), year=String(a.year);
@@ -254,12 +256,16 @@ function renderAsset(tab='details'){
  document.getElementById('assetCategory').textContent=asset.category;
  document.getElementById('assetTitle').textContent=[asset.year,asset.make,asset.model].filter(Boolean).join(' ');
  document.getElementById('assetStatus').textContent=asset.status||'Status to review';
- const values=[['VIN / serial number',asset.vin],['Tag / plate',asset.tag],['Year',asset.year],['Make',asset.make],['Model',asset.model],['Engine',asset.engine],['Transmission',asset.transmission],['Tire size',asset.tireSize],['Color',asset.color]];
+ const values=[['VIN / serial number',asset.vin],['Tag / plate',asset.tag],['Year',asset.year],['Make',asset.make],['Model',asset.model],['Engine',asset.engine],['Transmission',asset.transmission],['Tire size',asset.tireSize],['Color',asset.color],['Vehicle number',asset.vehicleNumber],['Registration renewal (recorded)',asset.renewal],['Insurance company (recorded)',asset.insuranceCompany],['Driver',asset.driver],['Department',asset.department],['Source type',asset.sourceType]];
  document.getElementById('assetFacts').innerHTML=values.map(([k,v])=>fact(k,v)).join('');
+ const report=asset.reportText||'';
+ document.getElementById('assetReport').textContent=report;
  const photo=asset.photo||'';
  document.getElementById('assetPhoto').innerHTML=photo.startsWith('https://drive.google.com/thumbnail?')?'<img class="asset-photo" src="'+esc(photo)+'" alt="'+esc(asset.make+' '+asset.model)+'" referrerpolicy="no-referrer" onerror="this.hidden=true">':'';
  const m=mileageFor(asset);
  document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+[['Current reading',m.currentMileage],['Starting reading',m.startMileage],['Mileage added',m.addedMileage],['Miles per month',m.monthlyEstimate],['Estimated miles per year',m.annualEstimate],['Service start',m.serviceStart]].map(([k,v])=>fact(k,v)).join('')+'</div><p class="asset-note">Mileage source: private workbook · '+esc(D.asOf||'latest')+'</p>':'<div class="asset-note"><strong>No linked mileage record.</strong><br>This item has no matching reading in the private mileage sheet.</div>';
+ const entries=serviceFor(asset);
+ document.getElementById('assetMaintenance').innerHTML=entries.length?'<p class="asset-note">'+entries.length+' recorded service entries · source: imported maintenance logs</p><div class="table-wrap"><table><thead><tr><th>Date</th><th>Service item</th><th>Odometer</th><th>Cost</th><th>Notes</th></tr></thead><tbody>'+entries.map(e=>'<tr><td>'+esc(e.date)+'</td><td>'+esc(e.item)+'</td><td>'+esc(e.odometer)+'</td><td>'+esc(e.cost)+'</td><td class="notes-cell">'+esc(e.notes)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="asset-note">No service entries were included for this item.</div>';
  for(const b of document.querySelectorAll('[data-asset-tab]'))b.classList.toggle('active',b.dataset.assetTab===tab);
  for(const [name,id] of [['details','assetDetails'],['mileage','assetMileage'],['maintenance','assetMaintenance']])document.getElementById(id).hidden=name!==tab;
 }
