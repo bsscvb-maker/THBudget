@@ -224,6 +224,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 .category-card{min-height:130px;justify-content:center}
 .category-card .category-icon{width:50px;height:50px;background:#122d57;color:#c6ddff}
 .category-icon svg{width:30px;height:30px;display:block}
+.category-manager{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0;padding:15px;border:1px solid #38577e;border-radius:10px;background:#152b49;color:#f2f7ff}.category-manager label{font-size:15px;font-weight:700}.category-manager select,.category-manager button{min-height:42px;padding:8px 12px;border-radius:7px;font:inherit}.category-manager select{background:#e4ebf2;color:#182b3d}.category-manager button{border:1px solid #7da8df;background:#244d83;color:white;cursor:pointer}.category-manager button:disabled{opacity:.55;cursor:wait}.category-manager [role=status]{width:100%;font-size:14px;color:#c8ddf7}
 .card-photo .category-icon{width:100%;height:100%;display:grid;place-items:center}
 .card-photo .category-icon svg{width:42px;height:42px;color:#b4d4ff}
 /* Roomier vehicle cards preserve the full photo without cropping. */
@@ -292,6 +293,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <div class="workspace-view" id="assetView" hidden>
 <button type="button" class="back-link" id="backCategory">Back</button>
 <div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span></div>
+<div class="category-manager"><label for="moveAssetCategory">Section</label><select id="moveAssetCategory" aria-label="Move item to section"></select><button type="button" id="moveAssetButton">Move</button><button type="button" id="unfileAssetButton">Remove from section</button><span id="categoryMoveStatus" role="status"></span></div>
 <div class="edit-bar"><button type="button" id="toggleAssetEdit" aria-pressed="false">Edit details</button><span>Fields are locked until you choose Edit.</span></div>
 <div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Maintenance</button><button type="button" data-asset-tab="schedules">Service Schedules</button></div>
 <section class="asset-tab-panel" id="assetDetails"><div class="photo-manager"><div id="assetPhoto"></div><label class="photo-upload">Add or replace photo<input id="assetPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><span id="photoUploadStatus" role="status"></span></div><div id="assetEditStatus" class="asset-edit-status" role="status"></div><div class="asset-facts" id="assetFacts"></div><details class="report-details"><summary>Full specification report</summary><p id="assetReport"></p></details></section>
@@ -329,6 +331,7 @@ const paths={
 function icon(c){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[c]||paths.Cars)+'</svg>'}
 function normalizeCategory(p){
  const source=String(p.category||'').toLowerCase(), name=clean([p.make,p.model,p.name].filter(Boolean).join(' '));
+ if(p.category==='Unfiled'||categories.includes(p.category))return p.category;
  if(/pressurewasher|powerwasher/.test(name))return 'Outdoor Equipment';
  if(/aircompressor|compressor/.test(name))return 'Shop Equipment';
  if(/weedeater|weedwacker|brushcutter|trimmer|blower|chainsaw|mower/.test(name)&&!/motorcycle/.test(source))return 'Yard Equipment';
@@ -359,7 +362,7 @@ function matchingProfile(r){
  });
 }
 const used=new Set();
-const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);return {...p,...r,category:normalizeCategory(r),id:'r'+i,photo:p?.photo||''}});
+const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);return {...p,...r,category:p?.category?normalizeCategory(p):normalizeCategory(r),id:'r'+i,photo:p?.photo||''}});
 const extras=profiles.filter(p=>!used.has(p)).map((p,i)=>({...p,category:normalizeCategory(p),id:'p'+i}));
 const listed=[...(D.activeFleet||[]),...(D.inactiveFleet||[])];
 function sameListedAsset(a,b){
@@ -407,7 +410,7 @@ function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'<
 let category='',asset=null,status='all',editing=false;
 const currentAsset=()=>asset;
 function show(view){for(const id of ['dashboardView','categoryView','assetView'])document.getElementById(id).hidden=id!==view;window.scrollTo({top:0,behavior:'smooth'})}
-function renderCategories(){document.getElementById('categoryGrid').innerHTML=categories.filter(c=>assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
+function renderCategories(){document.getElementById('categoryGrid').innerHTML=[...categories,'Unfiled'].filter(c=>assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
 function renderCategory(){
  const items=assets.filter(a=>a.category===category).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);return (Number.isFinite(ay)?ay:Infinity)-(Number.isFinite(by)?by:Infinity)||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))}), shown=items.filter(a=>status==='all'||clean(a.status)===status);
  document.getElementById('categoryTitle').textContent=category;
@@ -434,6 +437,8 @@ function renderAsset(tab='details'){
  document.getElementById('toggleAssetEdit').setAttribute('aria-pressed','false');
  document.querySelector('.edit-bar span').textContent='Fields are locked until you choose Edit.';
  document.getElementById('assetCategory').textContent=asset.category;
+ document.getElementById('moveAssetCategory').innerHTML=categories.map(c=>'<option value="'+esc(c)+'"'+(c===asset.category?' selected':'')+'>'+esc(c)+'</option>').join('');
+ document.getElementById('categoryMoveStatus').textContent='';
  document.getElementById('assetTitle').textContent=[asset.year,asset.make,asset.model].filter(Boolean).join(' ');
  document.getElementById('assetStatus').textContent=asset.status||'Status to review';
  const values=[['Year','year'],['Make','make'],['Model','model'],['VIN / serial number','vin'],['Tag / plate','tag'],['Engine','engine'],['Transmission','transmission'],['Tire size','tireSize'],['Color','color'],['Vehicle number','vehicleNumber'],['Registration renewal','renewal']];
@@ -488,6 +493,22 @@ async function ensureProfileRow(a){
  if(!a.profileRow)throw new Error('Could not locate the new profile row.');
  return a.profileRow;
 }
+async function moveAssetTo(next){
+ const a=asset, message=document.getElementById('categoryMoveStatus');
+ if(!a||next===a.category){message.textContent='This item is already in that section.';return}
+ const controls=[document.getElementById('moveAssetCategory'),document.getElementById('moveAssetButton'),document.getElementById('unfileAssetButton')];
+ controls.forEach(control=>control.disabled=true);message.textContent='Saving section…';
+ try{
+  await ensureProfileRow(a);
+  await thWriteCell('Portal Asset Profiles','H'+a.profileRow,next);
+  a.category=next;
+  renderCategories();renderCategory();renderAsset();
+  document.getElementById('categoryMoveStatus').textContent=next==='Unfiled'?'Removed from the section. Find it in Unfiled.':'Moved to '+next+'.';
+ }catch(error){message.textContent=error.message}
+ finally{controls.forEach(control=>control.disabled=false)}
+}
+document.getElementById('moveAssetButton').addEventListener('click',()=>moveAssetTo(document.getElementById('moveAssetCategory').value));
+document.getElementById('unfileAssetButton').addEventListener('click',()=>moveAssetTo('Unfiled'));
 document.getElementById('assetFacts').addEventListener('change',async e=>{
  const input=e.target.closest('[data-asset-field]');if(!input||!asset||!editing)return;
  const a=asset,key=input.dataset.assetField,next=input.value,prior=a[key]||'',message=document.getElementById('assetEditStatus');
