@@ -17,6 +17,15 @@ function thClearSession() {
   sessionStorage.removeItem(TH_SESSION_KEY);
 }
 
+function thSignOut() {
+  const token = thToken;
+  thClearSession();
+  if (token && window.google?.accounts?.oauth2?.revoke) {
+    google.accounts.oauth2.revoke(token, () => {});
+  }
+  location.reload();
+}
+
 function thStatus(message) {
   document.getElementById('th-auth-message').textContent = message;
 }
