@@ -211,6 +211,12 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 .report-details{background:#142236;border-color:#344968}
 @media(max-width:900px){.asset-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.category-grid,.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.category-card{min-height:133px;padding:14px}.category-card strong,.asset-card strong{font-size:16px}.asset-grid{grid-template-columns:1fr}.asset-card{min-height:116px}.card-photo{width:90px;height:82px}.asset-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.asset-fact{min-height:78px;padding:12px 2px}.asset-fact span{font-size:12px}.asset-fact strong{font-size:15px}.asset-tabs button{padding:9px 12px;font-size:14px}}
+
+.category-card{min-height:130px;justify-content:center}
+.category-card .category-icon{width:50px;height:50px;background:#122d57;color:#c6ddff}
+.category-icon svg{width:30px;height:30px;display:block}
+.card-photo .category-icon{width:100%;height:100%;display:grid;place-items:center}
+.card-photo .category-icon svg{width:42px;height:42px;color:#b4d4ff}
 </style>
 </head>
 <body data-th-page="fleet"><div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-mark">TH</div><h1 id="th-auth-title">THBudget</h1><p>Your private workbook stays in Google Sheets. Sign in to view it here on GitHub Pages.</p><button type="button" id="th-sign-in">Sign in with Google</button><p id="th-auth-message" role="status">Use the Google account that can open your TH Budget Sheet.</p></div></div>
@@ -254,15 +260,46 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 function renderFleetPage(D,PORTAL) {
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clean=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-const categories=['Cars','Trucks & SUVs','Classic & Project','Motorcycles','Boats & Watercraft','Trailers','RVs','Golf Carts','ATVs & Quads','Scooters & Mopeds','Mini Bikes','Tractors','Small Engines','Yard Equipment','Bicycles','Other'];
-const icons={'Cars':'🚗','Trucks & SUVs':'🛻','Classic & Project':'🚙','Motorcycles':'🏍️','Boats & Watercraft':'🚤','Trailers':'🛞','RVs':'🚐','Golf Carts':'🛺','ATVs & Quads':'🏎️','Scooters & Mopeds':'🛵','Mini Bikes':'🏍️','Tractors':'🚜','Small Engines':'⚙️','Yard Equipment':'🧰','Bicycles':'🚲','Other':'📦'};
+const categories=['Cars','Trucks','SUVs','Classic','Motorcycles','Boats','Trailers','RVs','Golf Carts','ATVs & Quads','Scooters & Mopeds','Mini Bikes','Tractors','Yard Equipment','Outdoor Equipment','Shop Equipment','Bicycles'];
+const paths={
+'Cars':'<path d="M4 15h16l-2-6H6l-2 6Zm2-6 2-3h8l2 3M5 15v3m14-3v3M7 18h10"/>',
+'Trucks':'<path d="M2 7h12v10H2zM14 11h4l4 4v2h-8M6 17a2 2 0 1 0 4 0m8 0a2 2 0 1 0 4 0"/>',
+'SUVs':'<path d="M3 16h18l-2-6-3-3H8l-3 3-2 6ZM5 16v2m14-2v2M7 10h10M8 18h8"/>',
+'Classic':'<path d="M3 16h18l-2-4H5l-2 4Zm2-4 3-5h8l3 5M6 16v2m12-2v2M9 7v5m6-5v5"/>',
+'Motorcycles':'<circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="m5 17 5-7 4 7h5l-4-8h-3m3 0h4"/>',
+'Boats':'<path d="M3 15h18l-3 5H6l-3-5Zm9-11v11M12 5l6 8h-6M3 21c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1"/>',
+'Trailers':'<path d="M2 7h17v10H2zM19 14h3M6 17a2 2 0 1 0 4 0m7 0a2 2 0 1 0 4 0"/>',
+'RVs':'<path d="M2 6h17l3 5v7H2zM5 9h5v4H5zM13 9h5v4h-5M6 18a2 2 0 1 0 4 0m8 0a2 2 0 1 0 4 0"/>',
+'Golf Carts':'<path d="M3 16h18l-2-5H5l-2 5ZM5 11l3-6h8l3 6M8 5h8M6 16a2 2 0 1 0 4 0m8 0a2 2 0 1 0 4 0"/>',
+'ATVs & Quads':'<circle cx="5" cy="18" r="3"/><circle cx="19" cy="18" r="3"/><path d="M5 18h14l-3-7H9l-4 7Zm5-7 2-4h3l2 4"/>',
+'Scooters & Mopeds':'<circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 18h9l4-5-2-7h-3M9 12h5M17 6h4"/>',
+'Mini Bikes':'<circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="m5 18 5-6 4 6h5l-3-7h-4M10 12l-2-3"/>',
+'Tractors':'<circle cx="6" cy="18" r="3"/><circle cx="19" cy="17" r="2"/><path d="M6 18h13M9 15V7h7v8M16 11h4l2 4M10 7V4"/>',
+'Yard Equipment':'<path d="m4 20 13-13 3 3L7 23M15 6l3-3 3 3-3 3M4 20l3 3"/>',
+'Outdoor Equipment':'<path d="M4 16h14v5H4zM7 16V8h8v8M10 8V4h3l2 4M18 18h3m-2 3h2M3 11h4"/>',
+'Shop Equipment':'<path d="M4 10h16v8H4zM7 10V7h10v3M8 18v3m8-3v3M9 14h6M20 12h2"/>',
+'Bicycles':'<circle cx="5" cy="17" r="4"/><circle cx="19" cy="17" r="4"/><path d="m5 17 5-8 4 8 5-8M9 9h5M18 9h3"/>'
+};
+function icon(c){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[c]||paths.Cars)+'</svg>'}
 function normalizeCategory(p){
- const c=p.category||'';
- if(c==='Trailers & RVs')return clean(p.make).includes('keystone')?'RVs':'Trailers';
- if(c==='Cars & SUVs')return 'Trucks & SUVs';
- if(c==='Small Engine Equipment')return /trimmer|blower|saw|weed|brushcutter/i.test(p.model||'')?'Yard Equipment':'Small Engines';
- if(c==='Trucks'&&String(p.year)==='1977')return 'Classic & Project';
- return categories.includes(c)?c:'Other';
+ const source=String(p.category||'').toLowerCase(), name=clean([p.make,p.model,p.name].filter(Boolean).join(' '));
+ if(/pressurewasher|powerwasher/.test(name))return 'Outdoor Equipment';
+ if(/aircompressor|compressor/.test(name))return 'Shop Equipment';
+ if(/weedeater|weedwacker|brushcutter|trimmer|blower|chainsaw|mower/.test(name)&&!/motorcycle/.test(source))return 'Yard Equipment';
+ if(/classic|project|antique/.test(source)||String(p.year)==='1977'||name.includes('1999chevrolettahoe'))return 'Classic';
+ if(/boat|watercraft|jet ski|jetski/.test(source))return 'Boats';
+ if(/trailer/.test(source)&&!name.includes('keystone'))return 'Trailers';
+ if(/\brv\b|camper|motorhome/.test(source)||name.includes('keystone'))return 'RVs';
+ if(/truck|suv|cars & suvs/.test(source)){
+  if(/4runner|aspen|tahoe|enclave|suburban|suv|highlander|cherokee|explorer|expedition/.test(name))return 'SUVs';
+  if(/ram|f150|f250|f350|silverado|pickup|truck/.test(name))return 'Trucks';
+  return source.includes('truck')?'Trucks':'SUVs';
+ }
+ if(/small engine/.test(source))return 'Outdoor Equipment';
+ const match=categories.find(x=>x.toLowerCase()===source);
+ if(match)return match;
+ if(/car/.test(source))return 'Cars';
+ return 'Shop Equipment';
 }
 const registry=D.registry||[], profiles=D.profiles||[];
 function matchingProfile(r){
@@ -275,7 +312,7 @@ function matchingProfile(r){
  });
 }
 const used=new Set();
-const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);return {...p,...r,category:r.category,id:'r'+i,photo:p?.photo||''}});
+const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);return {...p,...r,category:normalizeCategory(r),id:'r'+i,photo:p?.photo||''}});
 const extras=profiles.filter(p=>!used.has(p)).map((p,i)=>({...p,category:normalizeCategory(p),id:'p'+i}));
 const assets=primary.concat(extras);
 const mileage=D.vehicles||[], services=D.services||[];
@@ -290,12 +327,12 @@ function mileageFor(a){
 function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>'}
 let category='',asset=null,status='all';
 function show(view){for(const id of ['dashboardView','categoryView','assetView'])document.getElementById(id).hidden=id!==view;window.scrollTo({top:0,behavior:'smooth'})}
-function renderCategories(){document.getElementById('categoryGrid').innerHTML=categories.map(c=>{const count=assets.filter(a=>a.category===c).length;return '<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon" aria-hidden="true">'+icons[c]+'</span><strong>'+esc(c)+'</strong><small>'+count+' item'+(count===1?'':'s')+'</small></button>'}).join('')}
+function renderCategories(){document.getElementById('categoryGrid').innerHTML=categories.filter(c=>assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
 function renderCategory(){
  const items=assets.filter(a=>a.category===category), shown=items.filter(a=>status==='all'||clean(a.status)===status);
  document.getElementById('categoryTitle').textContent=category;
  document.getElementById('statusFilters').innerHTML=['all','active','inactive'].map(s=>'<button type="button" class="filter-chip '+(status===s?'active':'')+'" data-status="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' · '+(s==='all'?items.length:items.filter(a=>clean(a.status)===s).length)+'</button>').join('');
- document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>'<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-photo">'+(a.photo?'<img src="'+esc(a.photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<span class="category-icon" aria-hidden="true">'+icons[category]+'</span>')+'</span><span class="card-copy"><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><small>Engine: '+esc(a.engine&&a.engine!=='N/A'?a.engine:'Not recorded')+'</small><small>'+esc(a.status||'Status to review')+'</small></span></button>').join(''):'<div class="asset-note">No items in this view yet.</div>';
+ document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>'<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-photo">'+(a.photo?'<img src="'+esc(a.photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<span class="category-icon" aria-hidden="true">'+icon(category)+'</span>')+'</span><span class="card-copy"><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><small>Engine: '+esc(a.engine&&a.engine!=='N/A'?a.engine:'Not recorded')+'</small><small>'+esc(a.status||'Status to review')+'</small></span></button>').join(''):'<div class="asset-note">No items in this view yet.</div>';
 }
 function renderAsset(tab='details'){
  document.getElementById('assetCategory').textContent=asset.category;
