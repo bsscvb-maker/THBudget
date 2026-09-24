@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0d12">
+<title>THBudget — Vehicles & Mileage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0a0d12;--panel:#111720;--panel2:#161e29;--line:#26303c;--text:#f1f4f7;--muted:#9aa7b6;--dim:#667382;--orange:#f28b42;--lime:#c9f26d;--blue:#69b9ea;--radius:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 77% -10%,rgba(105,185,234,.13),transparent 37%),radial-gradient(ellipse at 0% 30%,rgba(242,139,66,.08),transparent 34%),var(--bg);color:var(--text);font:15px/1.5 Manrope,system-ui,sans-serif;min-height:100vh}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}
+.shell{max-width:1450px;margin:auto;padding:0 36px}.topbar{height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08)}.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-.03em}.brand-mark{width:38px;height:38px;display:grid;place-items:center;color:#111;background:var(--lime);border-radius:12px;font-size:13px;font-weight:900;letter-spacing:-.1em}.brand small{display:block;color:var(--muted);font:10px 'DM Mono',monospace;letter-spacing:.13em;text-transform:uppercase}.top-actions{display:flex;gap:10px}.pill-link{border:1px solid var(--line);color:#cbd4df;padding:10px 15px;border-radius:999px;font-size:12px;font-weight:700;transition:.2s}.pill-link:hover{border-color:var(--orange);color:#fff}.pill-link.hot{background:var(--lime);border-color:var(--lime);color:#121710}
+main{padding:44px 0 70px}.eyebrow{display:flex;align-items:center;gap:10px;color:var(--orange);font:11px 'DM Mono',monospace;letter-spacing:.18em;text-transform:uppercase}.eyebrow:before{content:"";width:23px;height:1px;background:var(--orange)}.hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:22px;margin:20px 0 16px}.hero-main{min-height:260px;padding:36px 40px;background:linear-gradient(125deg,#192331,#111720 68%);border:1px solid #2b3948;border-radius:24px;position:relative;overflow:hidden}.hero-main:after{content:"";position:absolute;width:360px;height:360px;right:-70px;top:-130px;border:1px solid rgba(201,242,109,.18);border-radius:50%;box-shadow:0 0 0 28px rgba(201,242,109,.025),0 0 0 58px rgba(201,242,109,.02)}.hero-main h1{margin:12px 0 8px;font-size:clamp(38px,5vw,65px);line-height:.98;letter-spacing:-.065em;font-weight:800;max-width:680px}.hero-main h1 em{font-style:normal;color:var(--lime)}.hero-main p{color:#aab5c1;margin:15px 0 0;max-width:510px;font-size:14px}.hero-meta{position:absolute;left:40px;bottom:25px;color:#7f8b99;font:10px 'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.hero-side{padding:25px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(155deg,#202b38,#121821);border:1px solid #2b3948;border-radius:24px;position:relative;overflow:hidden}.hero-side .label{color:#8593a1;font:10px 'DM Mono',monospace;letter-spacing:.16em;text-transform:uppercase}.hero-side strong{display:block;font-size:30px;letter-spacing:-.05em;margin:12px 0 4px}.hero-side p{color:#aab5c1;font-size:12px;margin:0}.hero-side .orb{position:absolute;width:120px;height:120px;right:-18px;bottom:-24px;border:1px solid rgba(242,139,66,.28);border-radius:50%;box-shadow:0 0 0 16px rgba(242,139,66,.04),0 0 0 32px rgba(242,139,66,.025)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 38px}.stat{padding:19px 20px;background:var(--panel);border:1px solid var(--line);border-radius:15px}.stat .label{font:10px 'DM Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}.stat strong{display:block;margin-top:8px;font-size:25px;letter-spacing:-.05em}.stat small{color:var(--dim);font-size:11px}
+.section{margin-top:36px;scroll-margin-top:20px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:15px}.section-head h2{font-size:24px;letter-spacing:-.045em;margin:4px 0 0}.section-head p{margin:5px 0 0;color:var(--muted);font-size:12px}.section-kicker{color:var(--orange);font:10px 'DM Mono',monospace;letter-spacing:.15em;text-transform:uppercase}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}.tab{border:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 12px;border-radius:999px;font-size:11px;font-weight:700}.tab.active,.tab:hover{color:#131810;background:var(--lime);border-color:var(--lime)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}.toolbar{padding:14px 17px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}.toolbar .count{color:var(--muted);font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.1em}.search{max-width:260px;width:100%;background:#0b1016;border:1px solid #293441;color:var(--text);border-radius:10px;padding:9px 11px;font-size:12px;outline:none}.search:focus{border-color:var(--blue)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:780px}th{padding:12px 16px;color:#8190a0;text-align:left;font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.11em;background:#0e141c}td{padding:13px 16px;border-top:1px solid rgba(255,255,255,.055);font-size:12px;color:#d9e0e8;white-space:nowrap}tbody tr:hover{background:#151e28}.vehicle-name{font-weight:800;color:#f4f6f8}.vehicle-year{font:10px 'DM Mono',monospace;color:#7d8b9b;margin-top:3px}.mono{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums}.accent{color:var(--lime)}.progress{width:115px;height:5px;background:#27313c;border-radius:99px;overflow:hidden;margin-top:6px}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--lime));border-radius:99px}.muted{color:var(--muted)}.empty{padding:24px;color:var(--muted);text-align:center;font-size:12px}
+.split{display:grid;grid-template-columns:1.08fr .92fr;gap:14px}.rank-list{padding:4px 18px 12px}.rank{display:grid;grid-template-columns:25px minmax(110px,1fr) minmax(100px,1fr) 80px;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.06)}.rank:last-child{border:0}.rank-num{color:#6e7c8c;font:11px 'DM Mono',monospace}.rank-name{font-size:12px;font-weight:800}.rank-value{text-align:right;font:11px 'DM Mono',monospace;color:#dce5ee}.rank .progress{width:100%}.rank-label{text-align:right;color:#8794a2;font:10px 'DM Mono',monospace}
+.inventory{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:14px}.asset{padding:13px 14px;background:#0e141c;border:1px solid rgba(255,255,255,.06);border-radius:12px;display:flex;justify-content:space-between;gap:10px;align-items:center}.asset-title{font-size:12px;font-weight:800}.asset-sub{color:#8693a0;font:10px 'DM Mono',monospace;margin-top:4px}.badge{display:inline-flex;padding:5px 8px;border-radius:999px;background:rgba(201,242,109,.11);color:var(--lime);font:9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}.badge.retired{background:rgba(154,167,182,.1);color:#9aa7b6}
+.history-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px}.history-card{background:#0e141c;border:1px solid rgba(255,255,255,.06);border-radius:13px;padding:15px}.history-card strong{display:block;font-size:12px;margin-bottom:10px}.history-card div{display:flex;justify-content:space-between;color:#9aa7b6;font:10px 'DM Mono',monospace;margin:5px 0}.history-card b{color:var(--lime);font-weight:500}
+.note{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-top:30px;padding:17px 19px;border:1px solid rgba(105,185,234,.22);background:rgba(105,185,234,.055);border-radius:14px;color:#aab7c3;font-size:11px}.note strong{color:#d9e2ea}.footer{margin-top:40px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;gap:10px;color:#667382;font:10px 'DM Mono',monospace}
+@media(max-width:900px){.shell{padding:0 20px}.hero{grid-template-columns:1fr}.hero-side{min-height:150px}.stats{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.history-cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.shell{padding:0 14px}.topbar{height:66px}.pill-link{padding:8px 10px;font-size:10px}.brand{gap:8px}.brand-mark{width:34px;height:34px}.brand small{font-size:8px}.top-actions{gap:5px}.hero-main{padding:28px 22px 70px;min-height:255px}.hero-meta{left:22px}.hero-side{min-height:142px}.stats{gap:8px}.stat{padding:15px}.stat strong{font-size:21px}.section-head{align-items:start;flex-direction:column}.toolbar{align-items:stretch;flex-direction:column}.search{max-width:none}.inventory{grid-template-columns:1fr}.history-cards{grid-template-columns:1fr}.rank{grid-template-columns:20px minmax(85px,1fr) minmax(70px,1fr) 70px;gap:7px}.rank-label{font-size:9px}.note,.footer{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-mark">TH</div><h1 id="th-auth-title">THBudget</h1><p>Your private workbook stays in Google Sheets. Sign in to view it here on GitHub Pages.</p><button type="button" id="th-sign-in">Sign in with Google</button><p id="th-auth-message" role="status">Use the Google account that can open your TH Budget Sheet.</p></div></div>
+<style>
+#th-auth{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:#101d24;color:#e9f5f6;font:16px/1.5 system-ui,sans-serif}
+#th-auth[hidden]{display:none}#th-auth .th-auth-card{width:min(100%,440px);padding:40px;border:1px solid #35656d;border-radius:14px;background:#173039;box-shadow:0 20px 60px #0006;text-align:center}
+.th-auth-mark{display:inline-grid;place-items:center;width:48px;height:48px;background:#20c3cc;color:#10252b;font-weight:900;border-radius:8px}
+#th-auth h1{color:#fff;font-size:32px;margin:15px 0}#th-auth p{color:#d0e3e6}#th-sign-in{padding:12px 22px;background:#24c5ce;color:#10252b;border:0;border-radius:6px;font:700 16px system-ui;cursor:pointer}#th-sign-in:focus-visible{outline:3px solid white;outline-offset:3px}
+#th-auth-message{font-size:13px;min-height:2em}
+</style>
+<div class="shell">
+<header class="topbar">
+  <a class="brand" href="#" aria-label="THBudget">
+    <span class="brand-mark">TH</span><span>THBudget<small>VEHICLE DIVISION</small></span>
+  </a>
+  <nav class="top-actions">
+    <a class="pill-link" href="#" id="allPortal">ALL 136 SECTIONS</a>
+    <a class="pill-link hot" href="#mileage">MILEAGE OVERVIEW ↓</a>
+  </nav>
+</header>
+<main>
+  <div class="eyebrow">Garage / 01 — Control room</div>
+  <section class="hero">
+    <div class="hero-main">
+      <div class="eyebrow">Your vehicles · your numbers</div>
+      <h1>Own the road.<br><em>Know every mile.</em></h1>
+      <p>One sharp view of the fleet, current odometers, mileage pace, and the vehicles you’ve kept on the road.</p>
+      <div class="hero-meta">PRIVATE WORKSPACE &nbsp; / &nbsp; LIVE SHEET CONNECTION</div>
+    </div>
+    <aside class="hero-side">
+      <div><div class="label">Top annual pace</div><strong id="topVehicle">—</strong><p id="topVehicleSub">Vehicle with the highest estimated annual mileage</p></div>
+      <div class="orb"></div>
+    </aside>
+  </section>
+  <div class="stats" id="stats"></div>
+
+  <section class="section" id="mileage">
+    <div class="section-head"><div><div class="section-kicker">Live odometer file</div><h2>Mileage, at a glance</h2><p>Latest readings and projected miles per year from your mileage log.</p></div><span class="badge" id="asOf"></span></div>
+    <div class="tabs" id="mileageTabs">
+      <button class="tab active" data-filter="all">All tracked</button>
+      <button class="tab" data-filter="high">Road miles</button>
+      <button class="tab" data-filter="low">Low-use & equipment</button>
+    </div>
+    <div class="panel">
+      <div class="toolbar"><span class="count" id="mileageCount"></span><input class="search" id="search" placeholder="Find a vehicle…" aria-label="Find a vehicle"></div>
+      <div class="table-wrap"><table><thead><tr><th>Vehicle</th><th>Start of service</th><th>Current reading</th><th>Added since service</th><th>Avg / month</th><th>Est. / year</th></tr></thead><tbody id="mileageRows"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="section split" id="insights">
+    <div>
+      <div class="section-head"><div><div class="section-kicker">Usage profile</div><h2>Where the miles go</h2><p>Annual mileage estimates, highest first.</p></div></div>
+      <div class="panel"><div class="rank-list" id="rankList"></div></div>
+    </div>
+    <div>
+      <div class="section-head"><div><div class="section-kicker">Ownership register</div><h2>Fleet status</h2><p>Active and inactive entries from your fleet list.</p></div></div>
+      <div class="tabs" id="fleetTabs"><button class="tab active" data-fleet="active">Active <span id="activeCount"></span></button><button class="tab" data-fleet="inactive">Inactive <span id="inactiveCount"></span></button></div>
+      <div class="panel"><div class="inventory" id="inventory"></div></div>
+    </div>
+  </section>
+
+  <section class="section" id="history">
+    <div class="section-head"><div><div class="section-kicker">Looking back</div><h2>Then and now</h2><p>Latest mileage compared with matching entries in the saved 2024 mileage log.</p></div></div>
+    <div class="panel"><div class="history-cards" id="historyCards"></div></div>
+  </section>
+  <div class="note"><span><strong>Private by design.</strong> Live figures are read from the owner’s Google Sheet. Public website files do not contain vehicle records.</span><span>DATA SOURCE &nbsp; / &nbsp; VEHICLE & MILEAGE</span></div>
+  <footer class="footer"><span>THBUDGET · VEHICLES & MILEAGE</span><span>LIVE PRIVATE DATA · AS OF <span id="footerDate"></span></span></footer>
+</main>
+</div>
+<script>
+function renderVehiclePage(DATA,PORTAL_URL) {
+const num=v=>{const n=Number(String(v||'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0};
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=v=>num(v).toLocaleString('en-US',{maximumFractionDigits:1});
+const annual=v=>num(v.annualEstimate);
+const vehicles=DATA.vehicles||[];
+const active=DATA.activeFleet||[];
+const inactive=DATA.inactiveFleet||[];
+document.getElementById('allPortal').href=PORTAL_URL+'budget.html';
+document.querySelector('.brand').href=PORTAL_URL+'budget.html';
+document.getElementById('asOf').textContent='UPDATED · '+(DATA.asOf||'Latest');
+document.getElementById('footerDate').textContent=esc(DATA.asOf||'latest');
+const leadVehicle=[...vehicles].sort((a,b)=>annual(b)-annual(a))[0];
+if(leadVehicle){document.getElementById('topVehicle').textContent=leadVehicle.name;document.getElementById('topVehicleSub').textContent=fmt(leadVehicle.annualEstimate)+' estimated miles per year';}
+document.getElementById('stats').innerHTML=[
+  {label:'Mileage tracked',value:vehicles.length,sub:'vehicles & equipment logs'},
+  {label:'Active fleet',value:active.length,sub:'entries marked active'},
+  {label:'Inactive archive',value:inactive.length,sub:'vehicles retained in register'},
+  {label:'Top annual estimate',value:leadVehicle?fmt(leadVehicle.annualEstimate):'—',sub:leadVehicle?leadVehicle.name:'from latest log'}
+].map(s=>'<article class="stat"><div class="label">'+esc(s.label)+'</div><strong>'+esc(s.value)+'</strong><small>'+esc(s.sub)+'</small></article>').join('');
+document.getElementById('activeCount').textContent=active.length;
+document.getElementById('inactiveCount').textContent=inactive.length;
+let mileageFilter='all', fleetFilter='active';
+function renderMileage(){
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  const rows=[...vehicles].sort((a,b)=>annual(b)-annual(a)).filter(v=>{
+    const miles=annual(v);
+    return (!q||v.name.toLowerCase().includes(q)||String(v.year).includes(q))&&
+      (mileageFilter==='all'||(mileageFilter==='high'?miles>=1000:miles<1000));
+  });
+  const topScale=Math.max(...vehicles.map(annual),1);
+  document.getElementById('mileageCount').textContent=rows.length+' tracked · '+(DATA.asOf||'latest data');
+  document.getElementById('mileageRows').innerHTML=rows.length?rows.map(v=>'<tr><td><div class="vehicle-name">'+esc(v.name)+'</div><div class="vehicle-year">MODEL YEAR '+esc(v.year)+'</div></td><td class="mono">'+esc(v.serviceStart||'—')+'</td><td class="mono">'+esc(v.currentMileage||'—')+'</td><td class="mono">'+esc(v.addedMileage||'—')+'</td><td class="mono">'+esc(v.monthlyEstimate||'—')+'</td><td><span class="mono accent">'+esc(v.annualEstimate||'—')+'</span><div class="progress"><i style="width:'+Math.max(3,annual(v)/topScale*100)+'%"></i></div></td></tr>').join(''):'<tr><td colspan="6" class="empty">No vehicles match that filter.</td></tr>';
+}
+function renderRank(){
+  const max=Math.max(...vehicles.map(annual),1);
+  document.getElementById('rankList').innerHTML=[...vehicles].sort((a,b)=>annual(b)-annual(a)).slice(0,6).map((v,i)=>'<div class="rank"><span class="rank-num">0'+(i+1)+'</span><div class="rank-name">'+esc(v.name)+'<div class="progress"><i style="width:'+Math.max(3,annual(v)/max*100)+'%"></i></div></div><span class="rank-value">'+esc(v.annualEstimate||'—')+'</span><span class="rank-label">MILES / YR</span></div>').join('');
+}
+function renderFleet(){
+  const rows=fleetFilter==='active'?active:inactive;
+  document.getElementById('inventory').innerHTML=rows.length?rows.map(v=>'<article class="asset"><div><div class="asset-title">'+esc([v.year,v.make,v.model].filter(Boolean).join(' '))+'</div><div class="asset-sub">'+esc(v.make||'')+' · '+esc(v.model||'')+'</div></div><span class="badge '+(fleetFilter==='inactive'?'retired':'')+'">'+(fleetFilter==='inactive'?'Inactive':'Active')+'</span></article>').join(''):'<div class="empty">No entries in this view.</div>';
+}
+function renderHistory(){
+  const old=DATA.history||[];
+  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const cards=vehicles.map(v=>{const n=norm(v.name);const match=old.find(o=>{const m=norm(o.name);return m===n||m.endsWith(n)||n.endsWith(m)});if(!match)return null;return {v,old:match};}).filter(Boolean).slice(0,9);
+  document.getElementById('historyCards').innerHTML=cards.length?cards.map(({v,old})=>'<article class="history-card"><strong>'+esc(v.name)+'</strong><div><span>2024 saved reading</span><span>'+esc(old.currentMileage)+'</span></div><div><span>Latest reading</span><span>'+esc(v.currentMileage)+'</span></div><div><span>Change since saved log</span><b>+'+fmt(num(v.currentMileage)-num(old.currentMileage))+'</b></div></article>').join(''):'<div class="empty">No matching entries across the two logs.</div>';
+}
+document.getElementById('search').addEventListener('input',renderMileage);
+document.querySelectorAll('#mileageTabs [data-filter]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#mileageTabs .tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');mileageFilter=b.dataset.filter;renderMileage();}));
+document.querySelectorAll('#fleetTabs [data-fleet]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#fleetTabs .tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');fleetFilter=b.dataset.fleet;renderFleet();}));
+renderMileage();renderRank();renderFleet();renderHistory();
+}
+window.thStart = async () => renderVehiclePage(await thFleetData(), new URL('./',location.href).href);
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script><script src="sheets.js"></script></body>
+</html
