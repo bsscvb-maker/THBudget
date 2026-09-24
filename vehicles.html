@@ -274,13 +274,13 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <div class="category-grid" id="categoryGrid"></div>
 </div>
 <div class="workspace-view" id="categoryView" hidden>
-<button type="button" class="back-link" id="backDashboard">← All categories</button>
+<button type="button" class="back-link" id="backDashboard">Back</button>
 <div class="section-title"><div><div class="kicker">Category</div><h2 id="categoryTitle"></h2><p>Choose an item to view its details, mileage, and maintenance.</p></div></div>
 <div class="status-filter" id="statusFilters"></div>
 <div class="asset-grid" id="assetGrid"></div>
 </div>
 <div class="workspace-view" id="assetView" hidden>
-<button type="button" class="back-link" id="backCategory">← All categories</button>
+<button type="button" class="back-link" id="backCategory">Back</button>
 <div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span></div>
 <div class="edit-bar"><button type="button" id="toggleAssetEdit" aria-pressed="false">Edit details</button><span>Fields are locked until you choose Edit.</span></div>
 <div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Maintenance</button></div>
@@ -489,7 +489,7 @@ document.getElementById('assetPhotoInput').addEventListener('change',async e=>{
  finally {label.style.pointerEvents='';e.target.value=''}
 });
 document.getElementById('backDashboard').addEventListener('click',()=>show('dashboardView'));
-document.getElementById('backCategory').addEventListener('click',()=>show('dashboardView'));
+document.getElementById('backCategory').addEventListener('click',()=>{renderCategory();show('categoryView')});
 }
 
 window.thStart = async () => renderFleetPage(await thFleetData(), new URL('./',location.href).href);
