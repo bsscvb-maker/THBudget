@@ -223,6 +223,8 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 
 .category-card{min-height:130px;justify-content:center}
 .category-card .category-icon{width:50px;height:50px;background:#122d57;color:#c6ddff}
+.year-sort{display:flex;align-items:center;gap:9px;margin:0 0 15px;color:#d4e3f6;font-weight:700}
+.year-sort select{min-height:42px;padding:8px 12px;border:1px solid #6489b8;border-radius:7px;background:#203e68;color:#fff;font:inherit}
 .category-icon svg{width:30px;height:30px;display:block}
 .category-manager{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0;padding:15px;border:1px solid #38577e;border-radius:10px;background:#152b49;color:#f2f7ff}.category-manager label{font-size:15px;font-weight:700}.category-manager select,.category-manager button{min-height:42px;padding:8px 12px;border-radius:7px;font:inherit}.category-manager select{background:#e4ebf2;color:#182b3d}.category-manager button{border:1px solid #7da8df;background:#244d83;color:white;cursor:pointer}.category-manager button:disabled{opacity:.55;cursor:wait}.category-manager [role=status]{width:100%;font-size:14px;color:#c8ddf7}
 .card-photo .category-icon{width:100%;height:100%;display:grid;place-items:center}
@@ -288,6 +290,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <button type="button" class="back-link" id="backDashboard">Back</button>
 <div class="section-title"><div><div class="kicker">Category</div><h2 id="categoryTitle"></h2><p>Choose an item to view its details, mileage, maintenance, and service schedules.</p></div></div>
 <div class="status-filter" id="statusFilters"></div>
+<label class="year-sort" for="yearSort">Year order <select id="yearSort"><option value="oldest">Oldest to newest</option><option value="newest">Newest to oldest</option></select></label>
 <div class="asset-grid" id="assetGrid"></div>
 </div>
 <div class="workspace-view" id="assetView" hidden>
@@ -420,15 +423,15 @@ function mileageFor(a){
  return mileage.find(m=>String(m.year)===year&&(byAlias&&clean(m.name).includes(clean(byAlias[1]))||name.includes(clean(m.name))||clean(m.name).includes(clean(a.make))&&name.includes(clean(m.name).slice(0,6))))||null;
 }
 function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>'}
-let category='',asset=null,status='all',editing=false;
+let category='',asset=null,status='all',yearOrder='oldest',editing=false;
 const currentAsset=()=>asset;
 function show(view){for(const id of ['dashboardView','categoryView','assetView'])document.getElementById(id).hidden=id!==view;window.scrollTo({top:0,behavior:'smooth'})}
-function renderCategories(){document.getElementById('categoryGrid').innerHTML=[...categories,'Unfiled'].filter(c=>c==='Vans'||c==='Personal Watercraft'||assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
+function renderCategories(){document.getElementById('categoryGrid').innerHTML=['All Vehicles',...categories,'Unfiled'].filter(c=>c==='All Vehicles'||c==='Vans'||c==='Personal Watercraft'||assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
 function renderCategory(){
- const items=assets.filter(a=>a.category===category).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);return (Number.isFinite(ay)?ay:Infinity)-(Number.isFinite(by)?by:Infinity)||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))}), shown=items.filter(a=>status==='all'||clean(a.status)===status);
+ const items=assets.filter(a=>category==='All Vehicles'||a.category===category).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);const aKnown=Number.isFinite(ay),bKnown=Number.isFinite(by);return (aKnown&&bKnown?(yearOrder==='oldest'?ay-by:by-ay):Number(bKnown)-Number(aKnown))||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))}), shown=items.filter(a=>status==='all'||clean(a.status)===status);
  document.getElementById('categoryTitle').textContent=category;
  document.getElementById('statusFilters').innerHTML=['all','active','inactive'].map(s=>'<button type="button" class="filter-chip '+(status===s?'active':'')+'" data-status="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' · '+(s==='all'?items.length:items.filter(a=>clean(a.status)===s).length)+'</button>').join('');
- document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>'<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-photo">'+(a.photoObjectUrl||a.photoFileId||a.photo?'<img src="'+esc(a.photoObjectUrl||(!a.photoFileId?a.photo:''))+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<span class="category-icon" aria-hidden="true">'+icon(category)+'</span>')+'</span><span class="card-copy"><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><small>Engine: '+esc(a.engine&&a.engine!=='N/A'?a.engine:'Not recorded')+'</small><small>'+esc(a.status||'Status to review')+'</small></span></button>').join(''):'<div class="asset-note">No items in this view yet.</div>';
+ document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>'<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-photo">'+(a.photoObjectUrl||a.photoFileId||a.photo?'<img src="'+esc(a.photoObjectUrl||(!a.photoFileId?a.photo:''))+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span>')+'</span><span class="card-copy"><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><small>Engine: '+esc(a.engine&&a.engine!=='N/A'?a.engine:'Not recorded')+'</small><small>'+esc(a.status||'Status to review')+'</small></span></button>').join(''):'<div class="asset-note">No items in this view yet.</div>';
  for(const a of shown.filter(a=>a.photoFileId&&!a.photoObjectUrl)){
   thPhotoObjectUrl(a.photoFileId).then(src=>{
    a.photoObjectUrl=src;
@@ -479,6 +482,7 @@ document.getElementById('updated').textContent=D.asOf||'latest';
 renderCategories();
 document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;status='all';renderCategory();show('categoryView')});
 document.getElementById('statusFilters').addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b)return;status=b.dataset.status;renderCategory()});
+document.getElementById('yearSort').addEventListener('change',e=>{yearOrder=e.target.value;renderCategory()});
 document.getElementById('assetGrid').addEventListener('click',e=>{const b=e.target.closest('[data-asset]');if(!b)return;asset=assets.find(a=>a.id===b.dataset.asset);if(!asset)return;renderAsset();show('assetView')});
 document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
  const tab=document.querySelector('[data-asset-tab].active')?.dataset.assetTab||'details';
