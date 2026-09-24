@@ -257,6 +257,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 #assetMaintenance input{min-width:100px;width:100%;padding:8px;background:#172940;color:#f3f7ff;border:1px solid #526b8c;border-radius:4px}
 #assetMaintenance .notes-cell input{min-width:220px}
 #addService{margin:15px 0;padding:10px 14px;border:1px solid #638ac0;border-radius:5px;background:#244a7b;color:white;font-weight:700}
+.add-vehicle-button{border:1px solid #79aaff;border-radius:9px;background:#315d99;color:white;padding:11px 18px;font-size:17px;font-weight:800;cursor:pointer;white-space:nowrap}.add-vehicle-button:hover{background:#3d74ba}.add-vehicle-dialog{width:min(650px,calc(100% - 28px));max-height:90vh;overflow:auto;border:1px solid #688ab9;border-radius:14px;background:#142236;color:#f2f7ff;padding:26px;box-shadow:0 25px 70px #000b}.add-vehicle-dialog::backdrop{background:#020713bd}.add-vehicle-head,.add-vehicle-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}.add-vehicle-head h2{margin:0 0 20px;font-size:28px}.add-vehicle-head button{border:0;background:transparent;color:white;font-size:28px;cursor:pointer}.add-vehicle-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.add-vehicle-fields label{display:grid;gap:6px;color:#d5e4fb;font-size:14px;font-weight:700}.add-vehicle-fields input,.add-vehicle-fields select{min-width:0;width:100%;padding:11px;border:1px solid #688ab9;border-radius:7px;background:#0e1b2d;color:white;font-size:16px}.add-vehicle-fields input:focus-visible,.add-vehicle-fields select:focus-visible{outline:3px solid #8ac5ff}.add-vehicle-actions{justify-content:flex-end;margin-top:14px}.add-vehicle-actions button{padding:10px 16px;border:1px solid #688ab9;border-radius:7px;background:#244a7b;color:white;font-weight:800;cursor:pointer}.add-vehicle-actions button:disabled{opacity:.6}.add-vehicle-dialog [role=status]{min-height:20px;color:#ffbcbd}@media(max-width:600px){.add-vehicle-fields{grid-template-columns:1fr}.add-vehicle-dialog{padding:18px}#dashboardView .section-title{align-items:flex-start;flex-wrap:wrap}}
 </style>
 </head>
 <body data-th-page="fleet"><div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-mark">TH</div><h1 id="th-auth-title">THBudget</h1><p>Your private workbook stays in Google Sheets. Sign in to view it here on GitHub Pages.</p><button type="button" id="th-sign-in">Sign in with Google</button><p id="th-auth-message" role="status">Use the Google account that can open your TH Budget Sheet.</p></div></div>
@@ -285,12 +286,12 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <div class="topline"><span>VEHICLES / PERSONAL GARAGE</span><span class="updated">LIVE SHEET · UPDATED <b id="updated"></b></span></div>
 
 <div class="workspace-view" id="dashboardView">
-<div class="section-title"><div><div class="kicker">Your garage</div><h2>Vehicle directory</h2><p>Choose a category to see its vehicles and equipment.</p></div></div>
+<div class="section-title"><div><div class="kicker">Your garage</div><h2>Vehicle directory</h2><p>Choose a category to see its vehicles and equipment.</p></div><button type="button" class="add-vehicle-button" id="addVehicleButton">+ Add vehicle</button></div>
 <div class="category-grid" id="categoryGrid"></div>
 </div>
 <div class="workspace-view" id="categoryView" hidden>
 <button type="button" class="back-link" id="backDashboard">Back</button>
-<div class="section-title"><div><div class="kicker">Category</div><h2 id="categoryTitle"></h2><p>Choose an item to view its details, mileage, maintenance, and service schedules.</p></div></div>
+<div class="section-title"><div><div class="kicker">Category</div><h2 id="categoryTitle"></h2><p>Choose an item to view its details, mileage, maintenance, and service schedules.</p></div><button type="button" class="add-vehicle-button" id="addCategoryVehicleButton">+ Add vehicle</button></div>
 <div class="status-filter" id="statusFilters"></div>
 <label class="year-sort" for="yearSort">Year order <select id="yearSort"><option value="oldest">Oldest to newest</option><option value="newest">Newest to oldest</option></select></label>
 <div class="asset-grid" id="assetGrid"></div>
@@ -309,6 +310,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <footer class="foot"><span>THBUDGET · VEHICLES</span><span>PRIVATE SHEET CONNECTION</span></footer>
 </main></div>
 </div></div></div>
+<dialog id="addVehicleDialog" class="add-vehicle-dialog" aria-labelledby="addVehicleTitle"><form id="addVehicleForm"><div class="add-vehicle-head"><h2 id="addVehicleTitle">Add a vehicle</h2><button type="button" id="closeAddVehicle" aria-label="Close">×</button></div><div class="add-vehicle-fields"><label>Year <input name="year" type="number" min="1900" max="2100" required></label><label>Make <input name="make" required maxlength="100"></label><label>Model <input name="model" required maxlength="120"></label><label>Section <select name="category" id="newVehicleCategory" required></select></label><label>Status <select name="status"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></label><label>Engine <input name="engine" maxlength="100"></label><label>VIN / serial number <input name="vin" maxlength="100"></label><label>Tag / plate <input name="tag" maxlength="50"></label><label>Color <input name="color" maxlength="80"></label></div><p id="addVehicleStatus" role="status"></p><div class="add-vehicle-actions"><button type="button" id="cancelAddVehicle">Cancel</button><button type="submit" id="saveVehicle">Save vehicle</button></div></form></dialog>
 <script>
 function renderFleetPage(D,PORTAL) {
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -527,6 +529,31 @@ async function moveAssetTo(next){
 }
 document.getElementById('moveAssetButton').addEventListener('click',()=>moveAssetTo(document.getElementById('moveAssetCategory').value));
 document.getElementById('unfileAssetButton').addEventListener('click',()=>moveAssetTo('Unfiled'));
+document.getElementById('newVehicleCategory').innerHTML=categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
+for(const addButton of [document.getElementById('addVehicleButton'),document.getElementById('addCategoryVehicleButton')])addButton.addEventListener('click',()=>{
+ document.getElementById('addVehicleForm').reset();
+ document.getElementById('newVehicleCategory').value=category&&category!=='All Vehicles'&&category!=='Unfiled'?category:'Cars';
+ document.getElementById('addVehicleStatus').textContent='';
+ document.getElementById('addVehicleDialog').showModal();
+ document.querySelector('#addVehicleForm [name=year]').focus();
+});
+for(const id of ['closeAddVehicle','cancelAddVehicle'])document.getElementById(id).addEventListener('click',()=>document.getElementById('addVehicleDialog').close());
+document.getElementById('addVehicleForm').addEventListener('submit',async e=>{
+ e.preventDefault();const form=e.currentTarget,data=Object.fromEntries(new FormData(form)),button=document.getElementById('saveVehicle'),message=document.getElementById('addVehicleStatus');
+ for(const key of ['year','make','model'])data[key]=String(data[key]||'').trim();
+ if(!data.year||!data.make||!data.model){message.textContent='Enter year, make, and model.';return}
+ button.disabled=true;message.textContent='Saving…';
+ try{
+  const row=Array(27).fill('');
+  Object.assign(row,{1:[data.year,data.make,data.model].join(' '),2:data.year,3:data.make,4:data.model,5:data.color,7:data.category,8:data.status,11:data.vin,13:data.tag,15:data.engine});
+  const profileRow=await thAppendRow('Portal Asset Profiles',row);
+  if(!profileRow)throw new Error('The vehicle was saved, but its row could not be identified. Refresh to see it.');
+  const next={...data,name:row[1],profileRow,id:'new'+profileRow,photo:'',photoFileId:''};
+  assets.push(next);category=data.category;status='all';renderCategories();renderCategory();asset=next;renderAsset();show('assetView');
+  document.getElementById('addVehicleDialog').close();
+ }catch(error){message.textContent=error.message}
+ finally{button.disabled=false}
+});
 document.getElementById('deleteAssetButton').addEventListener('click',async()=>{
  const a=asset;if(!a)return;
  const name=[a.year,a.make,a.model].filter(Boolean).join(' ');
