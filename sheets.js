@@ -85,15 +85,44 @@ async function thFleetData() {
   ]);
   const activeFleet = fr.slice(1).map(r => ({year:r[0],make:r[1],model:r[2],status:r[3]})).filter(v => v.year || v.make || v.model);
   const inactiveFleet = fr.slice(1).map(r => ({year:r[5],make:r[6],model:r[7],status:r[8]})).filter(v => v.year || v.make || v.model);
-  const vehicles = mr.slice(4).filter(r => r[1] && Number(r[2]) >= 1900 && Number(r[2]) <= 2100).map(r => ({
+  const vehicles = mr.slice(4).map((r,i)=>({...r,__row:i+5})).filter(r => r[1] && Number(r[2]) >= 1900 && Number(r[2]) <= 2100).map(r => ({
+    sheetRow:r.__row,
     name:r[1],year:r[2],serviceStart:r[3],startMileage:r[4],currentMileage:r[5],addedMileage:r[6],
     daysDriven:r[7],monthsDriven:r[8],monthlyEstimate:r[9],annualEstimate:r[10]
   }));
   const history = hr.slice(4).filter(r => r[1]).map(r => ({name:r[1],currentMileage:r[4]}));
   const profiles = pr.slice(1).map((r,i) => ({name:r[1],year:r[2],make:r[3],model:r[4],color:r[5],category:r[7],status:r[8],reportOdometer:r[10],vin:r[11],tag:r[13],engine:r[15],transmission:r[16],tireSize:r[17],photo:r[24],renewal:r[14],vehicleNumber:r[12],sourceType:r[6],department:r[9],insuranceCompany:r[18],driver:r[22],reportText:r[25],reportDate:r[26],photoFileId:r[23],profileRow:i+2})).filter(p => p.name);
-  const registry = rr.slice(1).filter(r => r[1] && r[2]).map(r => ({category:r[0],year:r[1],make:r[2],model:r[3],vin:r[4],tag:r[5],status:r[6]}));
-  const services = sr.slice(1).filter(r => r[0] && r[3]).map(r => ({asset:r[0],id:r[1],date:r[2],item:r[3],odometer:r[4],cost:r[5],notes:r[6]}));
+  const registry = rr.slice(1).map((r,i)=>({...r,__row:i+2})).filter(r => r[1] && r[2]).map(r => ({registryRow:r.__row,category:r[0],year:r[1],make:r[2],model:r[3],vin:r[4],tag:r[5],status:r[6]}));
+  const services = sr.slice(1).map((r,i)=>({...r,__row:i+2})).filter(r => r[0] && r[3]).map(r => ({sheetRow:r.__row,asset:r[0],id:r[1],date:r[2],item:r[3],odometer:r[4],cost:r[5],notes:r[6]}));
   return {asOf:mr[0]?.[1] || '',activeFleet,inactiveFleet,vehicles,history,profiles,registry,services};
+}
+
+async function thWriteCell(sheet, cell, value) {
+  if (!thToken) throw new Error('Sign in again to save changes.');
+  const range="'"+sheet.replace(/'/g,"''")+"'!"+cell;
+  const response=await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+TH_SHEET_ID+'/values/'+encodeURIComponent(range)+'?valueInputOption=USER_ENTERED',{
+    method:'PUT',headers:{Authorization:'Bearer '+thToken,'Content-Type':'application/json'},
+    body:JSON.stringify({range,majorDimension:'ROWS',values:[[value]]})
+  });
+  if (!response.ok) {
+    const detail=await response.json().catch(()=>({}));
+    throw new Error(response.status===401?'Your sign-in expired. Sign out and sign in again.':(detail.error?.message||'Could not save the change.'));
+  }
+}
+async function thAppendRow(sheet, values) {
+  const range="'"+sheet.replace(/'/g,"''")+"'!A:AA";
+  const response=await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+TH_SHEET_ID+'/values/'+encodeURIComponent(range)+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{
+    method:'POST',headers:{Authorization:'Bearer '+thToken,'Content-Type':'application/json'},
+    body:JSON.stringify({values:[values]})
+  });
+  if(!response.ok){const detail=await response.json().catch(()=>({}));throw new Error(detail.error?.message||'Could not add a row.')}
+  const result=await response.json();
+  return Number(result.updates?.updatedRange?.match(/![A-Z]+(\d+)/)?.[1])||0;
+}
+async function thPhotoObjectUrl(fileId) {
+  const response=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(fileId)+'?alt=media',{headers:{Authorization:'Bearer '+thToken}});
+  if(!response.ok)throw new Error('Photo could not be loaded from Google Drive.');
+  return URL.createObjectURL(await response.blob());
 }
 async function thUploadAssetPhoto(file, asset) {
   if (!thToken) throw new Error('Sign in again to add a photo.');
@@ -108,7 +137,7 @@ async function thUploadAssetPhoto(file, asset) {
   const upload = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
     method:'POST',headers:{Authorization:'Bearer '+thToken,'Content-Type':'multipart/related; boundary='+boundary},body
   });
-  if (!upload.ok) throw new Error('Photo upload failed. Please sign in again and retry.');
+  if (!upload.ok) { const detail=await upload.json().catch(()=>({})); throw new Error('Photo upload failed: '+(detail.error?.message||('Google returned '+upload.status))); }
   const {id} = await upload.json();
   if (!id) throw new Error('Photo upload did not return a file ID.');
   const url = 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w800';
@@ -124,9 +153,10 @@ async function thUploadAssetPhoto(file, asset) {
     values = [row]; method = 'POST';
   }
   const save = await fetch(endpoint,{method,headers:{Authorization:'Bearer '+thToken,'Content-Type':'application/json'},body:JSON.stringify({values})});
-  if (!save.ok) throw new Error('Photo uploaded, but its vehicle link could not be saved. Please retry.');
+  if (!save.ok) { const detail=await save.json().catch(()=>({})); throw new Error('Photo uploaded, but its vehicle link could not be saved: '+(detail.error?.message||('Google returned '+save.status))); }
   const result = await save.json();
   if (!asset.profileRow) asset.profileRow = Number(result.updates?.updatedRange?.match(/![A-Z]+(\d+)/)?.[1]) || 0;
+  asset.photoFileId=id;
   return url;
 }
 async function thTab(position) {
