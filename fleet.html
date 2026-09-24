@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0e13"><title>THBudget · Active Fleet</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e13;--panel:#131922;--panel2:#19212c;--line:#28313d;--white:#f2f5f8;--muted:#a0abb8;--soft:#738090;--orange:#f28b42;--acid:#d0f279;--blue:#78c7ef;--green:#9ee1aa}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 82% -20%,rgba(120,199,239,.14),transparent 34%),radial-gradient(ellipse at 0% 28%,rgba(242,139,66,.09),transparent 32%),var(--bg);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--white)}
+a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}.wrap{max-width:1500px;margin:auto;padding:0 34px}
+header{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:850;letter-spacing:-.04em}.logo{width:37px;height:37px;border-radius:11px;background:var(--acid);display:grid;place-items:center;color:#10150b;font-size:12px;font-weight:950}.brand small{display:block;color:#8b98a6;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase}
+.actions{display:flex;gap:8px}.link{border:1px solid var(--line);border-radius:999px;padding:9px 13px;color:#c7d0da;font-size:11px;font-weight:750;transition:.18s}.link:hover{border-color:var(--orange);color:white}.link.primary{background:var(--acid);border-color:var(--acid);color:#14180e}
+main{padding:28px 0 58px}.topline{display:flex;justify-content:space-between;align-items:center;color:var(--orange);font:10px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em;text-transform:uppercase}.updated{color:#82909e;letter-spacing:.06em}
+.hero{margin:13px 0 14px;padding:28px 32px;min-height:175px;border:1px solid #2c3948;border-radius:21px;background:linear-gradient(115deg,#1a2633 0%,#131922 69%);display:flex;justify-content:space-between;align-items:center;gap:24px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;right:150px;top:-145px;width:320px;height:320px;border:1px solid rgba(208,242,121,.17);border-radius:50%;box-shadow:0 0 0 27px rgba(208,242,121,.025),0 0 0 56px rgba(208,242,121,.018);pointer-events:none}
+.hero h1{margin:7px 0 5px;font-size:clamp(37px,5vw,60px);line-height:1;letter-spacing:-.065em}.hero h1 em{font-style:normal;color:var(--acid)}.hero p{margin:9px 0 0;color:#aab6c2;font-size:12px;max-width:560px}.hero-copy{position:relative;z-index:1}.hero-mark{position:relative;z-index:1;min-width:190px;padding:15px 18px;border:1px solid #344353;border-radius:15px;background:rgba(8,12,17,.35)}.hero-mark span{display:block;color:#8090a0;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase}.hero-mark strong{display:block;margin:4px 0;font-size:27px;letter-spacing:-.05em}.hero-mark small{color:#a2adba;font-size:10px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 27px}.metric{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 17px;min-height:83px}.metric span{color:#8f9cab;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase}.metric strong{display:block;font-size:23px;letter-spacing:-.045em;margin-top:4px}.metric small{color:#73808e;font-size:10px}
+.section-title{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:0 0 11px}.kicker{color:var(--orange);font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase}.section-title h2{margin:3px 0 0;font-size:23px;letter-spacing:-.045em}.section-title p{margin:4px 0 0;color:#9aa6b4;font-size:11px}
+.panel{overflow:hidden;border:1px solid var(--line);border-radius:17px;background:var(--panel)}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border-bottom:1px solid var(--line)}.count{color:#8996a4;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase}.search{width:min(290px,100%);padding:9px 11px;border:1px solid #303a46;border-radius:10px;background:#0d1218;color:white;font-size:11px;outline:none}.search:focus{border-color:var(--blue)}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:820px}thead{background:#0e141b}th{padding:12px 14px;text-align:left;color:#8391a0;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.13em;text-transform:uppercase;white-space:nowrap}td{padding:13px 14px;border-top:1px solid rgba(255,255,255,.055);font-size:12px;color:#d9e0e7;white-space:nowrap}tbody tr{transition:background .15s}tbody tr:hover{background:#18212b}.year{font:12px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--blue)}.make{font-weight:800;color:#f5f7f9}.model{color:#c7d0da}.status{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid rgba(158,225,170,.2);border-radius:99px;color:var(--green);background:rgba(158,225,170,.06);font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.07em}.status:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--green)}.mono{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;font-variant-numeric:tabular-nums}.acid{color:var(--acid)}.not-logged{color:#728090;font-size:10px}.progress{height:3px;background:#29333e;border-radius:8px;margin-top:5px;overflow:hidden}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--acid))}
+.insight{margin-top:13px;display:grid;grid-template-columns:1.15fr .85fr;gap:11px}.insight-card{padding:16px 18px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(135deg,#141b24,#10161d)}.insight-card h3{font-size:13px;margin:0 0 10px;letter-spacing:-.02em}.leaders{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.leader{padding:11px;background:#0d1319;border:1px solid rgba(255,255,255,.05);border-radius:11px}.leader span{display:block;color:#8c99a8;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.07em}.leader strong{display:block;margin-top:5px;font-size:15px}.leader small{color:var(--acid);font:10px ui-monospace,SFMono-Regular,Consolas,monospace}.linked-note{color:#9ca9b7;font-size:11px}.linked-note strong{color:#e8edf2}.linked-note a{color:var(--acid);font-weight:800}
+details.archive{margin-top:20px;border:1px solid var(--line);border-radius:15px;background:rgba(19,25,34,.7);padding:0 16px 14px}details.archive summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 2px;color:var(--white);font-weight:800;font-size:12px}details.archive summary::-webkit-details-marker{display:none}details.archive summary:after{content:"OPEN +";color:var(--acid);font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.1em}details.archive[open] summary:after{content:"CLOSE −"}.archive-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.archive-item{padding:10px 12px;border-radius:10px;background:#0e141a;border:1px solid rgba(255,255,255,.05);font-size:11px}.archive-item small{display:block;color:#8794a2;margin-top:3px}
+.privacy{display:flex;justify-content:space-between;gap:12px;margin-top:20px;padding:12px 15px;border-radius:12px;border:1px solid rgba(120,199,239,.16);background:rgba(120,199,239,.045);color:#a5b2bf;font-size:10px}.privacy strong{color:#e2e8ee}.foot{display:flex;justify-content:space-between;gap:10px;margin-top:24px;padding-top:12px;border-top:1px solid rgba(255,255,255,.075);color:#687584;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.07em}
+@media(max-width:860px){.wrap{padding:0 20px}.metrics{grid-template-columns:repeat(2,1fr)}.hero-mark{min-width:160px}.insight{grid-template-columns:1fr}}
+@media(max-width:560px){.wrap{padding:0 13px}header{height:64px}.brand{gap:8px}.logo{width:33px;height:33px}.actions{gap:5px}.link{padding:8px 9px;font-size:9px}.hero{padding:22px;align-items:flex-start;flex-direction:column}.hero-mark{width:100%}.hero:after{right:-145px}.metrics{gap:7px}.metric{padding:12px}.metric strong{font-size:20px}.section-title{align-items:flex-start;flex-direction:column}.toolbar{align-items:stretch;flex-direction:column}.search{width:100%}.leaders{grid-template-columns:1fr}.archive-grid{grid-template-columns:1fr}.privacy,.foot{flex-direction:column}}
+
+/* THB MOTOR POOL — warm stone / ink / cobalt / signal orange */
+:root{color-scheme:light;--bg:#eeeadd;--panel:#fffdf7;--panel2:#e5e0d2;--line:#c8c4b8;--white:#18232c;--muted:#4c5861;--soft:#64717a;--orange:#e64d26;--acid:#315ce8;--blue:#315ce8;--green:#1e7657}
+html{scroll-behavior:smooth}
+body{background-color:var(--bg);background-image:linear-gradient(rgba(24,35,44,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(24,35,44,.035) 1px,transparent 1px);background-size:24px 24px;color:var(--white);font-family:Arial,Helvetica,sans-serif}
+.wrap{max-width:1560px;padding:0 38px}
+header{height:78px;border-bottom:0;background:#18232c;color:#fffdf7;padding:0 24px;margin:0 -24px}
+.brand{color:#fffdf7;font-size:15px;letter-spacing:-.02em}.brand small{color:#b4bbc0;letter-spacing:.2em;font-size:8px}
+.logo{background:#315ce8;color:#fffdf7;border-radius:4px;width:39px;height:39px;font-size:13px}
+.actions{gap:9px}.link{border:1px solid #53606a;border-radius:3px;color:#e7e5dc;padding:10px 15px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.link:hover{border-color:#e64d26;color:white}.link.primary{background:#e64d26;border-color:#e64d26;color:#fffdf7}.link.primary:hover{background:#c83a19}
+main{padding:29px 0 50px}
+.topline{color:#e64d26;font-size:10px;letter-spacing:.2em}.updated{color:#626f77;letter-spacing:.07em}
+.hero{margin:14px 0 16px;padding:34px 38px;min-height:224px;border:0;border-radius:4px;background:#e64d26;box-shadow:8px 8px 0 #18232c;align-items:flex-end}
+.hero:after{right:185px;top:-226px;width:420px;height:420px;border:2px solid rgba(255,253,247,.34);border-radius:50%;box-shadow:0 0 0 26px rgba(49,92,232,.13),0 0 0 52px rgba(255,253,247,.12),0 0 0 88px rgba(24,35,44,.08)}
+.hero h1{color:#18232c;font-size:clamp(54px,8vw,100px);line-height:.9;letter-spacing:-.075em;text-transform:uppercase;margin:12px 0 0;font-weight:950}
+.hero h1 em{color:#fffdf7;font-style:normal}
+.hero .kicker{color:#18232c;font-weight:900;letter-spacing:.21em}
+.hero p{color:rgba(24,35,44,.78);font-size:13px;max-width:600px;font-weight:600;margin-top:13px}
+.hero-mark{min-width:205px;padding:16px 18px;border:1px solid rgba(255,255,255,.22);border-radius:3px;background:#18232c;color:#fffdf7;box-shadow:5px 5px 0 rgba(49,92,232,.75)}
+.hero-mark span{color:#c4cbd0;letter-spacing:.2em}.hero-mark strong{font-size:43px;line-height:1;color:#fffdf7}.hero-mark small{color:#c4cbd0}
+.metrics{gap:12px;margin:20px 0 34px}.metric{background:#fffdf7;border:1px solid #c8c4b8;border-radius:3px;padding:17px 19px;min-height:98px;box-shadow:3px 3px 0 rgba(24,35,44,.1)}
+.metric:nth-child(1){border-top:4px solid #315ce8}.metric:nth-child(2){border-top:4px solid #e64d26}.metric:nth-child(3){border-top:4px solid #18232c}.metric:nth-child(4){border-top:4px solid #8a8d88}
+.metric span{color:#5c6871;letter-spacing:.17em;font-weight:800}.metric strong{font-size:31px;color:#18232c;margin:6px 0 0}.metric small{color:#68747b}
+.section-title{margin-bottom:13px}.kicker{color:#e64d26;font-size:10px;letter-spacing:.2em;font-weight:850}
+.section-title h2{font-size:30px;line-height:1.02;color:#18232c;text-transform:uppercase;letter-spacing:-.055em;margin:6px 0 0;font-weight:950}
+.section-title p{color:#5c6871;font-size:12px;margin-top:6px}
+.panel{border:1px solid #bdb9ae;border-radius:4px;background:#fffdf7;box-shadow:5px 5px 0 #18232c}
+.toolbar{padding:13px 16px;background:#fffdf7;border-bottom:1px solid #d2cec2}
+.count{color:#5b6871;font-weight:800;letter-spacing:.16em}
+.search{border:1px solid #aaa99f;border-radius:3px;background:#f1eee5;color:#18232c;padding:10px 12px;font-size:12px}
+.search::placeholder{color:#7a817f}.search:focus{border-color:#315ce8;box-shadow:0 0 0 3px rgba(49,92,232,.12)}
+table{min-width:880px}thead{background:#18232c}th{padding:14px 15px;color:#d6d5cb;font-size:9px;letter-spacing:.16em}
+td{padding:14px 15px;border-top:1px solid #e4e0d5;color:#35424a;font-size:12px}
+tbody tr:nth-child(even){background:#f7f4ec}tbody tr:hover{background:#e6eaf5}
+.year{color:#315ce8;font-weight:900}.make{color:#18232c;font-weight:900}.model{color:#4c5861}
+.status{border-radius:3px;border:1px solid rgba(30,118,87,.25);color:#1e7657;background:#e7f2ec;font-weight:800;padding:5px 8px}.status:before{background:#1e7657}
+.mono{color:#29363f;font-variant-numeric:tabular-nums}.acid{color:#e64d26;font-weight:900}
+.not-logged{color:#7d817a}.progress{height:4px;background:#dedbd1;border-radius:0}.progress i{background:#315ce8}
+.insight{margin-top:19px;grid-template-columns:1.1fr .9fr;gap:13px}
+.insight-card{padding:20px;border:1px solid #c8c4b8;border-radius:4px;background:#18232c;color:#fffdf7;box-shadow:4px 4px 0 rgba(230,77,38,.35)}
+.insight-card h3{font-size:17px;color:#fffdf7;margin:5px 0 13px}
+.insight-card .kicker{color:#f06a43}
+.leader{padding:13px;background:#26333d;border:1px solid #47535a;border-radius:3px}.leader span{color:#c1c7c7;font-weight:700}.leader strong{color:#fffdf7;font-size:16px}.leader small{color:#ff815f;font-weight:800}
+.linked-note{color:#d0d5d2;font-size:12px}.linked-note strong{color:#fffdf7}.linked-note a{color:#86a1ff}
+details.archive{margin-top:24px;border:1px solid #c8c4b8;border-radius:4px;background:#e6e1d4;padding:0 18px 16px}
+details.archive summary{color:#18232c;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+details.archive summary:after{color:#315ce8}details.archive[open] summary:after{color:#315ce8}
+.archive-item{padding:11px 13px;border-radius:3px;background:#fffdf7;border:1px solid #d2cec2;color:#35424a}
+.archive-item small{color:#e64d26;font-weight:800;letter-spacing:.1em}
+.privacy{margin-top:22px;padding:14px 16px;border-radius:3px;border:1px solid #c8c4b8;background:#e4e0d4;color:#56616a;font-size:11px}.privacy strong{color:#18232c}
+.foot{border-color:#c5c1b6;color:#737a78}
+@media(max-width:860px){.wrap{padding:0 20px}header{margin:0 -12px;padding:0 12px}.hero{padding:28px;min-height:210px}}
+@media(max-width:560px){.wrap{padding:0 13px}header{height:66px;margin:0 -4px;padding:0 4px}.brand{font-size:13px}.logo{width:34px;height:34px}.link{padding:8px 9px;font-size:8px}.hero{padding:23px;min-height:auto;box-shadow:5px 5px 0 #18232c;align-items:flex-start;flex-direction:column}.hero h1{font-size:clamp(48px,14vw,76px)}.hero-mark{min-width:0;width:100%;box-shadow:3px 3px 0 rgba(49,92,232,.75)}.hero:after{right:-190px;top:-150px}.metrics{gap:8px;margin:17px 0 28px}.metric{padding:13px;min-height:88px}.metric strong{font-size:25px}.section-title h2{font-size:26px}.toolbar{align-items:stretch;flex-direction:column}.search{width:100%}.insight{grid-template-columns:1fr}.leaders{grid-template-columns:1fr}.archive-grid{grid-template-columns:1fr}.privacy,.foot{flex-direction:column}}
+
+
+/* ARCTIC STEEL palette — same layout, cool graphite and teal */
+:root{color-scheme:light;--bg:#e6edef;--panel:#f8fbfb;--panel2:#dce6e9;--line:#bdcbd0;--white:#17262d;--muted:#4f626b;--soft:#687b82;--orange:#168d98;--acid:#24c4cc;--blue:#168d98;--green:#327a61}
+body{background-color:#e6edef;background-image:linear-gradient(rgba(20,43,51,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(20,43,51,.045) 1px,transparent 1px);color:#17262d}
+header{background:#13242b;color:#f5f9fa}
+.logo{background:#21c2ca;color:#10232a}
+.link{border-color:#53666d;color:#e2ecee}.link:hover{border-color:#34d1d5;color:#fff}
+.link.primary{background:#21c2ca;border-color:#21c2ca;color:#10232a}.link.primary:hover{background:#55d9dd}
+.topline,.kicker{color:#168d98}.updated{color:#63767d}
+.hero{background:#17333c;box-shadow:8px 8px 0 #102128}
+.hero:after{border-color:rgba(73,213,219,.32);box-shadow:0 0 0 26px rgba(36,196,204,.11),0 0 0 52px rgba(170,218,222,.09),0 0 0 88px rgba(8,21,26,.1)}
+.hero h1{color:#f1f7f8}.hero h1 em{color:#42d3d8}.hero .kicker{color:#77dce0}
+.hero p{color:#ccdcdf}
+.hero-mark{border-color:#506a72;background:#10242b;color:#f5f9fa;box-shadow:5px 5px 0 rgba(36,196,204,.66)}
+.hero-mark span,.hero-mark small{color:#bfd0d3}.hero-mark strong{color:#f8fbfb}
+.metric{background:#f8fbfb;border-color:#bfccd0;box-shadow:3px 3px 0 rgba(19,43,50,.1)}
+.metric:nth-child(1){border-top-color:#168d98}.metric:nth-child(2){border-top-color:#24c4cc}.metric:nth-child(3){border-top-color:#17333c}.metric:nth-child(4){border-top-color:#82959a}
+.metric span{color:#596d74}.metric strong{color:#17262d}.metric small{color:#687b82}
+.section-title h2{color:#17262d}.section-title p{color:#596d74}
+.panel{border-color:#bdcbd0;background:#f8fbfb;box-shadow:5px 5px 0 #14262d}
+.toolbar{background:#f8fbfb;border-color:#cbd6d9}.count{color:#53676e}
+.search{border-color:#aebfc3;background:#edf3f4;color:#17262d}.search::placeholder{color:#72858a}
+.search:focus{border-color:#168d98;box-shadow:0 0 0 3px rgba(36,196,204,.14)}
+thead{background:#183039}th{color:#d7e4e6}
+td{border-color:#dce5e6;color:#34464d}
+tbody tr:nth-child(even){background:#eff4f4}tbody tr:hover{background:#e1f1f2}
+.year{color:#168d98}.make{color:#17262d}.model{color:#53666d}
+.status{border-color:rgba(50,122,97,.26);color:#327a61;background:#e8f3ee}.status:before{background:#327a61}
+.mono{color:#2e4148}.acid{color:#087f89}.not-logged{color:#728388}
+.progress{background:#d6e0e2}.progress i{background:linear-gradient(90deg,#168d98,#47d3d8)}
+.insight-card{border-color:#2e555e;background:linear-gradient(135deg,#17333c,#10262d);color:#f7fbfb;box-shadow:4px 4px 0 rgba(36,196,204,.3)}
+.insight-card h3{color:#f7fbfb}.insight-card .kicker{color:#57d1d5}
+.leader{background:#213e47;border-color:#42636b}.leader span{color:#bfd0d2}.leader strong{color:#f8fbfb}.leader small{color:#50d0d5}
+.linked-note{color:#cedbdd}.linked-note strong{color:#f8fbfb}.linked-note a{color:#64dce0}
+details.archive{border-color:#bdcbd0;background:#dce7e9}details.archive summary{color:#17262d}
+details.archive summary:after,details.archive[open] summary:after{color:#168d98}
+.archive-item{background:#f8fbfb;border-color:#cbd6d9;color:#34464d}.archive-item small{color:#168d98}
+.privacy{border-color:#bdcbd0;background:#dfe9ea;color:#53666d}.privacy strong{color:#17262d}
+.foot{border-color:#bdcbd0;color:#6f8085}
+@media(max-width:560px){.hero{box-shadow:5px 5px 0 #102128}.hero-mark{box-shadow:3px 3px 0 rgba(36,196,204,.66)}}
+
+
+/* Fleet controls and compact data-first layout */
+.hero{min-height:154px;padding:25px 30px;align-items:center}
+.hero h1{font-size:clamp(44px,6vw,76px);margin:9px 0 0}
+.hero-mark{min-width:152px;padding:13px 16px}
+.hero-mark strong{font-size:36px}
+.metrics{margin-bottom:23px}
+.fleet-filters{display:grid;gap:10px;margin:0 0 16px}
+.filter-line{display:flex;align-items:flex-start;gap:12px}
+.filter-label{flex:0 0 64px;padding-top:8px;color:#687b82;font:800 9px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase}
+.filter-options{display:flex;flex-wrap:wrap;gap:6px}
+.filter-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #bdcbd0;border-radius:3px;background:#f8fbfb;color:#334850;font:700 10px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.filter-chip b{color:#168d98;font-size:10px}
+.filter-chip:hover{border-color:#168d98}
+.filter-chip.active{border-color:#17333c;background:#17333c;color:#f8fbfb}
+.filter-chip.active b{color:#57d1d5}
+.filter-chip.zero{color:#89989c}
+.type-tag{display:inline-block;margin-top:4px;padding:3px 6px;border:1px solid #c4d2d5;border-radius:2px;color:#168d98;font:800 8px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.04em;text-transform:uppercase}
+.status-cell{display:flex;align-items:center;gap:8px}
+.status.inactive{border-color:#98a9ae;color:#697b80;background:#e5ecee}
+.status.inactive:before{background:#82959a}
+.detail-toggle{padding:4px 0;border:0;background:transparent;color:#168d98;font:800 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;cursor:pointer}
+.detail-toggle:hover{color:#086e78}
+tr.detail-row[hidden]{display:none}
+tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space:normal}
+.detail-panel{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:8px;padding:12px;border:1px solid #c4d1d4;border-radius:3px;background:#f8fbfb}
+.detail-item{min-width:0;padding:8px 9px;border-left:2px solid #24c4cc;background:#edf3f4}
+.detail-item span{display:block;color:#62767c;font:800 8px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase}
+.detail-item strong{display:block;margin-top:5px;color:#17262d;font-size:13px;font-weight:850;overflow-wrap:anywhere}
+.detail-heading{grid-column:1/-1;color:#168d98;font:900 9px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase}
+@media(max-width:860px){.hero{min-height:145px;padding:22px}.detail-panel{grid-template-columns:repeat(3,minmax(100px,1fr))}}
+@media(max-width:560px){.hero{min-height:0;padding:20px}.hero h1{font-size:clamp(42px,12vw,65px)}.hero-mark{min-width:0;width:auto;align-self:stretch}.fleet-filters{gap:8px}.filter-line{display:block}.filter-label{display:block;padding:0 0 5px}.filter-chip{padding:7px 8px;font-size:9px}.detail-panel{grid-template-columns:repeat(2,minmax(90px,1fr))}.status-cell{align-items:flex-start;flex-direction:column;gap:5px}}
+
+</style>
+</head>
+<body><div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-mark">TH</div><h1 id="th-auth-title">THBudget</h1><p>Your private workbook stays in Google Sheets. Sign in to view it here on GitHub Pages.</p><button type="button" id="th-sign-in">Sign in with Google</button><p id="th-auth-message" role="status">Use the Google account that can open your TH Budget Sheet.</p></div></div>
+<style>
+#th-auth{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:#101d24;color:#e9f5f6;font:16px/1.5 system-ui,sans-serif}
+#th-auth[hidden]{display:none}#th-auth .th-auth-card{width:min(100%,440px);padding:40px;border:1px solid #35656d;border-radius:14px;background:#173039;box-shadow:0 20px 60px #0006;text-align:center}
+.th-auth-mark{display:inline-grid;place-items:center;width:48px;height:48px;background:#20c3cc;color:#10252b;font-weight:900;border-radius:8px}
+#th-auth h1{color:#fff;font-size:32px;margin:15px 0}#th-auth p{color:#d0e3e6}#th-sign-in{padding:12px 22px;background:#24c5ce;color:#10252b;border:0;border-radius:6px;font:700 16px system-ui;cursor:pointer}#th-sign-in:focus-visible{outline:3px solid white;outline-offset:3px}
+#th-auth-message{font-size:13px;min-height:2em}
+</style><div class="wrap">
+<header>
+<a class="brand" id="homeLink" href="#"><span class="logo">TH</span><span>THBudget<small>MOTOR POOL / FIELD OFFICE</small></span></a>
+<nav class="actions"><a class="link" id="mileageLink" href="#">MILEAGE HUB</a><a class="link primary" id="allLink" href="#">FULL PORTAL ↗</a></nav>
+</header>
+<main>
+<div class="topline"><span>MOTOR POOL / VEHICLE REGISTER</span><span class="updated">LIVE SHEET · UPDATED <b id="updated"></b></span></div>
+<section class="hero">
+<div class="hero-copy"><div class="kicker">CURRENT VEHICLES / LIVE REGISTER</div><h1>Active <em>Fleet.</em></h1><p>One live view of every active vehicle, its latest odometer reading, and the miles logged.</p></div>
+<div class="hero-mark"><span>Current fleet</span><strong id="heroCount">—</strong><small>active vehicles</small></div>
+</section>
+<div class="metrics" id="metrics"></div>
+<div class="fleet-filters">
+<div class="filter-line"><span class="filter-label">VIEW</span><div class="filter-options" id="scopeFilters"></div></div>
+<div class="filter-line"><span class="filter-label">VEHICLE TYPE</span><div class="filter-options" id="typeFilters"></div></div>
+</div>
+<section>
+<div class="section-title"><div><div class="kicker">Your current vehicles</div><h2>Active fleet</h2><p>Sorted newest model year first. Mileage is matched to the latest mileage log when available.</p></div></div>
+<div class="panel">
+<div class="toolbar"><span class="count" id="tableCount"></span><input class="search" id="fleetSearch" type="search" placeholder="Search year, make, model…" aria-label="Search active fleet"></div>
+<div class="table-wrap"><table><thead><tr><th>Year</th><th>Make</th><th>Model</th><th>Type</th><th>Status / details</th><th>Current odometer</th><th>Added mileage</th><th>Est. miles / year</th></tr></thead><tbody id="fleetRows"></tbody></table></div>
+</div>
+</section>
+<section class="insight">
+<article class="insight-card"><div class="kicker">Mileage leaders</div><h3>Highest annual estimate</h3><div class="leaders" id="leaders"></div></article>
+<article class="insight-card"><div class="kicker">Mileage coverage</div><h3>What needs attention</h3><div class="linked-note" id="coverage"></div></article>
+</section>
+
+<div class="privacy"><span><strong>Private workspace.</strong> These live records are read from your Google Sheet and stay out of the public GitHub files.</span><span>THB · VEHICLE OPERATIONS</span></div>
+<footer class="foot"><span>THBUDGET · ACTIVE VEHICLES</span><span>PRIVATE SHEET CONNECTION</span></footer>
+</main></div>
+<script>
+function renderFleetPage(D,PORTAL) {
+const clean=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const n=s=>{const x=Number(String(s||'').replace(/[^0-9.-]/g,''));return Number.isFinite(x)?x:0};
+const fmt=s=>n(s).toLocaleString('en-US',{maximumFractionDigits:1});
+const alias={
+'xpro200':'XPro 200','volpamsp03':'SP03','colemanb200':'B200','makdaddylegend':'Legend',
+'harleydavidsonroadglidelimitedfltrk':'FLTRK','stirlingtrailer':'Stirling',
+'ram3500hodrw4x4cummings':'3500 DRW','keystonebullet331bhs':'Bullet',
+'fordmustang':'Mustang','harleydavidsonultraclassicflhtcui':'FLHTCUI','fordf150':'F150'
+};
+const fleet=D.activeFleet||[], inactive=D.inactiveFleet||[], vehicles=D.vehicles||[], history=D.history||[];
+const findMileage=f=>{const key=clean(f.make+' '+f.model), short=alias[key];return vehicles.find(v=>short&&v.name===short)||null};
+const findHistory=f=>{const key=clean(f.make+' '+f.model), short=alias[key];return history.find(v=>(short&&v.name===short)||clean(v.name)===key)||null};
+const typeOrder=['Cars','Trucks','Boats & Watercraft','Tractors','Motorcycles','Scooters & Mopeds','Mini Bikes','Golf Carts','Go-Karts','Trailers & RVs','Bicycles','Other'];
+function vehicleType(v){
+ const k=clean(v.make+' '+v.model), make=clean(v.make), model=clean(v.model);
+ if(k.includes('ls2000')||k.includes('lst1200x')||k.includes('sailboat')||k.includes('seadoo')||k.includes('boat')||k.includes('watercraft')||k.includes('waverunner')||model.includes('jf650')) return 'Boats & Watercraft';
+ if(k.includes('tractor')) return 'Tractors';
+ if(k.includes('tacoma')||k.includes('s10')||k.includes('f150')||k.includes('f250')||k.includes('f350')||k.includes('ram')||k.includes('pickup')||k.includes('silverado')||k.includes('truck')) return 'Trucks';
+ if(k.includes('harley')||k.includes('motorcycle')||model.includes('ninja')||model.includes('zzr')||model.includes('en450')||model.includes('cx500')) return 'Motorcycles';
+ if(k.includes('xpro')||k.includes('volpam')||k.includes('taotao')||k.includes('scooter')||k.includes('moped')) return 'Scooters & Mopeds';
+ if(k.includes('coleman')||k.includes('minibike')) return 'Mini Bikes';
+ if(k.includes('makdaddy')||k.includes('golfcart')) return 'Golf Carts';
+ if(k.includes('gocart')||k.includes('gokart')||k.includes('dingo')) return 'Go-Karts';
+ if(k.includes('trek')||k.includes('bicycle')) return 'Bicycles';
+ if(k.includes('keystone')||k.includes('stirling')||k.includes('trailer')||k.includes('rv')) return 'Trailers & RVs';
+ if(['chrysler','chevrolet','scion','lincoln','toyota','daewoo','mitsubishi','dodge','ford','volkswagen'].includes(make)) return 'Cars';
+ return 'Other';
+}
+document.getElementById('homeLink').href=PORTAL;
+document.getElementById('allLink').href=PORTAL+'budget.html';
+document.getElementById('mileageLink').href=PORTAL+'vehicles.html';
+document.getElementById('updated').textContent=esc(D.asOf||'latest');
+document.getElementById('heroCount').textContent=fleet.length;
+const linked=fleet.filter(findMileage).length;
+document.getElementById('metrics').innerHTML=[
+ {label:'Active fleet',value:fleet.length,sub:'listed as active'},
+ {label:'Mileage linked',value:linked,sub:'current odometer available'},
+ {label:'Needs mileage log',value:fleet.length-linked,sub:'active entries without a match'},
+ {label:'Inactive archive',value:inactive.length,sub:'kept out of active view'}
+].map(x=>'<article class="metric"><span>'+esc(x.label)+'</span><strong>'+esc(x.value)+'</strong><small>'+esc(x.sub)+'</small></article>').join('');
+let scope='active', typeChoice='all';
+const scopeRows=()=>scope==='inactive'?inactive:scope==='needs'?fleet.filter(v=>!findMileage(v)):fleet;
+function renderFilters(){
+ const base=scopeRows();
+ const scopes=[{id:'active',label:'All active',count:fleet.length},{id:'needs',label:'Needs mileage',count:fleet.length-linked},{id:'inactive',label:'Inactive archive',count:inactive.length}];
+ document.getElementById('scopeFilters').innerHTML=scopes.map(x=>'<button type="button" class="filter-chip '+(scope===x.id?'active':'')+'" data-scope="'+x.id+'">'+esc(x.label)+' <b>'+x.count+'</b></button>').join('');
+ document.getElementById('typeFilters').innerHTML=typeOrder.map(t=>{const count=base.filter(v=>vehicleType(v)===t).length;if(!count&&t!=='Tractors')return '';return '<button type="button" class="filter-chip '+(typeChoice===t?'active':'')+'" data-type="'+esc(t)+'">'+esc(t)+' <b>'+count+'</b></button>'}).join('');
+}
+function renderFleet(){
+ const q=(document.getElementById('fleetSearch').value||'').toLowerCase().trim();
+ const rows=scopeRows().filter(v=>(typeChoice==='all'||vehicleType(v)===typeChoice)&&[v.year,v.make,v.model,vehicleType(v)].join(' ').toLowerCase().includes(q)).sort((a,b)=>Number(b.year)-Number(a.year));
+ document.getElementById('tableCount').textContent=rows.length+' VEHICLES · '+(scope==='inactive'?'INACTIVE ARCHIVE':scope==='needs'?'NEEDS MILEAGE':'ACTIVE FLEET');
+ document.getElementById('fleetRows').innerHTML=rows.length?rows.map(v=>{
+  const m=findMileage(v), old=findHistory(v), type=vehicleType(v), isInactive=scope==='inactive';
+  const current=m?fmt(m.currentMileage):'No current match';
+  const prior=old?fmt(old.currentMileage):'No prior record';
+  const added=m?fmt(m.addedMileage):'—', annual=m?fmt(m.annualEstimate):'—';
+  return '<tr class="vehicle-row"><td class="year">'+esc(v.year)+'</td><td class="make">'+esc(v.make)+'</td><td class="model">'+esc(v.model)+'</td><td><span class="type-tag">'+esc(type)+'</span></td><td><div class="status-cell"><span class="status '+(isInactive?'inactive':'')+'">'+(isInactive?'INACTIVE':'ACTIVE')+'</span><button type="button" class="detail-toggle">DETAILS +</button></div></td><td class="mono">'+(m?esc(current):'<span class="not-logged">Not in mileage log</span>')+'</td><td class="mono">'+esc(added)+'</td><td class="mono acid">'+esc(annual)+(m?'<div class="progress"><i style="width:'+Math.max(3,n(m.annualEstimate)/11044*100)+'%"></i></div>':'')+'</td></tr>'+
+  '<tr class="detail-row" hidden><td colspan="8"><div class="detail-panel"><div class="detail-heading">Vehicle details / mileage history</div><div class="detail-item"><span>Vehicle type</span><strong>'+esc(type)+'</strong></div><div class="detail-item"><span>Prior mileage record</span><strong>'+esc(prior)+'</strong></div><div class="detail-item"><span>Latest odometer · '+esc(D.asOf||'latest')+'</span><strong>'+esc(current)+'</strong></div><div class="detail-item"><span>Mileage added</span><strong>'+esc(added)+'</strong></div><div class="detail-item"><span>Estimated miles / year</span><strong>'+esc(annual)+'</strong></div></div></td></tr>';
+ }).join(''):'<tr><td colspan="8" class="muted">No vehicles match those filters.</td></tr>';
+ document.querySelectorAll('.detail-toggle').forEach(button=>button.addEventListener('click',()=>{const row=button.closest('tr').nextElementSibling;row.hidden=!row.hidden;button.textContent=row.hidden?'DETAILS +':'HIDE −'}));
+}
+function renderLeaders(){
+ const current=fleet.map(f=>({f,m:findMileage(f)})).filter(x=>x.m).sort((a,b)=>n(b.m.annualEstimate)-n(a.m.annualEstimate)).slice(0,3);
+ document.getElementById('leaders').innerHTML=current.map(({f,m})=>'<div class="leader"><span>'+esc(vehicleType(f))+' · '+esc(f.make)+'</span><strong>'+esc(m.name)+'</strong><small>'+esc(fmt(m.annualEstimate))+' / yr</small></div>').join('')||'<div class="muted">No mileage entries matched.</div>';
+ document.getElementById('coverage').innerHTML='<strong>'+linked+' of '+fleet.length+'</strong> active fleet entries have a matching current mileage record. The rest are clearly marked in the fleet table.';
+}
+document.getElementById('scopeFilters').addEventListener('click',e=>{const b=e.target.closest('[data-scope]');if(!b)return;scope=b.dataset.scope;typeChoice='all';renderFilters();renderFleet()});
+document.getElementById('typeFilters').addEventListener('click',e=>{const b=e.target.closest('[data-type]');if(!b)return;typeChoice=typeChoice===b.dataset.type?'all':b.dataset.type;renderFilters();renderFleet()});
+document.getElementById('fleetSearch').addEventListener('input',renderFleet);
+renderFilters();renderFleet();renderLeaders();
+}
+window.thStart = async () => renderFleetPage(await thFleetData(), new URL('./',location.href).href);
+</script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="sheets.js"></script></body></html>
