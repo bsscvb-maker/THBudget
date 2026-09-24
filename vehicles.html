@@ -101,7 +101,7 @@ const vehicles=DATA.vehicles||[];
 const active=DATA.activeFleet||[];
 const inactive=DATA.inactiveFleet||[];
 document.getElementById('allPortal').href=PORTAL_URL+'budget.html';
-document.querySelector('.brand').href=PORTAL_URL+'budget.html';
+document.querySelector('.brand').href=PORTAL_URL;
 document.getElementById('asOf').textContent='UPDATED · '+(DATA.asOf||'Latest');
 document.getElementById('footerDate').textContent=esc(DATA.asOf||'latest');
 const leadVehicle=[...vehicles].sort((a,b)=>annual(b)-annual(a))[0];
