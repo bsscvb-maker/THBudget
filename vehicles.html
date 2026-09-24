@@ -308,14 +308,16 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 function renderFleetPage(D,PORTAL) {
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clean=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-const categories=['Cars','Trucks','SUVs','Classic','Motorcycles','Boats','Trailers','RVs','Golf Carts','ATVs & Quads','Scooters & Mopeds','Mini Bikes','Tractors','Yard Equipment','Outdoor Equipment','Shop Equipment','Bicycles'];
+const categories=['Cars','Trucks','SUVs','Vans','Classic','Motorcycles','Boats','Personal Watercraft','Trailers','RVs','Golf Carts','ATVs & Quads','Scooters & Mopeds','Mini Bikes','Tractors','Yard Equipment','Outdoor Equipment','Shop Equipment','Bicycles'];
 const paths={
 'Cars':'<path d="M4 15h16l-2-6H6l-2 6Zm2-6 2-3h8l2 3M5 15v3m14-3v3M7 18h10"/>',
 'Trucks':'<path d="M2 7h12v10H2zM14 11h4l4 4v2h-8M6 17a2 2 0 1 0 4 0m8 0a2 2 0 1 0 4 0"/>',
 'SUVs':'<path d="M3 16h18l-2-6-3-3H8l-3 3-2 6ZM5 16v2m14-2v2M7 10h10M8 18h8"/>',
+'Vans':'<path d="M2 8h15l4 5v5H2zM4 11h10v4H4zM17 13h3M6 18a2 2 0 1 0 4 0m7 0a2 2 0 1 0 4 0"/>',
 'Classic':'<path d="M3 16h18l-2-4H5l-2 4Zm2-4 3-5h8l3 5M6 16v2m12-2v2M9 7v5m6-5v5"/>',
 'Motorcycles':'<circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="m5 17 5-7 4 7h5l-4-8h-3m3 0h4"/>',
 'Boats':'<path d="M3 15h18l-3 5H6l-3-5Zm9-11v11M12 5l6 8h-6M3 21c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1"/>',
+'Personal Watercraft':'<path d="m2 16 5-4h9l5 4-3 3H5zM11 12l2-5h4l2 5M3 21c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1"/>',
 'Trailers':'<path d="M2 7h17v10H2zM19 14h3M6 17a2 2 0 1 0 4 0m7 0a2 2 0 1 0 4 0"/>',
 'RVs':'<path d="M2 6h17l3 5v7H2zM5 9h5v4H5zM13 9h5v4h-5M6 18a2 2 0 1 0 4 0m8 0a2 2 0 1 0 4 0"/>',
 'Golf Carts':'<path d="M3 16h18l-2-5H5l-2 5ZM5 11l3-6h8l3 6M8 5h8M6 16a2 2 0 1 0 4 0m8 0a2 2 0 1 0 4 0"/>',
@@ -331,12 +333,21 @@ const paths={
 function icon(c){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[c]||paths.Cars)+'</svg>'}
 function normalizeCategory(p){
  const source=String(p.category||'').toLowerCase(), name=clean([p.make,p.model,p.name].filter(Boolean).join(' '));
- if(p.category==='Unfiled'||categories.includes(p.category))return p.category;
+ if(p.category==='Unfiled')return 'Unfiled';
+ // Identify distinctive models first, even when an old profile has a valid but incorrect section.
+ if(/seadoo|jetski|personalwatercraft|yamaha.*(lst|waverunner|vx|fx)|kawasaki.*(jf650|jetski|stx)/.test(name)||/jet ski|jetski|personal watercraft/.test(source))return 'Personal Watercraft';
+ if(/sienna|caravan|townandcountry|pacifica|odyssey|sedona|carnival|transit|sprinter|promaster|expressvan|savana|astrovan|van$/.test(name))return 'Vans';
+ if(/sailboat|pontoon|speedboat|motorboat|bayliner|bowrider/.test(name))return 'Boats';
+ if(/1999chevrolettahoe/.test(name)||String(p.year)==='1977'||/classic|project|antique/.test(source))return 'Classic';
+ if(/4runner|aspen|tahoe|enclave|suburban|trailblazer|navigator|tracker|highlander|cherokee|explorer|expedition/.test(name))return 'SUVs';
+ if(/ram3500|fordf150|fordf250|fordf350|silverado|pickup|chevrolets10|toyotatacoma/.test(name))return 'Trucks';
+ if(/civic|mustang|sedan|coupe/.test(name))return 'Cars';
+ if(categories.includes(p.category))return p.category;
  if(/pressurewasher|powerwasher/.test(name))return 'Outdoor Equipment';
  if(/aircompressor|compressor/.test(name))return 'Shop Equipment';
  if(/weedeater|weedwacker|brushcutter|trimmer|blower|chainsaw|mower/.test(name)&&!/motorcycle/.test(source))return 'Yard Equipment';
  if(/classic|project|antique/.test(source)||String(p.year)==='1977'||name.includes('1999chevrolettahoe'))return 'Classic';
- if(/boat|watercraft|jet ski|jetski/.test(source))return 'Boats';
+ if(/boat/.test(source))return 'Boats';
  if(/trailer/.test(source)&&!name.includes('keystone'))return 'Trailers';
  if(/\brv\b|camper|motorhome/.test(source)||name.includes('keystone'))return 'RVs';
  if(source==='cars & suvs'&&/civic|mustang|sedan|coupe/.test(name))return 'Cars';
@@ -377,12 +388,14 @@ function sameListedAsset(a,b){
 }
 function listedCategory(a){const n=clean(a.make+' '+a.model);
  if(/tahoe/.test(n))return 'Classic';
- if(/seadoo|yamaha.*lst|kawasaki.*jf650|sailboat/.test(n))return 'Boats';
+ if(/seadoo|yamaha.*lst|kawasaki.*jf650/.test(n))return 'Personal Watercraft';
+ if(/sailboat/.test(n))return 'Boats';
+ if(/sienna|caravan|townandcountry|pacifica|odyssey|sedona|carnival|transit|sprinter|promaster|expressvan|savana|astrovan/.test(n))return 'Vans';
  if(/mango.*dingo/.test(n))return 'Golf Carts';
  if(/taotao.*moped/.test(n))return 'Scooters & Mopeds';
  if(/harley|kawasaki|honda.*cx500/.test(n))return 'Motorcycles';
  if(/ram|f150|s10|tacoma/.test(n))return 'Trucks';
- if(/aspen|trailblazer|navigator|sienna|tracker/.test(n))return 'SUVs';
+ if(/aspen|trailblazer|navigator|tracker/.test(n))return 'SUVs';
  if(/stirling/.test(n))return 'Trailers';
  if(/keystone/.test(n))return 'RVs';
  if(/trek/.test(n))return 'Bicycles';
@@ -410,7 +423,7 @@ function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'<
 let category='',asset=null,status='all',editing=false;
 const currentAsset=()=>asset;
 function show(view){for(const id of ['dashboardView','categoryView','assetView'])document.getElementById(id).hidden=id!==view;window.scrollTo({top:0,behavior:'smooth'})}
-function renderCategories(){document.getElementById('categoryGrid').innerHTML=[...categories,'Unfiled'].filter(c=>assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
+function renderCategories(){document.getElementById('categoryGrid').innerHTML=[...categories,'Unfiled'].filter(c=>c==='Vans'||c==='Personal Watercraft'||assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
 function renderCategory(){
  const items=assets.filter(a=>a.category===category).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);return (Number.isFinite(ay)?ay:Infinity)-(Number.isFinite(by)?by:Infinity)||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))}), shown=items.filter(a=>status==='all'||clean(a.status)===status);
  document.getElementById('categoryTitle').textContent=category;
