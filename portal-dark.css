@@ -34,3 +34,12 @@ body[data-th-page="fleet"] .vehicle-tabs button.active,body[data-th-page="fleet"
 body[data-th-page="fleet"] #metrics,body[data-th-page="fleet"] #register,body[data-th-page="fleet"] #mileage{scroll-margin-top:88px}
 body[data-th-page="fleet"] .vehicle-mileage{margin-top:36px}body[data-th-page="fleet"] .vehicle-mileage .panel{overflow:hidden}body[data-th-page="fleet"] .vehicle-mileage table{min-width:790px}
 @media(max-width:700px){body[data-th-page="home"] .cards{grid-template-columns:1fr}body[data-th-page="fleet"] .vehicle-tabs{top:0;flex-wrap:nowrap;overflow-x:auto}body[data-th-page="fleet"] .vehicle-tabs button{flex:none}}
+
+/* Account control shared by Home, Vehicles, and Finance. */
+.th-account{display:flex;align-items:center;gap:10px;margin-left:auto}
+.th-authorized{font-size:13px;font-weight:700;color:#c2d0e3;white-space:nowrap}
+.th-sign-out{padding:8px 12px;border:1px solid #718198;border-radius:7px;background:#26364e;color:#f3f6fb;font:700 13px/1.2 system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.th-sign-out:hover{background:#395477;border-color:#9db7d9}
+.th-sign-out:focus-visible{outline:3px solid #8bbcff;outline-offset:2px}
+.th-account-mark{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:#356bbb;color:#fff;font:800 12px/1 system-ui,sans-serif}
+@media(max-width:800px){.th-account{gap:6px}.th-authorized{display:none}.th-account .th-connection{display:none}.th-sign-out{padding:8px 9px}.th-account-mark{width:32px;height:32px}}
