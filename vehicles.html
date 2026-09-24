@@ -261,7 +261,17 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 .th-auth-mark{display:inline-grid;place-items:center;width:48px;height:48px;background:#20c3cc;color:#10252b;font-weight:900;border-radius:8px}
 #th-auth h1{color:#fff;font-size:32px;margin:15px 0}#th-auth p{color:#d0e3e6}#th-sign-in{padding:12px 22px;background:#24c5ce;color:#10252b;border:0;border-radius:6px;font:700 16px system-ui;cursor:pointer}#th-sign-in:focus-visible{outline:3px solid white;outline-offset:3px}
 #th-auth-message{font-size:13px;min-height:2em}
- .report-details{margin-top:18px;border:1px solid var(--line);padding:13px;border-radius:4px}.report-details summary{cursor:pointer;font-weight:700}.report-details p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;color:var(--muted)}.notes-cell{white-space:normal;min-width:180px;max-width:480px}#assetMaintenance table{min-width:700px} </style><div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TH</span><span>THBudget<small>Personal command center</small></span></a><nav aria-label="THBudget pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link " href="finance.html"><span class="th-nav-icon">◫</span>Finance</a><a class="th-nav-link" href="freebirds.html"><span class="th-nav-icon" style="overflow:hidden"><img src="freebirds-logo.svg" alt="" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 72%"></span>Freebirds</a><a class="th-nav-link active" href="vehicles.html"><span class="th-nav-icon ram-nav-icon"><img src="https://www.onestepgps.com/assets/ram-4lxd-NAa.webp" alt="" referrerpolicy="no-referrer"></span>Vehicles</a></nav><div class="th-sidebar-foot">© 2026 THBudget<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Vehicles</strong><small>Vehicle dashboard and individual profiles</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="wrap">
+ .report-details{margin-top:18px;border:1px solid var(--line);padding:13px;border-radius:4px}.report-details summary{cursor:pointer;font-weight:700}.report-details p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;color:var(--muted)}.notes-cell{white-space:normal;min-width:180px;max-width:480px}#assetMaintenance table{min-width:700px} #assetView .edit-bar[hidden]{display:none}
+#assetSchedules .schedule-intro{color:#b7c9e1;font-size:14px;margin:0 0 14px;line-height:1.5}
+#assetSchedules .schedule-warning{color:#ffe0a5;background:#463921;border:1px solid #987549;padding:12px;margin:0 0 14px;border-radius:5px}
+#assetSchedules .table-wrap{max-height:min(70vh,740px);overflow:auto;border:1px solid #344968;border-radius:6px}
+#assetSchedules table{width:100%;min-width:820px;border-collapse:collapse}
+#assetSchedules thead th{position:sticky;top:0;z-index:2;background:#223c62;color:#fff;text-align:left;font:800 16px/1.3 Arial,Helvetica,sans-serif;padding:15px 13px;white-space:nowrap}
+#assetSchedules tbody td{padding:13px;border-top:1px solid #344968;vertical-align:top;font-size:15px;line-height:1.45}
+#assetSchedules tbody tr:nth-child(even){background:#17283d}
+#assetSchedules tbody td:first-child{font-weight:700;min-width:240px}
+#assetSchedules .reading{display:block;color:#b5cae5;font-size:14px;margin-top:3px}
+</style><div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TH</span><span>THBudget<small>Personal command center</small></span></a><nav aria-label="THBudget pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link " href="finance.html"><span class="th-nav-icon">◫</span>Finance</a><a class="th-nav-link" href="freebirds.html"><span class="th-nav-icon" style="overflow:hidden"><img src="freebirds-logo.svg" alt="" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 72%"></span>Freebirds</a><a class="th-nav-link active" href="vehicles.html"><span class="th-nav-icon ram-nav-icon"><img src="https://www.onestepgps.com/assets/ram-4lxd-NAa.webp" alt="" referrerpolicy="no-referrer"></span>Vehicles</a></nav><div class="th-sidebar-foot">© 2026 THBudget<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Vehicles</strong><small>Vehicle dashboard and individual profiles</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="wrap">
 <header>
 <a class="brand" id="homeLink" href="#"><span class="logo">TH</span><span>THBudget<small>VEHICLE WORKSPACE</small></span></a>
 <nav class="actions"><a class="link primary" id="allLink" href="#">FULL PORTAL ↗</a></nav>
@@ -275,7 +285,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 </div>
 <div class="workspace-view" id="categoryView" hidden>
 <button type="button" class="back-link" id="backDashboard">Back</button>
-<div class="section-title"><div><div class="kicker">Category</div><h2 id="categoryTitle"></h2><p>Choose an item to view its details, mileage, and maintenance.</p></div></div>
+<div class="section-title"><div><div class="kicker">Category</div><h2 id="categoryTitle"></h2><p>Choose an item to view its details, mileage, maintenance, and service schedules.</p></div></div>
 <div class="status-filter" id="statusFilters"></div>
 <div class="asset-grid" id="assetGrid"></div>
 </div>
@@ -283,10 +293,11 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <button type="button" class="back-link" id="backCategory">Back</button>
 <div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span></div>
 <div class="edit-bar"><button type="button" id="toggleAssetEdit" aria-pressed="false">Edit details</button><span>Fields are locked until you choose Edit.</span></div>
-<div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Maintenance</button></div>
+<div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Maintenance</button><button type="button" data-asset-tab="schedules">Service Schedules</button></div>
 <section class="asset-tab-panel" id="assetDetails"><div class="photo-manager"><div id="assetPhoto"></div><label class="photo-upload">Add or replace photo<input id="assetPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><span id="photoUploadStatus" role="status"></span></div><div id="assetEditStatus" class="asset-edit-status" role="status"></div><div class="asset-facts" id="assetFacts"></div><details class="report-details"><summary>Full specification report</summary><p id="assetReport"></p></details></section>
 <section class="asset-tab-panel" id="assetMileage" hidden></section>
 <section class="asset-tab-panel" id="assetMaintenance" hidden></section>
+<section class="asset-tab-panel" id="assetSchedules" hidden></section>
 </div>
 <footer class="foot"><span>THBUDGET · VEHICLES</span><span>PRIVATE SHEET CONNECTION</span></footer>
 </main></div>
@@ -350,10 +361,42 @@ function matchingProfile(r){
 const used=new Set();
 const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);return {...p,...r,category:normalizeCategory(r),id:'r'+i,photo:p?.photo||''}});
 const extras=profiles.filter(p=>!used.has(p)).map((p,i)=>({...p,category:normalizeCategory(p),id:'p'+i}));
+const listed=[...(D.activeFleet||[]),...(D.inactiveFleet||[])];
+function sameListedAsset(a,b){
+ const am=clean(a.make),bm=clean(b.make),an=clean(a.model),bn=clean(b.model);
+ if((am==='stirling'||am==='westbrook'||an.includes('stirling'))&&(bm==='stirling'||bm==='westbrook'||bn.includes('stirling')))return true;
+ if(am!==bm&&!(am==='harleydavidson'&&bm==='harleydavidson'))return false;
+ if(am==='ram'&&an.includes('3500')&&bn.includes('3500'))return true;
+ if(am==='trek'&&bm==='trek'&&an.includes('7200')&&bn.includes('7200'))return true;
+ if(am==='harleydavidson'&&bm==='harleydavidson'&&String(a.year)===String(b.year)&&((an.includes('ultra')&&bn.includes('ultra'))||(an.includes('roadglide')&&bn.includes('roadglide'))))return true;
+ if(am==='xpro'&&an==='200'&&bn.includes('jaguar200'))return true;
+ return String(a.year)===String(b.year)&&(an===bn||an.length>=4&&bn.includes(an)||bn.length>=4&&an.includes(bn));
+}
+function listedCategory(a){const n=clean(a.make+' '+a.model);
+ if(/tahoe/.test(n))return 'Classic';
+ if(/seadoo|yamaha.*lst|kawasaki.*jf650|sailboat/.test(n))return 'Boats';
+ if(/mango.*dingo/.test(n))return 'Golf Carts';
+ if(/taotao.*moped/.test(n))return 'Scooters & Mopeds';
+ if(/harley|kawasaki|honda.*cx500/.test(n))return 'Motorcycles';
+ if(/ram|f150|s10|tacoma/.test(n))return 'Trucks';
+ if(/aspen|trailblazer|navigator|sienna|tracker/.test(n))return 'SUVs';
+ if(/stirling/.test(n))return 'Trailers';
+ if(/keystone/.test(n))return 'RVs';
+ if(/trek/.test(n))return 'Bicycles';
+ return 'Cars';
+}
 const assets=primary.concat(extras);
+for(const [i,item] of listed.entries())if(!assets.some(a=>sameListedAsset(a,item)))assets.push({...item,category:listedCategory(item),id:'f'+i});
 const mileage=D.vehicles||[], services=D.services||[];
 const serviceKeys={'keystone':'331','ram3500':'3500','toyota4runner':'4Runner','chrysleraspen':'Aspen','hondacivic':'Civic','fordmustang':'Mustang','fordf150':'F150','harleydavidsonultra':'FLHTCUI','harleydavidsonroad':'FLTRK','makdaddy':'Legend','stirling':'Stirling','westbrook':'Stirling','trek':'trek','colemanb200':'B200','volpam':'SP03','coolster':'3050C','xpro':'Xpro'};
 function serviceFor(a){const name=clean(a.make+' '+a.model);const key=Object.entries(serviceKeys).find(([prefix])=>name.startsWith(prefix))?.[1];return key?services.filter(s=>clean(s.asset)===clean(key)):[]}
+const schedules=D.schedules||{};
+const scheduleKeys=[[/trek.*7200/, 'trek7200'],[/harley.*(ultra|flhtcui)/,'harleydavidsonultra'],[/lifetime.*spitfire/,'lifetimespitfire'],[/keystone.*bullet/,'keystonebullet'],[/stirling|westbrook.*trailer/,'stirling'],[/makdaddy.*legend/,'makdaddylegend'],[/harley.*(roadglide|fltrk)/,'harleydavidsonroad'],[/ram.*3500/,'ram3500'],[/coleman.*(b200|8200)/,'colemanb200'],[/volpam.*sp03/,'volpamsp03'],[/coolster.*3050/,'coolster3050'],[/ford.*f150/,'fordf150'],[/xpro.*jaguar/,'xprojaguar'],[/ford.*mustang/,'fordmustang'],[/toyota.*4runner/,'toyota4runner'],[/chrysler.*aspen/,'chrysleraspen'],[/honda.*civic/,'hondacivic'],[/husqvarna.*122hd4[5s]/,'husqvarna122hd4s'],[/echo.*pb2520/,'echopb2520'],[/dewalt.*aircompressor/,'dewaltaircompressor'],[/dewalt.*dxpw3425|dewalt.*pressurewasher/,'dewaltdxpw3425'],[/craftsman.*18.*chainsaw/,'craftsman18inchchainsaw'],[/craftsman.*10.*polesaw/,'craftsman10polesaw'],[/husqvarna.*yth24k48/,'husqvarnayth24k48'],[/cubcadet.*kohler/,'cubcadetkohler'],[/husqvarna.*330lx|husqvarna.*weedeater/,'husqvarna330lx'],[/stihl.*fs56/,'stihlfs56']];
+function scheduleFor(a){const name=clean([a.make,a.model,a.name].filter(Boolean).join(' '));const entry=scheduleKeys.find(([pattern])=>pattern.test(name));return entry?schedules[entry[1]]:null}
+function renderSchedule(a){const schedule=scheduleFor(a),panel=document.getElementById('assetSchedules');if(!schedule){panel.innerHTML='<div class="asset-note">No service schedule for this item was included in the September 24, 2026 report.</div>';return}
+ const warning=clean(a.make+' '+a.model).includes('ram3500')&&String(a.year)!=='2021'?'<p class="schedule-warning">The report identifies this truck as a 2021 Ram 3500, while its vehicle record says '+esc(a.year)+'. Verify that this schedule belongs to your truck before relying on its due dates.</p>':'';
+ panel.innerHTML='<p class="schedule-intro">Imported from the service report dated September 24, 2026. Due dates and readings are shown as recorded in that report; completed work belongs on the Maintenance tab. '+esc(schedule.tasks.length)+' scheduled items.</p>'+warning+'<div class="table-wrap"><table><thead><tr><th>Service item</th><th>Frequency</th><th>Last completed</th><th>Next due</th></tr></thead><tbody>'+schedule.tasks.map(x=>'<tr><td>'+esc(x.task)+'</td><td>'+esc(x.interval)+'</td><td>'+esc(x.lastDate||'Not recorded')+(x.lastReading?'<span class="reading">'+esc(x.lastReading)+' '+(x.interval.includes('Hours')?'hours':'miles')+'</span>':'')+'</td><td>'+esc(x.nextDate||'Not recorded')+(x.nextReading?'<span class="reading">'+esc(x.nextReading)+' '+(x.interval.includes('Hours')?'hours':'miles')+'</span>':'')+'</td></tr>').join('')+'</tbody></table></div>';
+}
 const alias={'ram3500':'3500 DRW','fordmustang':'Mustang','hondacivic':'Civic','harleydavidsonroadglide':'FLTRK','harleydavidsonultra':'FLHTCUI','keystonebullet':'Bullet','makdaddylegend':'Legend','fordf150':'F150','stirlingtrailer':'Stirling'};
 function mileageFor(a){
  const name=clean(a.make+' '+a.model), year=String(a.year);
@@ -386,6 +429,7 @@ function renderCategory(){
 }
 function renderAsset(tab='details'){
  editing=false;
+ document.querySelector('.edit-bar').hidden=tab==='schedules';
  document.getElementById('toggleAssetEdit').textContent='Edit '+(tab==='details'?'details':tab);
  document.getElementById('toggleAssetEdit').setAttribute('aria-pressed','false');
  document.querySelector('.edit-bar span').textContent='Fields are locked until you choose Edit.';
@@ -405,9 +449,10 @@ function renderAsset(tab='details'){
  const mileageEditable=m?[['Service start date','serviceStart','D'],['Starting odometer','startMileage','E'],['Current odometer','currentMileage','F']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]||'')+'" readonly></label>').join(''):'';
  document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+mileageEditable+[['Miles added',m.addedMileage],['Miles per month',m.monthlyEstimate],['Estimated miles per year',m.annualEstimate]].map(([k,v])=>fact(k,v)).join('')+'</div>':'<div class="asset-note">No mileage record found for this vehicle.</div>';
  const entries=serviceFor(asset);
+ renderSchedule(asset);
  document.getElementById('assetMaintenance').innerHTML='<button type="button" id="addService">+ Add service entry</button><div class="table-wrap"><table><thead><tr><th>Date</th><th>Service item</th><th>Odometer</th><th>Notes</th></tr></thead><tbody>'+entries.map(e=>'<tr>'+[['date','C'],['item','D'],['odometer','E'],['notes','G']].map(([key,col])=>'<td class="'+(key==='notes'?'notes-cell':'')+'"><input data-service-row="'+e.sheetRow+'" data-service-col="'+col+'" aria-label="'+esc(key)+'" value="'+esc(e[key]||'')+'" readonly></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
  for(const b of document.querySelectorAll('[data-asset-tab]'))b.classList.toggle('active',b.dataset.assetTab===tab);
- for(const [name,id] of [['details','assetDetails'],['mileage','assetMileage'],['maintenance','assetMaintenance']])document.getElementById(id).hidden=name!==tab;
+ for(const [name,id] of [['details','assetDetails'],['mileage','assetMileage'],['maintenance','assetMaintenance'],['schedules','assetSchedules']])document.getElementById(id).hidden=name!==tab;
 }
 document.getElementById('homeLink').href=PORTAL;
 document.getElementById('allLink').href=PORTAL+'finance.html';
@@ -420,6 +465,7 @@ document.getElementById('assetGrid').addEventListener('click',e=>{const b=e.targ
 document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
  const tab=document.querySelector('[data-asset-tab].active')?.dataset.assetTab||'details';
  editing=!editing;
+ if(tab==='schedules')return;
  const panel=document.getElementById(({details:'assetDetails',mileage:'assetMileage',maintenance:'assetMaintenance'})[tab]);
  panel.querySelectorAll('input[data-asset-field],input[data-mileage-col],input[data-service-row]').forEach(input=>{
   input.readOnly=!editing;
