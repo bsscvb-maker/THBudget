@@ -258,6 +258,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 #assetMaintenance .notes-cell input{min-width:220px}
 #addService{margin:15px 0;padding:10px 14px;border:1px solid #638ac0;border-radius:5px;background:#244a7b;color:white;font-weight:700}
 .add-vehicle-button{border:1px solid #79aaff;border-radius:9px;background:#315d99;color:white;padding:11px 18px;font-size:17px;font-weight:800;cursor:pointer;white-space:nowrap}.add-vehicle-button:hover{background:#3d74ba}.add-vehicle-dialog{width:min(650px,calc(100% - 28px));max-height:90vh;overflow:auto;border:1px solid #688ab9;border-radius:14px;background:#142236;color:#f2f7ff;padding:26px;box-shadow:0 25px 70px #000b}.add-vehicle-dialog::backdrop{background:#020713bd}.add-vehicle-head,.add-vehicle-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}.add-vehicle-head h2{margin:0 0 20px;font-size:28px}.add-vehicle-head button{border:0;background:transparent;color:white;font-size:28px;cursor:pointer}.add-vehicle-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.add-vehicle-fields label{display:grid;gap:6px;color:#d5e4fb;font-size:14px;font-weight:700}.add-vehicle-fields input,.add-vehicle-fields select{min-width:0;width:100%;padding:11px;border:1px solid #688ab9;border-radius:7px;background:#0e1b2d;color:white;font-size:16px}.add-vehicle-fields input:focus-visible,.add-vehicle-fields select:focus-visible{outline:3px solid #8ac5ff}.add-vehicle-actions{justify-content:flex-end;margin-top:14px}.add-vehicle-actions button{padding:10px 16px;border:1px solid #688ab9;border-radius:7px;background:#244a7b;color:white;font-weight:800;cursor:pointer}.add-vehicle-actions button:disabled{opacity:.6}.add-vehicle-dialog [role=status]{min-height:20px;color:#ffbcbd}@media(max-width:600px){.add-vehicle-fields{grid-template-columns:1fr}.add-vehicle-dialog{padding:18px}#dashboardView .section-title{align-items:flex-start;flex-wrap:wrap}}
+#assetView .asset-header .add-vehicle-button{display:block;margin-top:14px}
 </style>
 </head>
 <body data-th-page="fleet"><div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-mark">TH</div><h1 id="th-auth-title">THBudget</h1><p>Your private workbook stays in Google Sheets. Sign in to view it here on GitHub Pages.</p><button type="button" id="th-sign-in">Sign in with Google</button><p id="th-auth-message" role="status">Use the Google account that can open your TH Budget Sheet.</p></div></div>
@@ -298,7 +299,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 </div>
 <div class="workspace-view" id="assetView" hidden>
 <button type="button" class="back-link" id="backCategory">Back</button>
-<div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span></div>
+<div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span><button type="button" class="add-vehicle-button" id="addDetailVehicleButton">+ Add vehicle</button></div>
 <div class="category-manager"><label for="moveAssetCategory">Section</label><select id="moveAssetCategory" aria-label="Move item to section"></select><button type="button" id="moveAssetButton">Move</button><button type="button" id="unfileAssetButton">Remove from section</button><button type="button" class="delete-asset" id="deleteAssetButton">Delete vehicle</button><span id="categoryMoveStatus" role="status"></span></div>
 <div class="edit-bar"><button type="button" id="toggleAssetEdit" aria-pressed="false">Edit details</button><span>Fields are locked until you choose Edit.</span></div>
 <div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Maintenance</button><button type="button" data-asset-tab="schedules">Service Schedules</button></div>
@@ -530,9 +531,9 @@ async function moveAssetTo(next){
 document.getElementById('moveAssetButton').addEventListener('click',()=>moveAssetTo(document.getElementById('moveAssetCategory').value));
 document.getElementById('unfileAssetButton').addEventListener('click',()=>moveAssetTo('Unfiled'));
 document.getElementById('newVehicleCategory').innerHTML=categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
-for(const addButton of [document.getElementById('addVehicleButton'),document.getElementById('addCategoryVehicleButton')])addButton.addEventListener('click',()=>{
+for(const addButton of [document.getElementById('addVehicleButton'),document.getElementById('addCategoryVehicleButton'),document.getElementById('addDetailVehicleButton')])addButton.addEventListener('click',()=>{
  document.getElementById('addVehicleForm').reset();
- document.getElementById('newVehicleCategory').value=category&&category!=='All Vehicles'&&category!=='Unfiled'?category:'Cars';
+ document.getElementById('newVehicleCategory').value=asset&&!document.getElementById('assetView').hidden?asset.category:category&&category!=='All Vehicles'&&category!=='Unfiled'?category:'Cars';
  document.getElementById('addVehicleStatus').textContent='';
  document.getElementById('addVehicleDialog').showModal();
  document.querySelector('#addVehicleForm [name=year]').focus();
