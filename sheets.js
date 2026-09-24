@@ -4,6 +4,10 @@ const TH_SHEET_ID = '1uC1tKyX4DnBKXH-4pIz8tm3zAvxdWr6ecrxrwUS9Hts';
 const TH_CLIENT_ID = '881518334290-kimg628u5oriddlrqoq6vb619m8gn13s.apps.googleusercontent.com';
 let thToken = '';
 let thTokenClient;
+try {
+  const saved = JSON.parse(sessionStorage.getItem('thbudget-session') || 'null');
+  if (saved?.expiresAt > Date.now() + 30000) thToken = saved.token;
+} catch (_) { sessionStorage.removeItem('thbudget-session'); }
 
 function thStatus(message) {
   document.getElementById('th-auth-message').textContent = message;
@@ -23,12 +27,14 @@ function thSignIn() {
         return;
       }
       thToken = response.access_token;
+      sessionStorage.setItem('thbudget-session', JSON.stringify({token:thToken,expiresAt:Date.now()+(Number(response.expires_in)||3600)*1000}));
       thStatus('Opening your private workbook…');
       try {
         await window.thStart();
         document.getElementById('th-auth').hidden = true;
       } catch (error) {
         thToken = '';
+        sessionStorage.removeItem('thbudget-session');
         thStatus(error.message);
       }
     }
@@ -73,3 +79,12 @@ async function thTab(position) {
   return {title:sheet.title,rows,rowCount:sheet.gridProperties.rowCount,columnCount:Math.min(sheet.gridProperties.columnCount,20)};
 }
 document.getElementById('th-sign-in').addEventListener('click', thSignIn);
+if (thToken) {
+  Promise.resolve().then(() => window.thStart()).then(() => {
+    document.getElementById('th-auth').hidden = true;
+  }).catch(error => {
+    thToken = '';
+    sessionStorage.removeItem('thbudget-session');
+    thStatus(error.message);
+  });
+}
