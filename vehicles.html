@@ -232,6 +232,11 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 #assetGrid .card-photo{width:clamp(200px,42%,310px);height:184px;background:#102744;display:grid;place-items:center}
 #assetGrid .card-photo img{width:100%;height:100%;object-fit:contain}
 #assetGrid .card-copy{flex:1}
+#assetMaintenance .table-wrap{max-height:min(65vh,660px);overflow:auto;border:1px solid #344968;border-radius:6px}
+#assetMaintenance table{min-width:760px}
+#assetMaintenance thead th{position:sticky;top:0;z-index:2;background:#223c62;color:#fff;font:800 18px/1.3 Arial,Helvetica,sans-serif;letter-spacing:0;text-transform:none;padding:15px 16px;white-space:nowrap;box-shadow:0 2px 0 #6788b4}
+#assetMaintenance tbody td{padding:10px 14px}
+
 @media(max-width:1050px){#assetGrid{grid-template-columns:1fr}}
 @media(max-width:620px){#assetGrid .asset-card{min-height:145px;padding:12px;gap:12px}#assetGrid .card-photo{width:42%;height:120px}#assetGrid .asset-card strong{font-size:16px}}
 
@@ -280,7 +285,6 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <section class="asset-tab-panel" id="assetMileage" hidden></section>
 <section class="asset-tab-panel" id="assetMaintenance" hidden></section>
 </div>
-<div class="privacy"><span><strong>Private workspace.</strong> Vehicle specifications and service history are read from your Google Sheet and stay out of the public GitHub files.</span><span>THB · VEHICLE OPERATIONS</span></div>
 <footer class="foot"><span>THBUDGET · VEHICLES</span><span>PRIVATE SHEET CONNECTION</span></footer>
 </main></div>
 </div></div></div>
@@ -395,10 +399,10 @@ function renderAsset(tab='details'){
  if(asset.photoObjectUrl){document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(asset.photoObjectUrl)+'" alt="'+esc(asset.make+' '+asset.model)+'">'}else if(asset.photoFileId)thPhotoObjectUrl(asset.photoFileId).then(src=>{if(document.getElementById('assetPhoto')&&asset===currentAsset()){asset.photoObjectUrl=src;document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(src)+'" alt="'+esc(asset.make+' '+asset.model)+'">';}}).catch(()=>{if(asset===currentAsset())document.getElementById('assetPhoto').innerHTML='<div class="photo-empty">Photo unavailable</div>'});
  document.getElementById('photoUploadStatus').textContent='';
  const m=mileageFor(asset);
- const mileageEditable=m?[['Current reading','currentMileage','F'],['Starting reading','startMileage','E'],['Service start','serviceStart','D']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]||'')+'" readonly></label>').join(''):'';
- document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+mileageEditable+[['Mileage added',m.addedMileage],['Miles per month',m.monthlyEstimate],['Estimated miles per year',m.annualEstimate]].map(([k,v])=>fact(k,v)).join('')+'</div><p class="asset-note">Calculated mileage updates from your private workbook.</p>':'<div class="asset-note">No linked mileage record was found in the current mileage sheet.</div>';
+ const mileageEditable=m?[['Service start date','serviceStart','D'],['Starting odometer','startMileage','E'],['Current odometer','currentMileage','F']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]||'')+'" readonly></label>').join(''):'';
+ document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+mileageEditable+[['Miles added',m.addedMileage],['Miles per month',m.monthlyEstimate],['Estimated miles per year',m.annualEstimate]].map(([k,v])=>fact(k,v)).join('')+'</div>':'<div class="asset-note">No mileage record found for this vehicle.</div>';
  const entries=serviceFor(asset);
- document.getElementById('assetMaintenance').innerHTML='<button type="button" id="addService">+ Add service entry</button><div class="table-wrap"><table><thead><tr><th>Date</th><th>Service item</th><th>Odometer</th><th>Cost</th><th>Notes</th></tr></thead><tbody>'+entries.map(e=>'<tr>'+[['date','C'],['item','D'],['odometer','E'],['cost','F'],['notes','G']].map(([key,col])=>'<td class="'+(key==='notes'?'notes-cell':'')+'"><input data-service-row="'+e.sheetRow+'" data-service-col="'+col+'" aria-label="'+esc(key)+'" value="'+esc(e[key]||'')+'" readonly></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+ document.getElementById('assetMaintenance').innerHTML='<button type="button" id="addService">+ Add service entry</button><div class="table-wrap"><table><thead><tr><th>Date</th><th>Service item</th><th>Odometer</th><th>Notes</th></tr></thead><tbody>'+entries.map(e=>'<tr>'+[['date','C'],['item','D'],['odometer','E'],['notes','G']].map(([key,col])=>'<td class="'+(key==='notes'?'notes-cell':'')+'"><input data-service-row="'+e.sheetRow+'" data-service-col="'+col+'" aria-label="'+esc(key)+'" value="'+esc(e[key]||'')+'" readonly></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
  for(const b of document.querySelectorAll('[data-asset-tab]'))b.classList.toggle('active',b.dataset.assetTab===tab);
  for(const [name,id] of [['details','assetDetails'],['mileage','assetMileage'],['maintenance','assetMaintenance']])document.getElementById(id).hidden=name!==tab;
 }
