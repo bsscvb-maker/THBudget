@@ -180,8 +180,8 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 .back-link{display:inline-flex;align-items:center;margin:12px 0 17px;padding:9px 15px;border:1px solid #47566b;border-radius:999px;background:#1d2839;color:#f1f5fa;font-size:14px}
 .back-link:hover{background:#2a3e5d;color:#fff}.back-link:before{content:"‹";display:grid;place-items:center;margin-right:9px;width:26px;height:26px;border-radius:50%;background:#315d99;color:white;font-size:23px;line-height:1}
 .asset-fact input{width:100%;max-width:100%;margin-top:6px;padding:7px 9px;border:1px solid transparent;border-radius:5px;background:transparent;color:#f3f7ff;font-size:17px;font-weight:650}
-.asset-fact input:hover{border-color:#415d81}.asset-fact input:focus{outline:2px solid #8cbdff;background:#1b304f}.asset-fact input:disabled{opacity:.65}
-.asset-fact input::placeholder{color:#879bb7}.asset-edit-status{min-height:22px;margin:0 0 12px;color:#a9deb9;font-size:14px}.asset-edit-status.error{color:#ffabab}
+.asset-fact input:not([readonly]):hover{border-color:#415d81}.asset-fact input:focus{outline:2px solid #8cbdff;background:#1b304f}.asset-fact input:disabled{opacity:.65}
+.asset-fact input[readonly],#assetMaintenance input[readonly]{cursor:default;border-color:transparent;background:transparent;pointer-events:none}.asset-fact input:not([readonly]),#assetMaintenance input:not([readonly]){border-color:#7299cc;background:#1b304f}.edit-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0 3px;color:#9fb4d1;font-size:14px}.edit-bar button{padding:10px 16px;border:1px solid #77a6e3;border-radius:6px;background:#244a7b;color:#fff;font-size:14px;font-weight:700}.edit-bar button[aria-pressed="true"]{background:#345b31;border-color:#9bdd9a}.asset-fact input::placeholder{color:#879bb7}.asset-edit-status{min-height:22px;margin:0 0 12px;color:#a9deb9;font-size:14px}.asset-edit-status.error{color:#ffabab}
 #assetMileage .asset-fact input{margin-top:6px}
 #assetMaintenance input{min-width:100px;width:100%;padding:8px;background:#172940;color:#f3f7ff;border:1px solid #526b8c;border-radius:4px}
 #assetMaintenance .notes-cell input{min-width:220px}
@@ -265,6 +265,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <div class="workspace-view" id="assetView" hidden>
 <button type="button" class="back-link" id="backCategory">← All categories</button>
 <div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span></div>
+<div class="edit-bar"><button type="button" id="toggleAssetEdit" aria-pressed="false">Edit details</button><span>Fields are locked until you choose Edit.</span></div>
 <div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Maintenance</button></div>
 <section class="asset-tab-panel" id="assetDetails"><div class="photo-manager"><div id="assetPhoto"></div><label class="photo-upload">Add or replace photo<input id="assetPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><span id="photoUploadStatus" role="status"></span></div><div id="assetEditStatus" class="asset-edit-status" role="status"></div><div class="asset-facts" id="assetFacts"></div><details class="report-details"><summary>Full specification report</summary><p id="assetReport"></p></details></section>
 <section class="asset-tab-panel" id="assetMileage" hidden></section>
@@ -344,7 +345,7 @@ function mileageFor(a){
  return mileage.find(m=>String(m.year)===year&&(byAlias&&clean(m.name).includes(clean(byAlias[1]))||name.includes(clean(m.name))||clean(m.name).includes(clean(a.make))&&name.includes(clean(m.name).slice(0,6))))||null;
 }
 function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>'}
-let category='',asset=null,status='all';
+let category='',asset=null,status='all',editing=false;
 const currentAsset=()=>asset;
 function show(view){for(const id of ['dashboardView','categoryView','assetView'])document.getElementById(id).hidden=id!==view;window.scrollTo({top:0,behavior:'smooth'})}
 function renderCategories(){document.getElementById('categoryGrid').innerHTML=categories.filter(c=>assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
@@ -355,11 +356,15 @@ function renderCategory(){
  document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>'<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-photo">'+(a.photo?'<img src="'+esc(a.photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<span class="category-icon" aria-hidden="true">'+icon(category)+'</span>')+'</span><span class="card-copy"><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><small>Engine: '+esc(a.engine&&a.engine!=='N/A'?a.engine:'Not recorded')+'</small><small>'+esc(a.status||'Status to review')+'</small></span></button>').join(''):'<div class="asset-note">No items in this view yet.</div>';
 }
 function renderAsset(tab='details'){
+ editing=false;
+ document.getElementById('toggleAssetEdit').textContent='Edit '+(tab==='details'?'details':tab);
+ document.getElementById('toggleAssetEdit').setAttribute('aria-pressed','false');
+ document.querySelector('.edit-bar span').textContent='Fields are locked until you choose Edit.';
  document.getElementById('assetCategory').textContent=asset.category;
  document.getElementById('assetTitle').textContent=[asset.year,asset.make,asset.model].filter(Boolean).join(' ');
  document.getElementById('assetStatus').textContent=asset.status||'Status to review';
- const values=[['VIN / serial number','vin'],['Tag / plate','tag'],['Year','year'],['Make','make'],['Model','model'],['Engine','engine'],['Transmission','transmission'],['Tire size','tireSize'],['Color','color'],['Vehicle number','vehicleNumber'],['Registration renewal','renewal']];
- document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(asset[key]||'')+'" placeholder="Not recorded"></label>').join('');
+ const values=[['Year','year'],['Make','make'],['Model','model'],['VIN / serial number','vin'],['Tag / plate','tag'],['Engine','engine'],['Transmission','transmission'],['Tire size','tireSize'],['Color','color'],['Vehicle number','vehicleNumber'],['Registration renewal','renewal']];
+ document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(asset[key]||'')+'" placeholder="Not recorded" readonly></label>').join('');
  document.getElementById('assetEditStatus').textContent='';
  const report=asset.reportText||'';
  document.getElementById('assetReport').textContent=report;
@@ -368,10 +373,10 @@ function renderAsset(tab='details'){
  if(asset.photoObjectUrl){document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(asset.photoObjectUrl)+'" alt="'+esc(asset.make+' '+asset.model)+'">'}else if(asset.photoFileId)thPhotoObjectUrl(asset.photoFileId).then(src=>{if(document.getElementById('assetPhoto')&&asset===currentAsset()){asset.photoObjectUrl=src;document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(src)+'" alt="'+esc(asset.make+' '+asset.model)+'">';}}).catch(()=>{if(asset===currentAsset())document.getElementById('assetPhoto').innerHTML='<div class="photo-empty">Photo unavailable</div>'});
  document.getElementById('photoUploadStatus').textContent='';
  const m=mileageFor(asset);
- const mileageEditable=m?[['Current reading','currentMileage','F'],['Starting reading','startMileage','E'],['Service start','serviceStart','D']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]||'')+'"></label>').join(''):'';
+ const mileageEditable=m?[['Current reading','currentMileage','F'],['Starting reading','startMileage','E'],['Service start','serviceStart','D']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]||'')+'" readonly></label>').join(''):'';
  document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+mileageEditable+[['Mileage added',m.addedMileage],['Miles per month',m.monthlyEstimate],['Estimated miles per year',m.annualEstimate]].map(([k,v])=>fact(k,v)).join('')+'</div><p class="asset-note">Calculated mileage updates from your private workbook.</p>':'<div class="asset-note">No linked mileage record was found in the current mileage sheet.</div>';
  const entries=serviceFor(asset);
- document.getElementById('assetMaintenance').innerHTML='<button type="button" id="addService">+ Add service entry</button><div class="table-wrap"><table><thead><tr><th>Date</th><th>Service item</th><th>Odometer</th><th>Cost</th><th>Notes</th></tr></thead><tbody>'+entries.map(e=>'<tr>'+[['date','C'],['item','D'],['odometer','E'],['cost','F'],['notes','G']].map(([key,col])=>'<td class="'+(key==='notes'?'notes-cell':'')+'"><input data-service-row="'+e.sheetRow+'" data-service-col="'+col+'" aria-label="'+esc(key)+'" value="'+esc(e[key]||'')+'"></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+ document.getElementById('assetMaintenance').innerHTML='<button type="button" id="addService">+ Add service entry</button><div class="table-wrap"><table><thead><tr><th>Date</th><th>Service item</th><th>Odometer</th><th>Cost</th><th>Notes</th></tr></thead><tbody>'+entries.map(e=>'<tr>'+[['date','C'],['item','D'],['odometer','E'],['cost','F'],['notes','G']].map(([key,col])=>'<td class="'+(key==='notes'?'notes-cell':'')+'"><input data-service-row="'+e.sheetRow+'" data-service-col="'+col+'" aria-label="'+esc(key)+'" value="'+esc(e[key]||'')+'" readonly></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
  for(const b of document.querySelectorAll('[data-asset-tab]'))b.classList.toggle('active',b.dataset.assetTab===tab);
  for(const [name,id] of [['details','assetDetails'],['mileage','assetMileage'],['maintenance','assetMaintenance']])document.getElementById(id).hidden=name!==tab;
 }
@@ -383,6 +388,20 @@ renderCategories();
 document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;status='all';renderCategory();show('categoryView')});
 document.getElementById('statusFilters').addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b)return;status=b.dataset.status;renderCategory()});
 document.getElementById('assetGrid').addEventListener('click',e=>{const b=e.target.closest('[data-asset]');if(!b)return;asset=assets.find(a=>a.id===b.dataset.asset);if(!asset)return;renderAsset();show('assetView')});
+document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
+ const tab=document.querySelector('[data-asset-tab].active')?.dataset.assetTab||'details';
+ editing=!editing;
+ const panel=document.getElementById(({details:'assetDetails',mileage:'assetMileage',maintenance:'assetMaintenance'})[tab]);
+ panel.querySelectorAll('input[data-asset-field],input[data-mileage-col],input[data-service-row]').forEach(input=>{
+  input.readOnly=!editing;
+  if(!editing){const key=input.dataset.assetField;if(key)input.value=asset[key]||'';}
+ });
+ const button=document.getElementById('toggleAssetEdit');
+ button.setAttribute('aria-pressed',String(editing));
+ button.textContent=editing?'Finish editing':'Edit '+tab;
+ document.querySelector('.edit-bar span').textContent=editing?'Changes save when you leave each field. Select Finish editing to lock them.':'Fields are locked until you choose Edit.';
+ if(!editing&&tab!=='details')renderAsset(tab);
+});
 document.querySelector('.asset-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-asset-tab]');if(b)renderAsset(b.dataset.assetTab)});
 const profileColumns={year:'C',make:'D',model:'E',color:'F',vin:'L',tag:'N',renewal:'O',engine:'P',transmission:'Q',tireSize:'R',vehicleNumber:'M'};
 const registryColumns={year:'B',make:'C',model:'D',vin:'E',tag:'F'};
@@ -395,7 +414,7 @@ async function ensureProfileRow(a){
  return a.profileRow;
 }
 document.getElementById('assetFacts').addEventListener('change',async e=>{
- const input=e.target.closest('[data-asset-field]');if(!input||!asset)return;
+ const input=e.target.closest('[data-asset-field]');if(!input||!asset||!editing)return;
  const a=asset,key=input.dataset.assetField,next=input.value,prior=a[key]||'',message=document.getElementById('assetEditStatus');
  input.disabled=true;message.textContent='Saving '+input.getAttribute('aria-label')+'…';message.classList.remove('error');
  try{
@@ -409,14 +428,14 @@ document.getElementById('assetFacts').addEventListener('change',async e=>{
  finally{input.disabled=false}
 });
 document.getElementById('assetMileage').addEventListener('change',async e=>{
- const input=e.target.closest('[data-mileage-col]');if(!input)return;
+ const input=e.target.closest('[data-mileage-col]');if(!input||!editing)return;
  input.disabled=true;
  try{await thWriteCell('Mileage-2025.10.16',input.dataset.mileageCol+input.dataset.mileageRow,input.value);document.getElementById('assetEditStatus').textContent='Mileage saved to your workbook.'}
  catch(error){document.getElementById('assetEditStatus').textContent=error.message;document.getElementById('assetEditStatus').classList.add('error')}
  finally{input.disabled=false}
 });
 document.getElementById('assetMaintenance').addEventListener('change',async e=>{
- const input=e.target.closest('[data-service-row]');if(!input)return;
+ const input=e.target.closest('[data-service-row]');if(!input||!editing)return;
  input.disabled=true;
  try{await thWriteCell('Portal Service History',input.dataset.serviceCol+input.dataset.serviceRow,input.value);document.getElementById('assetEditStatus').textContent='Service entry saved.'}
  catch(error){document.getElementById('assetEditStatus').textContent=error.message;document.getElementById('assetEditStatus').classList.add('error')}
