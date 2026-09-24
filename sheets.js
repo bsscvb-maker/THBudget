@@ -79,7 +79,7 @@ async function thFleetData() {
     thValues("'Fleet List'!A1:I100"),
     thValues("'Mileage-2025.10.16'!A1:K100"),
     thValues("'Mileage-2024.06.25'!A1:J100"),
-    thValues("'Portal Asset Profiles'!A1:AA100"),
+    thValues("'Portal Asset Profiles'!A1:AA1000"),
     thValues("'Vehicle Registry'!A1:G100"),
     thValues("'Portal Service History'!A1:G2300"),
     thValues("'Portal Service Schedules'!A1:I400")
