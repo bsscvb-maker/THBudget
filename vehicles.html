@@ -290,6 +290,7 @@ function normalizeCategory(p){
  if(/boat|watercraft|jet ski|jetski/.test(source))return 'Boats';
  if(/trailer/.test(source)&&!name.includes('keystone'))return 'Trailers';
  if(/\brv\b|camper|motorhome/.test(source)||name.includes('keystone'))return 'RVs';
+ if(source==='cars & suvs'&&/civic|mustang|sedan|coupe/.test(name))return 'Cars';
  if(/truck|suv|cars & suvs/.test(source)){
   if(/4runner|aspen|tahoe|enclave|suburban|suv|highlander|cherokee|explorer|expedition/.test(name))return 'SUVs';
   if(/ram|f150|f250|f350|silverado|pickup|truck/.test(name))return 'Trucks';
