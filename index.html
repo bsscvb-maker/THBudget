@@ -78,15 +78,20 @@ const themes={
 const groups=Object.keys(themes),groupCounts=Object.fromEntries(groups.map(g=>[g,tabs.filter(t=>t.group===g).length]));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const bridgeFrame=document.getElementById('dataBridge');
-let bridgeReady=false,activePosition=null,bridgeRequestId=0;
+const bridgeUrl='https://script.google.com/a/macros/boneshakerssocialclub.com/s/AKfycbw8CINskUt9WWX4WQ-LblKKiopwxRXAykWQfR5dnn2i80KOOAzx35UK_5JKqLOMWNdG/exec';
+let activePosition=null,bridgeRequestId=0,activeRequestId='',activeToken='';
 function requestTabData(position){
   activePosition=Number(position);
   const status=document.getElementById('dataStatus'),live=document.getElementById('liveData');
   if(status){status.className='status';status.innerHTML='<i></i> Connecting to your private data';}
   if(live)live.innerHTML='<div class="loading-state"><span class="loading-pip"></span> Loading this section…</div>';
-  if(!bridgeReady)return;
-  const requestId=String(++bridgeRequestId);
-  bridgeFrame.contentWindow.postMessage({source:'thbudget-ui',type:'read-tab',position:activePosition,requestId},'*');
+  activeRequestId=String(++bridgeRequestId);
+  activeToken=crypto.randomUUID().replace(/-/g,'');
+  const url=new URL(bridgeUrl);
+  url.searchParams.set('position',String(activePosition));
+  url.searchParams.set('requestId',activeRequestId);
+  url.searchParams.set('token',activeToken);
+  bridgeFrame.src=url.href;
 }
 function showTabData(result){
   const t=tabs.find(x=>x.position===activePosition),status=document.getElementById('dataStatus'),live=document.getElementById('liveData');
@@ -102,12 +107,9 @@ function showTabData(result){
   live.innerHTML='<div class="live-data-head"><div><b>'+esc(result.title||t.label)+'</b><span>'+countText+'</span></div><span class="live-live"><i></i> Live</span></div>'+(rows.length?table:'<div class="empty-live">This section is empty so far.</div>');
 }
 window.addEventListener('message',event=>{
-  if(!bridgeFrame||event.source!==bridgeFrame.contentWindow)return;
   if(event.origin!=='https://script.google.com'&&!event.origin.endsWith('.googleusercontent.com'))return;
   const message=event.data||{};
-  if(message.source!=='thbudget-bridge')return;
-  if(message.type==='ready'){bridgeReady=true;if(activePosition)requestTabData(activePosition);return;}
-  if(message.requestId!==String(bridgeRequestId))return;
+  if(message.source!=='thbudget-bridge'||message.requestId!==activeRequestId||message.token!==activeToken)return;
   if(message.type==='tab-data'){showTabData(message.result||{});return;}
   if(message.type==='error'){
     const status=document.getElementById('dataStatus'),live=document.getElementById('liveData');
