@@ -23,7 +23,7 @@ main{padding:44px 0 70px}.eyebrow{display:flex;align-items:center;gap:10px;color
 @media(max-width:900px){.shell{padding:0 20px}.hero{grid-template-columns:1fr}.hero-side{min-height:150px}.stats{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.history-cards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.shell{padding:0 14px}.topbar{height:66px}.pill-link{padding:8px 10px;font-size:10px}.brand{gap:8px}.brand-mark{width:34px;height:34px}.brand small{font-size:8px}.top-actions{gap:5px}.hero-main{padding:28px 22px 70px;min-height:255px}.hero-meta{left:22px}.hero-side{min-height:142px}.stats{gap:8px}.stat{padding:15px}.stat strong{font-size:21px}.section-head{align-items:start;flex-direction:column}.toolbar{align-items:stretch;flex-direction:column}.search{max-width:none}.inventory{grid-template-columns:1fr}.history-cards{grid-template-columns:1fr}.rank{grid-template-columns:20px minmax(85px,1fr) minmax(70px,1fr) 70px;gap:7px}.rank-label{font-size:9px}.note,.footer{align-items:flex-start;flex-direction:column}}
 </style>
-<link rel="stylesheet" href="portal.css?v=2">
+<link rel="stylesheet" href="portal-dark.css?v=3">
 </head>
 <body data-th-page="vehicles"><div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-mark">TH</div><h1 id="th-auth-title">THBudget</h1><p>Your private workbook stays in Google Sheets. Sign in to view it here on GitHub Pages.</p><button type="button" id="th-sign-in">Sign in with Google</button><p id="th-auth-message" role="status">Use the Google account that can open your TH Budget Sheet.</p></div></div>
 <style>
@@ -33,7 +33,7 @@ main{padding:44px 0 70px}.eyebrow{display:flex;align-items:center;gap:10px;color
 #th-auth h1{color:#fff;font-size:32px;margin:15px 0}#th-auth p{color:#d0e3e6}#th-sign-in{padding:12px 22px;background:#24c5ce;color:#10252b;border:0;border-radius:6px;font:700 16px system-ui;cursor:pointer}#th-sign-in:focus-visible{outline:3px solid white;outline-offset:3px}
 #th-auth-message{font-size:13px;min-height:2em}
 </style>
-<div class="shell">
+<div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TH</span><span>THBudget<small>Personal command center</small></span></a><nav aria-label="THBudget pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link " href="fleet.html"><span class="th-nav-icon">▣</span>Active Fleet</a><a class="th-nav-link active" href="vehicles.html"><span class="th-nav-icon">↗</span>Vehicles &amp; Mileage</a><a class="th-nav-link " href="budget.html"><span class="th-nav-icon">◫</span>Budget Workbook</a></nav><div class="th-sidebar-foot">© 2026 THBudget<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Vehicles & Mileage</strong><small>Your records, all in one place</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="shell">
 <header class="topbar">
   <a class="brand" href="#" aria-label="THBudget">
     <span class="brand-mark">TH</span><span>THBudget<small>VEHICLE DIVISION</small></span>
@@ -92,6 +92,7 @@ main{padding:44px 0 70px}.eyebrow{display:flex;align-items:center;gap:10px;color
   <footer class="footer"><span>THBUDGET · VEHICLES & MILEAGE</span><span>LIVE PRIVATE DATA · AS OF <span id="footerDate"></span></span></footer>
 </main>
 </div>
+</div></div></div>
 <script>
 function renderVehiclePage(DATA,PORTAL_URL) {
 const num=v=>{const n=Number(String(v||'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0};
@@ -148,5 +149,5 @@ renderMileage();renderRank();renderFleet();renderHistory();
 }
 window.thStart = async () => renderVehiclePage(await thFleetData(), new URL('./',location.href).href);
 </script>
-<script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=2"></script><script src="sheets.js?v=2"></script></body>
+<script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=3"></script><script src="sheets.js?v=3"></script></body>
 </html
