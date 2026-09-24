@@ -4,10 +4,18 @@ const TH_SHEET_ID = '1uC1tKyX4DnBKXH-4pIz8tm3zAvxdWr6ecrxrwUS9Hts';
 const TH_CLIENT_ID = '881518334290-kimg628u5oriddlrqoq6vb619m8gn13s.apps.googleusercontent.com';
 let thToken = '';
 let thTokenClient;
+const TH_SESSION_KEY = 'thbudget-session';
 try {
-  const saved = JSON.parse(sessionStorage.getItem('thbudget-session') || 'null');
+  const saved = JSON.parse(localStorage.getItem(TH_SESSION_KEY) || sessionStorage.getItem(TH_SESSION_KEY) || 'null');
   if (saved?.expiresAt > Date.now() + 30000) thToken = saved.token;
-} catch (_) { sessionStorage.removeItem('thbudget-session'); }
+  else { localStorage.removeItem(TH_SESSION_KEY); sessionStorage.removeItem(TH_SESSION_KEY); }
+} catch (_) { localStorage.removeItem(TH_SESSION_KEY); sessionStorage.removeItem(TH_SESSION_KEY); }
+
+function thClearSession() {
+  thToken = '';
+  localStorage.removeItem(TH_SESSION_KEY);
+  sessionStorage.removeItem(TH_SESSION_KEY);
+}
 
 function thStatus(message) {
   document.getElementById('th-auth-message').textContent = message;
@@ -27,14 +35,15 @@ function thSignIn() {
         return;
       }
       thToken = response.access_token;
-      sessionStorage.setItem('thbudget-session', JSON.stringify({token:thToken,expiresAt:Date.now()+(Number(response.expires_in)||3600)*1000}));
+      const session = JSON.stringify({token:thToken,expiresAt:Date.now()+Math.min(Number(response.expires_in)||3600,3600)*1000});
+      localStorage.setItem(TH_SESSION_KEY, session);
+      sessionStorage.setItem(TH_SESSION_KEY, session);
       thStatus('Opening your private workbook…');
       try {
         await window.thStart();
         document.getElementById('th-auth').hidden = true;
       } catch (error) {
-        thToken = '';
-        sessionStorage.removeItem('thbudget-session');
+        if (error.status === 401) thClearSession();
         thStatus(error.message);
       }
     }
@@ -46,7 +55,7 @@ async function thSheets(path) {
     headers: {Authorization: 'Bearer ' + thToken}
   });
   if (!response.ok) {
-    if (response.status === 401) throw new Error('Your sign-in expired. Please sign in again.');
+    if (response.status === 401) { const error = new Error('Your sign-in expired. Please sign in again.'); error.status = 401; throw error; }
     if (response.status === 403 || response.status === 404) throw new Error('This Google account cannot open the TH Budget workbook. Sign in with the account that owns it.');
     throw new Error('The workbook could not be loaded. Please try again.');
   }
@@ -80,11 +89,12 @@ async function thTab(position) {
 }
 document.getElementById('th-sign-in').addEventListener('click', thSignIn);
 if (thToken) {
+  document.getElementById('th-auth').hidden = true;
   Promise.resolve().then(() => window.thStart()).then(() => {
     document.getElementById('th-auth').hidden = true;
   }).catch(error => {
-    thToken = '';
-    sessionStorage.removeItem('thbudget-session');
+    if (error.status === 401) thClearSession();
     thStatus(error.message);
+    document.getElementById('th-auth').hidden = false;
   });
 }
