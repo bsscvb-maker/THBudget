@@ -179,36 +179,38 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 
 </style>
 <link rel="stylesheet" href="portal-dark.css?v=5">
-<style>/* Vehicle directory: quiet rows and clear label/value pairs. */
-#dashboardView .section-title,#categoryView .section-title{margin:18px 0 18px}
-#dashboardView .section-title h2,#categoryView .section-title h2{font-size:28px}
-.category-grid,.asset-grid{display:block;max-width:1120px;margin:0;border-top:1px solid #46555b}
-.category-card,.asset-card{width:100%;min-height:0;display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;text-align:left;gap:20px;padding:15px 18px;margin:0;border:0;border-bottom:1px solid #34444a;border-radius:0;background:transparent;box-shadow:none;color:#eaf1f2}
-.category-card:hover,.asset-card:hover{background:#1d3037;box-shadow:none;transform:none}
-.category-card:focus-visible,.asset-card:focus-visible{outline:2px solid #5dd7db;outline-offset:-2px}
-.category-card .category-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:5px;background:#263d45;font-size:24px}
-.category-card strong,.asset-card strong{display:block;margin:0;font-size:18px;color:#f4f8f8;line-height:1.35}
-.category-card small{font-size:14px;color:#c3d0d4}
-.category-card:after,.asset-card:after{content:"›";font:30px/1 Arial;color:#72cdd2}
-.asset-card{grid-template-columns:96px minmax(0,1fr) auto;padding:12px 18px}
-.card-photo{width:86px;height:62px;border-radius:4px;background:#263d45}
-.card-copy small{display:inline-block;margin:4px 18px 0 0;font-size:14px;color:#bfd0d4}
-.status-filter{margin:14px 0 22px}
-.asset-header{border-bottom:1px solid #45575d;padding-bottom:15px;margin-bottom:0}
-.asset-header h2{font-size:clamp(28px,3.2vw,42px);line-height:1.15;overflow-wrap:anywhere}
-.asset-tabs{margin:0 0 18px;padding:12px 0;border-bottom:1px solid #45575d}
-.asset-tabs button{background:transparent;color:#c7d7da;border:0;border-bottom:3px solid transparent;border-radius:0;padding:12px 18px;font-size:15px}
-.asset-tabs button:hover{background:#263b42;color:white}
-.asset-tabs button.active{background:transparent;color:#71d5da;border-color:#71d5da}
-.photo-manager{padding:8px 0 22px;border-bottom:1px solid #45575d;margin-bottom:0}
-.asset-photo,.photo-empty{width:200px;height:130px;border-radius:4px}
-.photo-upload{background:#24434b;border:1px solid #5b7b83;font-size:14px}
-.asset-facts{display:block;max-width:1120px;margin:10px 0 22px}
-.asset-fact{display:grid;grid-template-columns:minmax(180px,30%) minmax(0,1fr);gap:16px;align-items:baseline;padding:13px 8px;border:0;border-bottom:1px solid #35464c;border-radius:0;background:transparent;box-shadow:none}
-.asset-fact span{font-size:14px;letter-spacing:0;text-transform:none;color:#b2c4c8;font-weight:600}
-.asset-fact strong{font-size:16px;font-weight:650;color:#f1f6f6;margin:0;overflow-wrap:anywhere}
-.report-details{max-width:1120px;background:#192a31;border-color:#45575d}
-@media(max-width:600px){.category-card{grid-template-columns:46px minmax(0,1fr) auto;gap:12px;padding:13px 8px}.category-card .category-icon{width:40px;height:40px;font-size:21px}.asset-card{grid-template-columns:70px minmax(0,1fr) auto;gap:10px;padding:12px 5px}.card-photo{width:64px;height:54px}.category-card strong,.asset-card strong{font-size:16px}.card-copy small{display:block;font-size:13px;margin:3px 0}.asset-fact{grid-template-columns:1fr;gap:3px;padding:11px 3px}.asset-fact span{font-size:13px}.asset-fact strong{font-size:16px}.asset-tabs button{padding:10px 13px;font-size:14px}}
+<style>/* Vehicle directory and horizontal vehicle details */
+body[data-th-page="fleet"]{background:#080d15;color:#eef4ff}
+body[data-th-page="fleet"] .th-page-content{background:#080d15}
+#dashboardView .section-title,#categoryView .section-title{margin:18px 0}
+#dashboardView .section-title h2,#categoryView .section-title h2{font-size:28px;color:#f2f7ff}
+#dashboardView .section-title p,#categoryView .section-title p{font-size:14px;color:#abbdd7}
+.category-grid,.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin:16px 0 24px;border:0;max-width:none}
+.category-card,.asset-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:8px;width:100%;min-height:150px;margin:0;padding:20px;border:1px solid #3c73bf;border-radius:12px;background:linear-gradient(145deg,#214e91,#132c55);box-shadow:0 5px 18px #0005;color:#f4f8ff;transition:background .16s,transform .16s}
+.category-card:hover,.asset-card:hover{background:linear-gradient(145deg,#2c65b3,#1b3d75);transform:translateY(-2px);box-shadow:0 9px 24px #0008}
+.category-card:focus-visible,.asset-card:focus-visible{outline:3px solid #8ac5ff;outline-offset:2px}
+.category-card .category-icon{display:grid;place-items:center;width:45px;height:45px;border-radius:8px;background:#10294f;font-size:25px}
+.category-card strong,.asset-card strong{display:block;margin:0;color:white;font-size:18px;line-height:1.3}
+.category-card small,.asset-card small{display:block;margin:0;color:#cfdef4;font-size:14px}
+.asset-card{min-height:174px;padding:15px;flex-direction:row;align-items:center;gap:16px}
+.card-photo{flex:none;width:110px;height:100px;border-radius:7px;background:#0e2950}
+.card-copy{min-width:0}.card-copy small{margin-top:5px}
+.asset-header{padding-bottom:15px;margin-bottom:0;border-bottom:1px solid #344968}
+.asset-header h2{font-size:clamp(27px,3vw,42px);line-height:1.15;overflow-wrap:anywhere;color:#f3f7ff}
+.asset-tabs{margin:0 0 18px;padding:12px 0;border-bottom:1px solid #344968}
+.asset-tabs button{background:#24354c;border:1px solid #4b6482;color:#e0e8f4;border-radius:5px;padding:10px 17px;font-size:15px}
+.asset-tabs button:hover{background:#355376;color:#fff}
+.asset-tabs button.active{background:#315d99;border-color:#6ca5e8;color:#fff}
+.photo-manager{padding:8px 0 22px;margin-bottom:0}
+.asset-photo,.photo-empty{width:220px;height:150px;border-radius:7px}
+.photo-upload{background:#244a7b;border:1px solid #6392cf;font-size:14px}
+.asset-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 22px;max-width:none;margin:12px 0 24px}
+.asset-fact{min-width:0;min-height:84px;padding:15px 4px;border:0;border-bottom:1px solid #344968;border-radius:0;background:transparent;box-shadow:none}
+.asset-fact span{display:block;color:#a9bfdc;font-size:13px;letter-spacing:.03em;text-transform:uppercase;font-weight:700}
+.asset-fact strong{display:block;margin:7px 0 0;color:#f3f7ff;font-size:17px;font-weight:650;overflow-wrap:anywhere}
+.report-details{background:#142236;border-color:#344968}
+@media(max-width:900px){.asset-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.category-grid,.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.category-card{min-height:133px;padding:14px}.category-card strong,.asset-card strong{font-size:16px}.asset-grid{grid-template-columns:1fr}.asset-card{min-height:116px}.card-photo{width:90px;height:82px}.asset-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.asset-fact{min-height:78px;padding:12px 2px}.asset-fact span{font-size:12px}.asset-fact strong{font-size:15px}.asset-tabs button{padding:9px 12px;font-size:14px}}
 </style>
 </head>
 <body data-th-page="fleet"><div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-mark">TH</div><h1 id="th-auth-title">THBudget</h1><p>Your private workbook stays in Google Sheets. Sign in to view it here on GitHub Pages.</p><button type="button" id="th-sign-in">Sign in with Google</button><p id="th-auth-message" role="status">Use the Google account that can open your TH Budget Sheet.</p></div></div>
@@ -299,7 +301,7 @@ function renderAsset(tab='details'){
  document.getElementById('assetCategory').textContent=asset.category;
  document.getElementById('assetTitle').textContent=[asset.year,asset.make,asset.model].filter(Boolean).join(' ');
  document.getElementById('assetStatus').textContent=asset.status||'Status to review';
- const values=[['VIN / serial number',asset.vin],['Tag / plate',asset.tag],['Year',asset.year],['Make',asset.make],['Model',asset.model],['Engine',asset.engine],['Transmission',asset.transmission],['Tire size',asset.tireSize],['Color',asset.color],['Vehicle number',asset.vehicleNumber],['Registration renewal (recorded)',asset.renewal],['Insurance company (recorded)',asset.insuranceCompany],['Driver',asset.driver],['Department',asset.department],['Source type',asset.sourceType]];
+ const values=[['VIN / serial number',asset.vin],['Tag / plate',asset.tag],['Year',asset.year],['Make',asset.make],['Model',asset.model],['Engine',asset.engine],['Transmission',asset.transmission],['Tire size',asset.tireSize],['Color',asset.color],['Vehicle number',asset.vehicleNumber],['Registration renewal (recorded)',asset.renewal]];
  document.getElementById('assetFacts').innerHTML=values.map(([k,v])=>fact(k,v)).join('');
  const report=asset.reportText||'';
  document.getElementById('assetReport').textContent=report;
