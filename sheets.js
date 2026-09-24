@@ -131,6 +131,20 @@ async function thPhotoObjectUrl(fileId) {
   if(!response.ok)throw new Error('Photo could not be loaded from Google Drive.');
   return URL.createObjectURL(await response.blob());
 }
+async function thUploadFreebirdPhoto(file, row) {
+  if (!thToken) throw new Error('Sign in again to add a picture.');
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Choose a JPG, PNG, or WebP picture.');
+  if (file.size > 12 * 1024 * 1024) throw new Error('Choose a picture under 12 MB.');
+  const boundary='thbudget-'+crypto.randomUUID();
+  const metadata=JSON.stringify({name:'FreeBirds row '+row+' - '+file.name});
+  const body=new Blob([`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n`,`--${boundary}\r\nContent-Type: ${file.type}\r\n\r\n`,file,`\r\n--${boundary}--`],{type:'multipart/related; boundary='+boundary});
+  const response=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{Authorization:'Bearer '+thToken,'Content-Type':'multipart/related; boundary='+boundary},body});
+  if (!response.ok) {const detail=await response.json().catch(()=>({}));throw new Error('Picture upload failed: '+(detail.error?.message||response.status));}
+  const {id}=await response.json();
+  if (!id) throw new Error('Picture upload did not return a file ID.');
+  await thWriteCell('FreeBirds','P'+row,id);
+  return id;
+}
 async function thUploadAssetPhoto(file, asset) {
   if (!thToken) throw new Error('Sign in again to add a photo.');
   if (!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Choose a JPG, PNG, or WebP photo.');
