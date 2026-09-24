@@ -23,6 +23,9 @@ button,input,select{font:inherit}button{cursor:pointer}.th-page-content{padding:
 .empty{padding:24px;background:#132239;border:1px solid #3a5679;border-radius:9px}
 @media(max-width:900px){.paychecks{grid-template-columns:1fr}.th-page-content{padding:22px 16px 50px}}
 @media(max-width:650px){.finance-head{align-items:stretch;flex-direction:column}.summary{grid-template-columns:1fr}.budget-panel{overflow-x:auto}.budget-grid{min-width:620px}.income-grid{min-width:0}.paycheck .budget-grid{min-width:0}.budget-grid.header span,.budget-row input{font-size:14px;padding:10px 8px}}
+.finance-tabs{display:flex;gap:8px;margin:12px 0 22px;border-bottom:1px solid #3a526f;padding-bottom:12px}.finance-tabs button{border:1px solid #52749f;border-radius:6px;padding:10px 16px;background:#1c304b;color:#c9d9ee;font-weight:700}.finance-tabs button.active{background:#315e9b;color:white;border-color:#83b8ff}
+.register-table{width:100%;border-collapse:collapse;min-width:960px}.register-table th{padding:11px;text-align:left;background:#213e68;color:#f4f8ff;font-size:14px}.register-table td{border-top:1px solid #2a3b54}.register-table td input{min-width:0;width:100%;padding:10px 8px;border:0;background:transparent;color:#f1f5fc}.register-table td input:focus{outline:2px solid #8bbcff;background:#203b5f}.register-table td input[readonly]{color:#aac0da}.register-table .balance{color:#c7e7cf}.register-table th:nth-child(3){min-width:210px}
+.register-summary{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 20px}.register-summary span{padding:12px 17px;background:#172b46;border:1px solid #385c84;border-radius:7px}.register-summary strong{display:block;font-size:20px}
 </style></head>
 <body data-th-page="budget">
 <div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-mark">TH</div><h1 id="th-auth-title">THBudget</h1><p>Your private workbook stays in Google Sheets. Sign in to view it here.</p><button type="button" id="th-sign-in">Sign in with Google</button><p id="th-auth-message" role="status">Use the Google account that can open your TH Budget Sheet.</p></div></div>
@@ -31,11 +34,11 @@ button,input,select{font:inherit}button{cursor:pointer}.th-page-content{padding:
 <div class="th-app-main"><header class="th-app-topbar"><div><strong>Finance</strong><small>Monthly budget planner</small></div><span class="th-connection" id="th-connection">Connecting…</span></header>
 <main class="th-page-content"><div class="finance-wrap">
 <div class="finance-head"><div><h1>Monthly budget</h1><p>Plan income, expenses, and each payday from your workbook.</p></div><label class="month-picker">Budget month<select id="budget-month"></select></label></div>
-<div id="save-status" class="save-status" role="status"></div>
-<div id="budget-body"><div class="empty">Opening your budget…</div></div>
+<div class="finance-tabs" role="tablist" aria-label="Finance sections"><button type="button" class="active" id="budget-tab">Monthly budget</button><button type="button" id="register-tab">Account register</button></div><div id="save-status" class="save-status" role="status"></div>
+<div id="budget-body"><div class="empty">Opening your budget…</div></div><div id="register-body" hidden><div class="finance-head"><div><h2>Account register</h2><p>Transactions and balances from your workbook.</p></div><label class="month-picker">Account<select id="register-sheet"></select></label></div><div id="register-content" class="empty">Choose a register.</div></div>
 </div></main></div></div>
 <script>
-let budgetTab='',budgetValues=[],budgetFormulas=[];
+let budgetTab='',budgetValues=[],budgetFormulas=[],registerTab='',registerValues=[],registerFormulas=[];
 const money=v=>'$'+(Number(String(v||'').replace(/[^0-9.-]/g,''))||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const val=(r,c)=>budgetValues[r-1]?.[c-1]||'';
 const esc=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -58,9 +61,9 @@ async function readBudget(){
 function renderBudget(){
  const income=[3,4,5].map(r=>'<div class="budget-grid income-grid budget-row">'+edit('D',r,'Pay source row '+r,'Pay source')+edit('F',r,'Income amount row '+r,'0.00')+'</div>').join('');
  const expenses=Array.from({length:26},(_,i)=>i+9).map(r=>'<div class="budget-grid expense-grid budget-row">'+edit('B',r,'Expense row '+r,'Expense')+edit('C',r,'Amount row '+r,'0.00')+edit('D',r,'Due date row '+r,'Due date')+edit('E',r,'Account row '+r,'Account')+'</div>').join('');
- const paycheck=(col,labelCol,title)=>'<section class="paycheck"><h3>'+edit(col,2,title+' date','Pay date')+'</h3><div class="budget-grid header"><span>Planned item</span><span>Amount</span></div>'+Array.from({length:26},(_,i)=>i+3).map(r=>'<div class="budget-grid budget-row">'+edit(labelCol,r,title+' item '+r,'Item')+edit(col,r,title+' amount '+r,'0.00')+'</div>').join('')+'</section>';
- const incomeTotal=[3,4,5].reduce((s,r)=>s+(Number(String(val(r,6)).replace(/[^0-9.-]/g,''))||0),0);
- const expenseTotal=Array.from({length:26},(_,i)=>i+9).reduce((s,r)=>s+(Number(String(val(r,3)).replace(/[^0-9.-]/g,''))||0),0);
+ const paycheck=(col,labelCol,title)=>'<section class="paycheck"><h3>'+edit(col,2,title+' date','Pay date')+'</h3><div class="budget-grid header"><span>Planned item</span><span>Amount</span></div>'+Array.from({length:12},(_,i)=>i*2+5).map(r=>'<div class="budget-grid budget-row">'+edit(labelCol,r,title+' item '+r,'Item')+edit(col,r,title+' amount '+r,'0.00')+'</div>').join('')+'</section>';
+ const incomeTotal=Number(String(val(6,6)).replace(/[^0-9.-]/g,''))||[3,4,5].reduce((s,r)=>s+(Number(String(val(r,6)).replace(/[^0-9.-]/g,''))||0),0);
+ const expenseTotal=Number(String(val(35,3)).replace(/[^0-9.-]/g,''))||Array.from({length:26},(_,i)=>i+9).reduce((s,r)=>s+(Number(String(val(r,3)).replace(/[^0-9.-]/g,''))||0),0);
  document.getElementById('budget-body').innerHTML='<div class="summary"><div><span>Monthly income</span><strong>'+money(incomeTotal)+'</strong></div><div><span>Monthly expenses</span><strong>'+money(expenseTotal)+'</strong></div><div><span>Remaining to plan</span><strong>'+money(incomeTotal-expenseTotal)+'</strong></div></div><div class="section-title"><h2>Pay sources</h2><small>Enter each source and amount</small></div><div class="budget-panel"><div class="budget-grid income-grid header"><span>Pay source</span><span>Amount</span></div>'+income+'</div><div class="section-title"><h2>Monthly expenses</h2><small>Amount, due date, and account</small></div><div class="budget-panel"><div class="budget-grid expense-grid header"><span>Expense</span><span>Amount</span><span>Due date</span><span>Account</span></div>'+expenses+'</div><div class="section-title"><h2>Payday plans</h2><small>Based on the two pay periods in your sheet</small></div><div class="paychecks">'+paycheck('H','I',esc(val(2,8)||'First payday'))+paycheck('K','L',esc(val(2,11)||'Second payday'))+'</div><p class="notice">Calculated cells in your workbook are shown but cannot be typed over. Changes to editable cells save directly to this month’s sheet.</p>';
 }
 document.getElementById('budget-month').addEventListener('change',async e=>{budgetTab=e.target.value;status('Loading '+budgetTab+'…','busy');try{await readBudget();status('')}catch(err){status(err.message,'error')}});
@@ -75,9 +78,51 @@ document.getElementById('budget-body').addEventListener('change',async e=>{
   status('Saved to '+tab+'.');await readBudget();
  }catch(error){input.disabled=false;input.value=prior;status(error.message,'error')}
 });
+
+function showFinanceTab(tab){
+ const register=tab==='register';
+ document.getElementById('register-body').hidden=!register;
+ document.getElementById('budget-body').hidden=register;
+ document.querySelector('.finance-head .month-picker').hidden=register;
+ document.getElementById('budget-tab').classList.toggle('active',!register);
+ document.getElementById('register-tab').classList.toggle('active',register);
+ if(register&&registerTab)readRegister().catch(e=>status(e.message,'error'));
+}
+document.getElementById('budget-tab').addEventListener('click',()=>showFinanceTab('budget'));
+document.getElementById('register-tab').addEventListener('click',()=>showFinanceTab('register'));
+document.getElementById('register-sheet').addEventListener('change',e=>{registerTab=e.target.value;readRegister().catch(err=>status(err.message,'error'))});
+async function readRegister(){
+ status('Loading register…','busy');
+ const range="'"+registerTab.replace(/'/g,"''")+"'!A3:I520",path='/values/'+encodeURIComponent(range);
+ const [data,formulas]=await Promise.all([thSheets(path+'?valueRenderOption=FORMATTED_VALUE'),thSheets(path+'?valueRenderOption=FORMULA')]);
+ registerValues=data.values||[];registerFormulas=formulas.values||[];
+ const rows=registerValues.slice(5);
+ const last=Math.max(0,rows.reduce((index,row,i)=>row.some((v,col)=>col!==7&&String(v||'').trim())?i+1:index,0));
+ const display=Math.min(513,Math.max(last+5,12));
+ const fields=['Date','Num','Payee / Description','Category','R','Withdrawal / Payment','Deposit / Credit','Balance','Cleared'];
+ const body=Array.from({length:display},(_,i)=>{
+  const sheetRow=i+8,row=rows[i]||[],formula=registerFormulas[i+5]||[];
+  return '<tr>'+fields.map((field,col)=>{
+   const letter=String.fromCharCode(65+col),isFormula=String(formula[col]||'').startsWith('='),value=row[col]||'';
+   return '<td><input aria-label="'+esc(field+' row '+sheetRow)+'" data-register-cell="'+letter+sheetRow+'" value="'+esc(value)+'" '+(isFormula?'readonly title="Calculated in workbook"':'')+'></td>';
+  }).join('')+'</tr>';
+ }).join('');
+ const balance=registerValues[0]?.[7]||'',cleared=registerValues[1]?.[7]||'';
+ document.getElementById('register-content').className='';
+ document.getElementById('register-content').innerHTML='<div class="register-summary"><span>Current balance<strong>'+esc(balance||'—')+'</strong></span><span>Cleared balance<strong>'+esc(cleared||'—')+'</strong></span></div><div class="budget-panel" style="overflow:auto"><table class="register-table"><thead><tr>'+fields.map(f=>'<th>'+esc(f)+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div><p class="notice">Enter transactions in the empty rows. Balance formulas stay protected.</p>';
+ status('');
+}
+document.getElementById('register-content').addEventListener('change',async e=>{
+ const input=e.target.closest('[data-register-cell]:not([readonly])');if(!input)return;
+ input.disabled=true;status('Saving transaction…','busy');
+ try{await thWriteCell(registerTab,input.dataset.registerCell,input.value);status('Transaction saved.');await readRegister()}
+ catch(error){input.disabled=false;status(error.message,'error')}
+});
 window.thStart=async()=>{
  const meta=await thSheets('?fields=sheets.properties(title,index)');
- const titles=(meta.sheets||[]).map(s=>s.properties.title).filter(t=>/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+20\d{2}$/i.test(t));
+ const titles=(meta.sheets||[]).map(s=>s.properties.title).filter(t=>/^(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+20\d{2}$/i.test(t));
+ const registers=(meta.sheets||[]).map(s=>s.properties.title).filter(t=>/^Register-/i.test(t));
+ const registerPicker=document.getElementById('register-sheet');registerPicker.innerHTML=registers.map(t=>'<option value="'+esc(t)+'">'+esc(t.replace(/^Register-/i,''))+'</option>').join('');registerTab=registers.includes('Register-CapOne-Checking')?'Register-CapOne-Checking':registers[0]||'';registerPicker.value=registerTab;
  const picker=document.getElementById('budget-month');
  if(!titles.length){document.getElementById('budget-body').innerHTML='<div class="empty">No monthly budget sheet was found in the connected workbook.</div>';return}
  picker.innerHTML=titles.map(t=>'<option value="'+esc(t)+'">'+esc(t)+'</option>').join('');
@@ -85,5 +130,5 @@ window.thStart=async()=>{
  await readBudget();
 };
 </script>
-<script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=4"></script><script src="sheets.js?v=5"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=4"></script><script src="sheets.js?v=6"></script>
 </body></html>
