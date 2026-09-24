@@ -150,7 +150,7 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 @media(max-width:560px){.hero{min-height:0;padding:20px}.hero h1{font-size:clamp(42px,12vw,65px)}.hero-mark{min-width:0;width:auto;align-self:stretch}.fleet-filters{gap:8px}.filter-line{display:block}.filter-label{display:block;padding:0 0 5px}.filter-chip{padding:7px 8px;font-size:9px}.detail-panel{grid-template-columns:repeat(2,minmax(90px,1fr))}.status-cell{align-items:flex-start;flex-direction:column;gap:5px}}
 
 </style>
-<link rel="stylesheet" href="portal.css?v=2">
+<link rel="stylesheet" href="portal-dark.css?v=3">
 </head>
 <body data-th-page="fleet"><div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-mark">TH</div><h1 id="th-auth-title">THBudget</h1><p>Your private workbook stays in Google Sheets. Sign in to view it here on GitHub Pages.</p><button type="button" id="th-sign-in">Sign in with Google</button><p id="th-auth-message" role="status">Use the Google account that can open your TH Budget Sheet.</p></div></div>
 <style>
@@ -159,7 +159,7 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 .th-auth-mark{display:inline-grid;place-items:center;width:48px;height:48px;background:#20c3cc;color:#10252b;font-weight:900;border-radius:8px}
 #th-auth h1{color:#fff;font-size:32px;margin:15px 0}#th-auth p{color:#d0e3e6}#th-sign-in{padding:12px 22px;background:#24c5ce;color:#10252b;border:0;border-radius:6px;font:700 16px system-ui;cursor:pointer}#th-sign-in:focus-visible{outline:3px solid white;outline-offset:3px}
 #th-auth-message{font-size:13px;min-height:2em}
-</style><div class="wrap">
+</style><div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TH</span><span>THBudget<small>Personal command center</small></span></a><nav aria-label="THBudget pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link active" href="fleet.html"><span class="th-nav-icon">▣</span>Active Fleet</a><a class="th-nav-link " href="vehicles.html"><span class="th-nav-icon">↗</span>Vehicles &amp; Mileage</a><a class="th-nav-link " href="budget.html"><span class="th-nav-icon">◫</span>Budget Workbook</a></nav><div class="th-sidebar-foot">© 2026 THBudget<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Active Fleet</strong><small>Your records, all in one place</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="wrap">
 <header>
 <a class="brand" id="homeLink" href="#"><span class="logo">TH</span><span>THBudget<small>MOTOR POOL / FIELD OFFICE</small></span></a>
 <nav class="actions"><a class="link" id="mileageLink" href="#">MILEAGE HUB</a><a class="link primary" id="allLink" href="#">FULL PORTAL ↗</a></nav>
@@ -190,6 +190,7 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 <div class="privacy"><span><strong>Private workspace.</strong> These live records are read from your Google Sheet and stay out of the public GitHub files.</span><span>THB · VEHICLE OPERATIONS</span></div>
 <footer class="foot"><span>THBUDGET · ACTIVE VEHICLES</span><span>PRIVATE SHEET CONNECTION</span></footer>
 </main></div>
+</div></div></div>
 <script>
 function renderFleetPage(D,PORTAL) {
 const clean=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -266,4 +267,4 @@ document.getElementById('fleetSearch').addEventListener('input',renderFleet);
 renderFilters();renderFleet();renderLeaders();
 }
 window.thStart = async () => renderFleetPage(await thFleetData(), new URL('./',location.href).href);
-</script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=2"></script><script src="sheets.js?v=2"></script></body></html>
+</script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=3"></script><script src="sheets.js?v=3"></script></body></html>
