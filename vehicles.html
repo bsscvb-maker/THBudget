@@ -165,6 +165,10 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 .asset-photo{width:min(100%,440px);max-height:230px;object-fit:contain;border-radius:7px;margin:0 0 16px;background:#eaf2f3}
 #categoryView,#assetView{margin-top:22px}.category-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.category-head h2{margin:0}.status-filter{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
 @media(max-width:560px){.category-grid,.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.category-card,.asset-card{padding:13px;min-height:120px}.category-card strong,.asset-card strong{font-size:16px}.category-icon{width:44px;height:44px;font-size:25px}}
+.asset-grid{grid-template-columns:repeat(auto-fit,minmax(315px,1fr))}
+.asset-card{display:flex;align-items:center;gap:15px;min-height:128px;padding:12px}.card-photo{flex:none;width:130px;height:100px;display:grid;place-items:center;overflow:hidden;border-radius:6px;background:#dceef0}.card-photo img{width:100%;height:100%;object-fit:cover}.card-copy{min-width:0;display:block}.asset-card strong{margin:0 0 7px;font-size:17px;line-height:1.25}.asset-card small{display:block;margin-top:4px;font-size:13px}
+.photo-manager{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}.photo-manager #assetPhoto{min-width:180px}.asset-photo{width:260px;height:195px;max-height:none;object-fit:cover;margin:0}.photo-empty{width:260px;height:195px;display:grid;place-items:center;background:#dceef0;color:#506e75;border-radius:6px}.photo-upload{display:inline-block;padding:10px 14px;background:#17333c;color:white;border-radius:4px;cursor:pointer;font-weight:800}.photo-upload:focus-within{outline:3px solid #0c9aa5}#photoUploadStatus{font-size:14px;color:#315b62}
+@media(max-width:560px){.asset-grid{grid-template-columns:1fr}.asset-card{min-height:112px}.card-photo{width:108px;height:86px}.asset-card strong{font-size:16px}}
 </style>
 <link rel="stylesheet" href="portal-dark.css?v=5">
 </head>
@@ -197,7 +201,7 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 <button type="button" class="back-link" id="backCategory">← Back to category</button>
 <div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span></div>
 <div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Maintenance</button></div>
-<section class="asset-tab-panel" id="assetDetails"><div id="assetPhoto"></div><div class="asset-facts" id="assetFacts"></div><details class="report-details"><summary>Full specification report</summary><p id="assetReport"></p></details></section>
+<section class="asset-tab-panel" id="assetDetails"><div class="photo-manager"><div id="assetPhoto"></div><label class="photo-upload">Add or replace photo<input id="assetPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><span id="photoUploadStatus" role="status"></span></div><div class="asset-facts" id="assetFacts"></div><details class="report-details"><summary>Full specification report</summary><p id="assetReport"></p></details></section>
 <section class="asset-tab-panel" id="assetMileage" hidden></section>
 <section class="asset-tab-panel" id="assetMaintenance" hidden></section>
 </div>
@@ -250,7 +254,7 @@ function renderCategory(){
  const items=assets.filter(a=>a.category===category), shown=items.filter(a=>status==='all'||clean(a.status)===status);
  document.getElementById('categoryTitle').textContent=category;
  document.getElementById('statusFilters').innerHTML=['all','active','inactive'].map(s=>'<button type="button" class="filter-chip '+(status===s?'active':'')+'" data-status="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' · '+(s==='all'?items.length:items.filter(a=>clean(a.status)===s).length)+'</button>').join('');
- document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>'<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="category-icon" aria-hidden="true">'+icons[category]+'</span><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><small>'+esc(a.status||'Status to review')+'</small></button>').join(''):'<div class="asset-note">No items in this view yet.</div>';
+ document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>'<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-photo">'+(a.photo?'<img src="'+esc(a.photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<span class="category-icon" aria-hidden="true">'+icons[category]+'</span>')+'</span><span class="card-copy"><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><small>Engine: '+esc(a.engine&&a.engine!=='N/A'?a.engine:'Not recorded')+'</small><small>'+esc(a.status||'Status to review')+'</small></span></button>').join(''):'<div class="asset-note">No items in this view yet.</div>';
 }
 function renderAsset(tab='details'){
  document.getElementById('assetCategory').textContent=asset.category;
@@ -261,7 +265,8 @@ function renderAsset(tab='details'){
  const report=asset.reportText||'';
  document.getElementById('assetReport').textContent=report;
  const photo=asset.photo||'';
- document.getElementById('assetPhoto').innerHTML=photo.startsWith('https://drive.google.com/thumbnail?')?'<img class="asset-photo" src="'+esc(photo)+'" alt="'+esc(asset.make+' '+asset.model)+'" referrerpolicy="no-referrer" onerror="this.hidden=true">':'';
+ document.getElementById('assetPhoto').innerHTML=photo.startsWith('https://drive.google.com/thumbnail?')?'<img class="asset-photo" src="'+esc(photo)+'" alt="'+esc(asset.make+' '+asset.model)+'" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<div class="photo-empty">No photo yet</div>';
+ document.getElementById('photoUploadStatus').textContent='';
  const m=mileageFor(asset);
  document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+[['Current reading',m.currentMileage],['Starting reading',m.startMileage],['Mileage added',m.addedMileage],['Miles per month',m.monthlyEstimate],['Estimated miles per year',m.annualEstimate],['Service start',m.serviceStart]].map(([k,v])=>fact(k,v)).join('')+'</div><p class="asset-note">Mileage source: private workbook · '+esc(D.asOf||'latest')+'</p>':'<div class="asset-note"><strong>No linked mileage record.</strong><br>This item has no matching reading in the private mileage sheet.</div>';
  const entries=serviceFor(asset);
@@ -278,6 +283,14 @@ document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.t
 document.getElementById('statusFilters').addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b)return;status=b.dataset.status;renderCategory()});
 document.getElementById('assetGrid').addEventListener('click',e=>{const b=e.target.closest('[data-asset]');if(!b)return;asset=assets.find(a=>a.id===b.dataset.asset);if(!asset)return;renderAsset();show('assetView')});
 document.querySelector('.asset-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-asset-tab]');if(b)renderAsset(b.dataset.assetTab)});
+document.getElementById('assetPhotoInput').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file||!asset)return;const current=asset;
+ const statusEl=document.getElementById('photoUploadStatus'),label=document.querySelector('.photo-upload');
+ label.style.pointerEvents='none';statusEl.textContent='Uploading photo…';
+ try {const url=await thUploadAssetPhoto(file,current);current.photo=url;renderAsset();renderCategory();statusEl.textContent='Photo saved to this item.'}
+ catch(error){statusEl.textContent=error.message}
+ finally {label.style.pointerEvents='';e.target.value=''}
+});
 document.getElementById('backDashboard').addEventListener('click',()=>show('dashboardView'));
 document.getElementById('backCategory').addEventListener('click',()=>show('categoryView'));
 }
