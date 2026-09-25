@@ -17,7 +17,7 @@
 #th-auth{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:#152632;color:#e9f5f6;font:16px/1.5 system-ui,sans-serif}#th-auth[hidden]{display:none}.th-auth-card{width:min(100%,440px);padding:40px;border:1px solid #426170;border-radius:14px;background:#203b49;box-shadow:0 20px 60px #0006;text-align:center}.th-auth-mark{display:inline-grid;place-items:center;width:48px;height:48px;background:var(--bronze);color:#152632;font-weight:900;border-radius:8px}#th-auth h2{color:#fff;font-size:32px;margin:15px 0}#th-auth p{color:#d0e3e6}#th-sign-in{padding:12px 22px;background:var(--bronze);color:#152632;border:0;border-radius:6px;font:700 16px system-ui}#th-sign-in:focus-visible{outline:3px solid white;outline-offset:3px}#th-auth-message{font-size:13px;min-height:2em}
 @media(max-width:1050px){.metrics{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.shell{display:block}.sidebar{height:auto;position:static;border-right:0;border-bottom:3px solid var(--bronze);padding:12px}.brand{border:0;padding:0}.sidebar nav{display:flex;overflow:auto;gap:4px;margin-top:10px}.nav-label,.sidebar-foot{display:none}.nav-link{flex:none;font-size:13px;padding:8px}.nav-link.active{padding-left:5px}.nav-icon{display:none}.topbar{height:64px}.top-status{display:none}.hero{display:block;padding:25px}.hero-badge{margin-top:22px}.cards{grid-template-columns:1fr}.below{display:block}}
 </style>
-<link rel="stylesheet" href="auth.css?v=1"></head>
+<link rel="stylesheet" href="auth.css?v=1"><style>html.th-session-pending #th-auth{display:none!important}</style><script>try{const saved=JSON.parse(localStorage.getItem('thbudget-session-photos-v1')||sessionStorage.getItem('thbudget-session-photos-v1')||'null');if(saved?.expiresAt>Date.now()+30000){document.documentElement.classList.add('th-session-pending');setTimeout(()=>document.documentElement.classList.remove('th-session-pending'),15000)}}catch(_){}</script></head>
 <body>
 <div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-brand"><span class="th-auth-mark" aria-hidden="true">TZ</span><span>TisZod<small>PRIVATE WORKSPACE</small></span></div><h1 id="th-auth-title">Welcome back</h1><p class="th-auth-intro">Sign in to open your private workspace.</p><button type="button" id="th-sign-in">Continue with Google <span aria-hidden="true">→</span></button><p id="th-auth-message" role="status">Use the Google account with access to your workbook.</p></div></div>
 <div class="shell">
@@ -44,5 +44,5 @@ window.thStart=async()=>{
  document.getElementById('asOf').textContent='Updated '+new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}).format(new Date());
 };
 </script>
-<script src="https://accounts.google.com/gsi/client" async defer></script><script src="sheets.js?v=14"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script><script src="sheets.js?v=15"></script>
 </body></html>
