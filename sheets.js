@@ -202,11 +202,13 @@ if (thToken) {
   // A valid saved session can load each workspace behind its own page content.
   // Reserve the sign-in overlay for a new login or an actual access error.
   document.getElementById('th-auth').hidden = true;
+  document.documentElement.classList.remove('th-session-pending');
   Promise.resolve().then(() => window.thStart()).then(() => {
     document.getElementById('th-auth').hidden = true;
   }).catch(error => {
     if (error.status === 401) thClearSession();
     thStatus(error.message);
     document.getElementById('th-auth').hidden = false;
+    document.documentElement.classList.remove('th-session-pending');
   });
 }
