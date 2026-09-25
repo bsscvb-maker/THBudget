@@ -264,5 +264,9 @@ document.getElementById('typeFilters').addEventListener('click',e=>{const b=e.ta
 document.getElementById('fleetSearch').addEventListener('input',renderFleet);
 renderFilters();renderFleet();renderLeaders();
 }
-window.thStart = async () => renderFleetPage(await thFleetData(), new URL('./',location.href).href);
+window.thStart = async () => {
+ const [data, rows] = await Promise.all([thFleetData(), thValues("'Mileage-2024.06.25'!A1:J100")]);
+ data.history = rows.slice(4).filter(r => r[1]).map(r => ({name:r[1],currentMileage:r[4]}));
+ renderFleetPage(data, new URL('./',location.href).href);
+};
 </script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="sheets.js"></script></body></html>
