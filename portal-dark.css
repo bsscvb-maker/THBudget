@@ -41,7 +41,7 @@ body[data-th-page="fleet"] .vehicle-mileage{margin-top:36px}body[data-th-page="f
 .th-sign-out{padding:8px 12px;border:1px solid #718198;border-radius:7px;background:#26364e;color:#f3f6fb;font:700 13px/1.2 system-ui,sans-serif;cursor:pointer;white-space:nowrap}
 .th-sign-out:hover{background:#395477;border-color:#9db7d9}
 .th-sign-out:focus-visible{outline:3px solid #8bbcff;outline-offset:2px}
-.th-account-mark{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:#356bbb;color:#fff;font:800 12px/1 system-ui,sans-serif}
+.th-account-mark{display:grid;place-items:center;flex:none;width:38px;height:38px}.th-account-mark img{display:block;width:100%;height:100%;object-fit:contain}
 @media(max-width:800px){.th-account{gap:6px}.th-authorized{display:none}.th-account .th-connection{display:none}.th-sign-out{padding:8px 9px}.th-account-mark{width:32px;height:32px}}
 /* Clear, readable feedback while the signed-in workbook opens. */
 #th-auth #th-auth-message{font-size:clamp(20px,2vw,25px);font-weight:800;line-height:1.4;min-height:3em;color:#f7fbff;margin-top:20px}
