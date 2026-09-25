@@ -106,9 +106,9 @@ async function thFleetServiceData() {
   ]);
   const services = sr.slice(1).map((r,i)=>({...r,__row:i+2})).filter(r => r[0] && r[3]).map(r => ({sheetRow:r.__row,asset:r[0],id:r[1],date:r[2],item:r[3],odometer:r[4],cost:r[5],notes:r[6]}));
   const schedules={};
-  for(const r of sch.slice(1))if(r[0]&&r[2]){
+  for(const [index,r] of sch.slice(1).entries())if(r[0]&&r[2]){
     const entry=schedules[r[0]]||={sourceName:r[1],tasks:[]};
-    entry.tasks.push({task:r[2],interval:r[3]||'',lastDate:r[4]||'',lastReading:r[5]||'',nextDate:r[6]||'',nextReading:r[7]||''});
+    entry.tasks.push({sheetRow:index+2,task:r[2],interval:r[3]||'',lastDate:r[4]||'',lastReading:r[5]||'',nextDate:r[6]||'',nextReading:r[7]||''});
     schedules[r[0]]=entry;
   }
   return {services,schedules};
