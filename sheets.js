@@ -83,7 +83,7 @@ async function thValues(range) {
 async function thFleetData() {
   const [fr, mr, pr, notes, ownership, rr] = await Promise.all([
     thValues("'Fleet List'!A1:I100"),
-    thValues("'Mileage-2025.10.16'!A1:K1000"),
+    thValues("'Mileage-2025.10.16'!A1:K"),
     thValues("'Portal Asset Profiles'!A1:Y1000"),
     thValues("'Portal Asset Profiles'!AA1:AB1000"),
     thValues("'Portal Asset Profiles'!AC1:AC1000"),
