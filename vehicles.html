@@ -316,6 +316,13 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 .photo-preview-head strong{font-size:18px;line-height:1.3}
 .photo-preview-head button{padding:8px 14px;border:1px solid #8bb7ef;border-radius:6px;background:#244a7b;color:white;font-size:16px;font-weight:750;cursor:pointer}
 .photo-preview img{display:block;width:100%;max-height:calc(90vh - 105px);object-fit:contain;border-radius:6px;background:#0e1b2d}
+.vehicle-filter-bar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:13px 0 6px}
+.vehicle-filter-bar label{display:grid;gap:6px;min-width:185px;color:#bcd0eb;font-size:13px;font-weight:750}
+.vehicle-filter-bar .vehicle-search{flex:1;min-width:min(100%,250px)}
+.vehicle-filter-bar input,.vehicle-filter-bar select{width:100%;height:43px;padding:9px 12px;border:1px solid #6382ad;border-radius:6px;background:#1b304d;color:#f4f8ff;font-size:15px}
+.vehicle-filter-bar input::placeholder{color:#a9bdd7}
+.vehicle-filter-bar input:focus,.vehicle-filter-bar select:focus{outline:2px solid #a9ceff;outline-offset:2px}
+.vehicle-results{margin:12px 0 0;color:#bcd0eb;font-size:14px}
 </style><div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TH</span><span>THBudget<small>Personal command center</small></span></a><nav aria-label="THBudget pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link " href="finance.html"><span class="th-nav-icon">◫</span>Finance</a><a class="th-nav-link" href="freebirds.html"><span class="th-nav-icon" style="overflow:hidden"><img src="freebirds-logo.svg" alt="" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 72%"></span>Freebirds</a><a class="th-nav-link active" href="vehicles.html"><span class="th-nav-icon ram-nav-icon"><img src="https://www.onestepgps.com/assets/ram-4lxd-NAa.webp" alt="" referrerpolicy="no-referrer"></span>Vehicles</a></nav><div class="th-sidebar-foot">© 2026 THBudget<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Vehicles</strong><small>Vehicle dashboard and individual profiles</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="wrap">
 <header>
 <a class="brand" id="homeLink" href="#"><span class="logo">TH</span><span>THBudget<small>VEHICLE WORKSPACE</small></span></a>
@@ -332,7 +339,9 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <button type="button" class="back-link" id="backDashboard">Back</button>
 <div class="section-title"><div><div class="kicker">Category</div><h2 id="categoryTitle"></h2><p>Choose an item to view its details, mileage, maintenance, and service recommendations.</p></div><button type="button" class="add-vehicle-button" id="addCategoryVehicleButton">+ Add vehicle</button></div>
 <div class="status-filter" id="statusFilters"></div>
+<div class="vehicle-filter-bar"><label class="vehicle-search">Search vehicles<input id="vehicleSearch" type="search" placeholder="Year, make, model, VIN, plate…" autocomplete="off"></label><label>Section<select id="vehicleSectionFilter" aria-label="Filter by section"></select></label><label>Missing information<select id="vehicleMissingFilter"><option value="all">All records</option><option value="any">Any missing information</option><option value="photo">No photo</option><option value="engine">No engine size</option><option value="mileage">No mileage / reading</option></select></label></div>
 <label class="year-sort" for="yearSort">Year order <select id="yearSort"><option value="oldest">Oldest to newest</option><option value="newest">Newest to oldest</option></select></label>
+<p id="vehicleResults" class="vehicle-results" role="status"></p>
 <div class="asset-grid" id="assetGrid"></div>
 </div>
 <div class="workspace-view" id="assetView" hidden>
@@ -488,20 +497,27 @@ function cardNumber(value){const n=Number(String(value??'').replace(/,/g,'').tri
 function cardEngine(a){return a.engine&&clean(a.engine)!=='na'?a.engine:'Not recorded'}
 function cardReading(a,m){const value=cardNumber(m?.currentMileage)??cardNumber(a.reportOdometer);if(value===null)return 'Not recorded';const road=['Cars','Trucks','SUVs','Vans','Classic','Motorcycles','Scooters & Mopeds'].includes(a.category);return value+(road?' mi':' (report reading)')}
 function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>'}
-let category='',asset=null,status='all',yearOrder='oldest',editing=false;
+let category='',asset=null,status='all',yearOrder='oldest',editing=false,vehicleQuery='',missingFilter='all';
 const currentAsset=()=>asset;
 function show(view){for(const id of ['dashboardView','categoryView','assetView'])document.getElementById(id).hidden=id!==view;window.scrollTo({top:0,behavior:'smooth'})}
 function renderCategories(){document.getElementById('categoryGrid').innerHTML=['All Vehicles',...categories,'Unfiled'].filter(c=>c==='All Vehicles'||c==='Vans'||c==='Personal Watercraft'||assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
 function renderCategory(){
- const items=assets.filter(a=>category==='All Vehicles'||a.category===category).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);const aKnown=Number.isFinite(ay),bKnown=Number.isFinite(by);return (aKnown&&bKnown?(yearOrder==='oldest'?ay-by:by-ay):Number(bKnown)-Number(aKnown))||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))}), shown=items.filter(a=>status==='all'||clean(a.status)===status);
+ const items=assets.filter(a=>category==='All Vehicles'||a.category===category).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);const aKnown=Number.isFinite(ay),bKnown=Number.isFinite(by);return (aKnown&&bKnown?(yearOrder==='oldest'?ay-by:by-ay):Number(bKnown)-Number(aKnown))||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))});
+ const words=vehicleQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
+ const missing=a=>({photo:!(a.photoFileId||a.photo),engine:cardEngine(a)==='Not recorded',mileage:cardReading(a,mileageFor(a))==='Not recorded'});
+ const shown=items.filter(a=>{if(status!=='all'&&clean(a.status)!==status)return false;if(words.length&&!words.every(w=>[a.year,a.make,a.model,a.vin,a.tag,a.vehicleNumber,a.engine,a.category].join(' ').toLowerCase().includes(w)))return false;const gaps=missing(a);return missingFilter==='all'||missingFilter==='any'&&Object.values(gaps).some(Boolean)||Boolean(gaps[missingFilter])});
  document.getElementById('categoryTitle').textContent=category;
+ const sections=['All Vehicles',...categories,'Unfiled'].filter(c=>c==='All Vehicles'||c==='Vans'||c==='Personal Watercraft'||assets.some(a=>a.category===c));
+ document.getElementById('vehicleSectionFilter').innerHTML=sections.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
+ document.getElementById('vehicleSectionFilter').value=category;
+ document.getElementById('vehicleResults').textContent='Showing '+shown.length+' of '+items.length+' in '+category;
  document.getElementById('statusFilters').innerHTML=['all','active','inactive'].map(s=>'<button type="button" class="filter-chip '+(status===s?'active':'')+'" data-status="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' · '+(s==='all'?items.length:items.filter(a=>clean(a.status)===s).length)+'</button>').join('');
  document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>{
   const m=mileageFor(a),s=clean(a.status),added=cardNumber(m?.addedMileage),title=[a.year,a.make,a.model].filter(Boolean).join(' ');
   const photo=a.photoObjectUrl||(!a.photoFileId&&a.photo)||'';
   const picture=a.photoObjectUrl||a.photoFileId||a.photo?'<button type="button" class="card-photo" data-preview="'+esc(a.id)+'" aria-label="Enlarge photo of '+esc(title)+'"'+(!photo?' disabled':'')+'><img src="'+esc(photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true"></button>':'<span class="card-photo"><span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span></span>';
   return '<div class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-status '+(s==='active'||s==='inactive'?s:'')+'">'+esc(a.status||'Status to review')+'</span>'+picture+'<div class="card-copy"><strong>'+esc(title)+'</strong><span class="card-stat">Engine: <b>'+esc(cardEngine(a))+'</b></span><span class="card-stat">Mileage / reading: <b>'+esc(cardReading(a,m))+'</b></span><span class="card-stat">Miles added: <b>'+esc(added===null?'—':added)+'</b></span><button type="button" class="card-open" data-open-asset="'+esc(a.id)+'" aria-label="Open '+esc(title)+' details">View details</button></div></div>';
- }).join(''):'<div class="asset-note">No items in this view yet.</div>';
+ }).join(''):'<div class="asset-note">No vehicles match these filters.</div>';
  for(const a of shown.filter(a=>a.photoFileId&&!a.photoObjectUrl)){
   thPhotoObjectUrl(a.photoFileId).then(src=>{
    a.photoObjectUrl=src;
@@ -555,9 +571,12 @@ document.getElementById('allLink').href=PORTAL+'finance.html';
 document.getElementById('updated').textContent=D.asOf||'latest';
 
 renderCategories();
-document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;status='all';renderCategory();show('categoryView')});
+document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;status='all';vehicleQuery='';missingFilter='all';document.getElementById('vehicleSearch').value='';document.getElementById('vehicleMissingFilter').value='all';renderCategory();show('categoryView')});
 document.getElementById('statusFilters').addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b)return;status=b.dataset.status;renderCategory()});
 document.getElementById('yearSort').addEventListener('change',e=>{yearOrder=e.target.value;renderCategory()});
+document.getElementById('vehicleSearch').addEventListener('input',e=>{vehicleQuery=e.target.value;renderCategory()});
+document.getElementById('vehicleSectionFilter').addEventListener('change',e=>{category=e.target.value;renderCategory()});
+document.getElementById('vehicleMissingFilter').addEventListener('change',e=>{missingFilter=e.target.value;renderCategory()});
 function previewPhoto(a,src){if(!src)return;const dialog=document.getElementById('photoPreview');document.getElementById('photoPreviewTitle').textContent=[a.year,a.make,a.model].filter(Boolean).join(' ');const img=document.getElementById('photoPreviewImage');img.src=src;img.alt='Photo of '+document.getElementById('photoPreviewTitle').textContent;dialog.showModal()}
 document.getElementById('assetGrid').addEventListener('click',e=>{const preview=e.target.closest('[data-preview]'),open=e.target.closest('[data-open-asset]');if(preview){const a=assets.find(x=>x.id===preview.dataset.preview);if(a)previewPhoto(a,a.photoObjectUrl||a.photo);return}if(!open)return;asset=assets.find(a=>a.id===open.dataset.openAsset);if(!asset)return;renderAsset();show('assetView')});
 document.getElementById('assetPhoto').addEventListener('click',e=>{if(e.target.matches('img')&&asset)previewPhoto(asset,asset.photoObjectUrl||asset.photo)});
