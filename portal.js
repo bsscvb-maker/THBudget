@@ -5,7 +5,7 @@
   if (header && status) {
     const account = document.createElement('div');
     account.className = 'th-account';
-    account.innerHTML = '<span class="th-authorized">Authorized user</span><button type="button" class="th-sign-out" aria-label="Sign out of THBudget">Sign out</button><span class="th-account-mark" aria-hidden="true">TH</span>';
+    account.innerHTML = '<span class="th-authorized">Authorized user</span><button type="button" class="th-sign-out" aria-label="Sign out of TisZod">Sign out</button><span class="th-account-mark" aria-hidden="true">TZ</span>';
     status.replaceWith(account);
     account.prepend(status);
     account.querySelector('.th-sign-out').addEventListener('click', () => {
