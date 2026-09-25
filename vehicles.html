@@ -604,8 +604,9 @@ function renderAsset(tab='details'){
  if(asset.photoObjectUrl){document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(asset.photoObjectUrl)+'" alt="'+esc(asset.make+' '+asset.model)+'">'}else if(asset.photoFileId)assetPhoto(asset).then(src=>{if(document.getElementById('assetPhoto')&&asset===currentAsset()){document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(src)+'" alt="'+esc(asset.make+' '+asset.model)+'">';}}).catch(()=>{if(asset===currentAsset())document.getElementById('assetPhoto').innerHTML='<div class="photo-empty">Photo unavailable</div>'});
  document.getElementById('photoUploadStatus').textContent='';
  const m=mileageFor(asset);
- const mileageEditable=m?[['Service start date','serviceStart','D'],[hours?'Starting hours':'Starting odometer','startMileage','E'],[hours?'Current hours':'Current odometer','currentMileage','F']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]||'')+'" readonly></label>').join(''):'';
- document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+mileageEditable+[[hours?'Hours added':'Miles added',m.addedMileage],[hours?'Hours per month':'Miles per month',m.monthlyEstimate],[hours?'Estimated hours per year':'Estimated miles per year',m.annualEstimate]].map(([k,v])=>fact(k,v)).join('')+'</div>':'<div class="asset-note">No '+(hours?'hours':'mileage')+' record found for this vehicle.</div>';
+ const mileageEditable=m?[['Service start date','serviceStart','D'],[hours?'Starting hours':'Starting mileage','startMileage','E'],[hours?'Current hours':'Current mileage','currentMileage','F']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]??'')+'" readonly></label>').join(''):'';
+ document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+mileageEditable+[[hours?'Hours added':'Miles added',m.addedMileage],[hours?'Hours per month':'Miles per month',m.monthlyEstimate],[hours?'Estimated hours per year':'Estimated miles per year',m.annualEstimate]].map(([k,v])=>fact(k,v)).join('')+'</div>':'<div class="asset-note">No '+(hours?'hours':'mileage')+' record found for this vehicle. Add the starting and current readings below.</div><form id="newMileageForm" class="asset-facts"><label class="asset-fact"><span>Tracking start date</span><input name="startDate" type="date" required></label><label class="asset-fact"><span>'+(hours?'Starting hours':'Starting mileage')+'</span><input name="start" type="number" min="0" step="any" required></label><label class="asset-fact"><span>'+(hours?'Current hours':'Current mileage')+'</span><input name="current" type="number" min="0" step="any" required></label><div class="asset-fact"><button type="submit">Save readings</button><span role="status" id="newMileageStatus"></span></div></form>';
+ if(!m){const date=document.querySelector('#newMileageForm [name="startDate"]'),today=new Date();date.value=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');const current=document.querySelector('#newMileageForm [name="current"]');const reported=Number(String(asset.reportOdometer??'').replace(/,/g,''));if(asset.reportOdometer!==''&&Number.isFinite(reported))current.value=reported}
  if(!serviceLoaded){for(const id of ['assetMaintenance','assetRecommended'])document.getElementById(id).innerHTML='<div class="asset-note">Loading service history and schedules…</div>';openServiceDetails(asset)}
  else{
   const entries=serviceFor(asset).slice().sort((a,b)=>new Date(b.date)-new Date(a.date)||b.sheetRow-a.sheetRow);
@@ -761,10 +762,30 @@ document.getElementById('assetFacts').addEventListener('change',async e=>{
 });
 document.getElementById('assetMileage').addEventListener('change',async e=>{
  const input=e.target.closest('[data-mileage-col]');if(!input||!editing)return;
+ const m=mileageFor(asset),old=m?.[{D:'serviceStart',E:'startMileage',F:'currentMileage'}[input.dataset.mileageCol]];
+ const col=input.dataset.mileageCol;
+ if(col==='E'||col==='F'){
+  const value=Number(input.value.replace(/,/g,'')),other=Number(String(col==='E'?m?.currentMileage:m?.startMileage).replace(/,/g,''));
+  if(input.value.trim()===''||!Number.isFinite(value)||value<0||!Number.isFinite(other)||(col==='E'&&value>other)||(col==='F'&&value<other)){input.value=old??'';document.getElementById('assetEditStatus').textContent='Enter a valid reading. Starting mileage cannot exceed current mileage.';return}
+  input.value=String(value);
+ }
  input.disabled=true;
- try{await thWriteCell('Mileage-2025.10.16',input.dataset.mileageCol+input.dataset.mileageRow,input.value);document.getElementById('assetEditStatus').textContent='Mileage saved to your workbook.'}
- catch(error){document.getElementById('assetEditStatus').textContent=error.message;document.getElementById('assetEditStatus').classList.add('error')}
+ try{await thWriteCell('Mileage-2025.10.16',col+input.dataset.mileageRow,input.value);if(m){m[{D:'serviceStart',E:'startMileage',F:'currentMileage'}[col]]=input.value;m.addedMileage=Number(String(m.currentMileage).replace(/,/g,''))-Number(String(m.startMileage).replace(/,/g,''))}document.getElementById('assetEditStatus').textContent='Reading saved to your workbook.';renderCategory();}
+ catch(error){input.value=old??'';document.getElementById('assetEditStatus').textContent=error.message;document.getElementById('assetEditStatus').classList.add('error')}
  finally{input.disabled=false}
+});
+document.getElementById('assetMileage').addEventListener('submit',async e=>{
+ if(e.target.id!=='newMileageForm')return;e.preventDefault();const form=e.target,a=asset,button=form.querySelector('button'),status=form.querySelector('#newMileageStatus');
+ const starting=Number(form.elements.start.value),current=Number(form.elements.current.value);
+ if(!form.elements.startDate.value||!Number.isFinite(starting)||!Number.isFinite(current)||starting<0||current<starting){status.textContent='Enter a start date and readings with current mileage at least as high as starting mileage.';return}
+ button.disabled=true;status.textContent='Saving…';
+ try{
+  if(mileageFor(a))throw new Error('This vehicle already has a mileage record. Reload the page to edit it.');
+  const row=await thAppendRow('Mileage-2025.10.16',['',[a.make,a.model].filter(Boolean).join(' '),a.year,form.elements.startDate.value,starting,current,'','','','','']);
+  const m={sheetRow:row,name:[a.make,a.model].filter(Boolean).join(' '),year:a.year,serviceStart:form.elements.startDate.value,startMileage:starting,currentMileage:current,addedMileage:current-starting};mileage.push(m);
+  for(const [col,formula] of [['G','=F'+row+'-E'+row],['H','=TODAY()-D'+row],['I','=H'+row+'/30.4375'],['J','=IFERROR(G'+row+'/I'+row+',0)'],['K','=J'+row+'*12']])await thWriteCell('Mileage-2025.10.16',col+row,formula);
+  renderCategory();renderAsset('mileage');document.getElementById('assetEditStatus').textContent='Starting and current mileage saved.';
+ }catch(error){status.textContent=error.message}finally{button.disabled=false}
 });
 document.getElementById('assetMaintenance').addEventListener('change',async e=>{
  const input=e.target.closest('[data-service-row]');if(!input||!editing)return;
