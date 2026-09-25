@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#090d14"><meta name="robots" content="noindex,nofollow">
 <title>TisZod — Dashboard</title>
 <link rel="stylesheet" href="portal-dark.css?v=8">
-<link rel="stylesheet" href="dashboard.css?v=1">
+<link rel="stylesheet" href="dashboard.css?v=2">
 <link rel="stylesheet" href="auth.css?v=5"><style>html.th-session-pending #th-auth{display:none!important}</style><script>try{const saved=JSON.parse(localStorage.getItem('thbudget-session-photos-v1')||sessionStorage.getItem('thbudget-session-photos-v1')||'null');if(saved?.expiresAt>Date.now()+30000){document.documentElement.classList.add('th-session-pending');setTimeout(()=>document.documentElement.classList.remove('th-session-pending'),15000)}}catch(_){}</script><link rel="icon" type="image/svg+xml" href="tiszod-crest.svg?v=1"></head>
 <body data-th-page="home">
 <div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-brand"><img class="th-auth-logo" src="tiszod-crest.svg" alt=""><span class="th-auth-name" id="th-auth-title">TisZod</span></div><button type="button" id="th-sign-in"><svg class="th-google-icon" aria-hidden="true" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.25 5.48-4.77 7.18l7.73 6C44.41 38.03 46.98 31.87 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.2A23.9 23.9 0 0 0 0 24c0 3.87.93 7.51 2.56 10.78z"/><path fill="#34A853" d="M24 48c6.48 0 11.92-2.13 15.89-5.8l-7.73-6C30.01 37.65 27.25 38.5 24 38.5c-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Sign in with Google</span></button><p id="th-auth-message" role="status" aria-live="polite"></p></div></div>
@@ -16,12 +16,12 @@
  <div class="dash-heading"><div><span class="overline">TisZod / OVERVIEW</span><h1>Your dashboard</h1><p>What’s current across your workspaces.</p></div><a class="refresh" href="./" aria-label="Refresh dashboard">↻ <span>Refresh</span></a></div>
  <section class="stats" aria-label="Fleet snapshot">
   <a href="vehicles.html" class="stat"><span class="stat-label">Active vehicles</span><strong id="activeCount">—</strong><span class="stat-foot">View vehicle register <b>↗</b></span></a>
-  <a href="vehicles.html" class="stat"><span class="stat-label">Mileage logs</span><strong id="trackedCount">—</strong><span class="stat-foot">View mileage <b>↗</b></span></a>
-  <a href="#attention" class="stat alert"><span class="stat-label">Need mileage match</span><strong id="missingCount">—</strong><span class="stat-foot">Review below <b>↓</b></span></a>
+  <a href="vehicles.html" class="stat"><span class="stat-label">Vehicles with reading logs</span><strong id="trackedCount">—</strong><span class="stat-foot">View mileage <b>↗</b></span></a>
+  <a href="#attention" class="stat alert"><span class="stat-label">Vehicles needing service</span><strong id="missingCount">—</strong><span class="stat-foot">See service items <b>↓</b></span></a>
   <a href="vehicles.html" class="stat"><span class="stat-label">Inactive vehicles</span><strong id="inactiveCount">—</strong><span class="stat-foot">View archive <b>↗</b></span></a>
  </section>
  <div class="dash-grid">
-  <section class="panel attention" id="attention" aria-labelledby="attentionTitle"><div class="panel-heading"><div><span class="overline">FOLLOW UP</span><h2 id="attentionTitle">Mileage coverage</h2></div><span class="count-chip" id="coverageChip">Loading</span></div><p class="panel-intro" id="coverageText">Checking the active fleet against your mileage log…</p><div id="missingList" class="missing-list" aria-live="polite"></div><a class="text-link" href="vehicles.html">Open vehicles <span>↗</span></a></section>
+  <section class="panel attention" id="attention" aria-labelledby="attentionTitle"><div class="panel-heading"><div><span class="overline">FOLLOW UP</span><h2 id="attentionTitle">Service due and upcoming</h2></div><span class="count-chip" id="coverageChip">Loading</span></div><p class="panel-intro" id="coverageText">Checking service schedules for active vehicles…</p><div id="missingList" class="missing-list" aria-live="polite"></div><a class="text-link" href="vehicles.html">Open vehicles <span>↗</span></a></section>
   <section class="panel workspaces" aria-labelledby="workspacesTitle"><div class="panel-heading"><div><span class="overline">QUICK ACCESS</span><h2 id="workspacesTitle">Workspaces</h2></div></div><a class="workspace" href="finance.html"><span class="workspace-icon">▤</span><span><strong>Finance</strong><small id="sectionCount">Your workbook sections</small></span><span class="workspace-arrow">↗</span></a><a class="workspace" href="vehicles.html"><span class="workspace-icon">▣</span><span><strong>Vehicles</strong><small id="vehicleCardCount">Register, mileage, maintenance</small></span><span class="workspace-arrow">↗</span></a><a class="workspace" href="freebirds.html"><span class="workspace-icon">◈</span><span><strong>Freebirds</strong><small>Browse the footwear collection</small></span><span class="workspace-arrow">↗</span></a><a class="workspace" href="admin.html"><span class="workspace-icon">⚙</span><span><strong>Administration</strong><small>Check connections and site status</small></span><span class="workspace-arrow">↗</span></a></section>
  </div>
  <p class="data-note" id="updated">Loading your private workbook…</p>
@@ -29,26 +29,35 @@
 <script>
 document.getElementById('today').textContent=new Intl.DateTimeFormat('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(new Date());
 const clean=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-const aliases={'xpro200':'XPro 200','volpamsp03':'SP03','colemanb200':'B200','makdaddylegend':'Legend','harleydavidsonroadglidelimitedfltrk':'FLTRK','stirlingtrailer':'Stirling','ram3500hodrw4x4cummings':'3500 DRW','keystonebullet331bhs':'Bullet','fordmustang':'Mustang','harleydavidsonultraclassicflhtcui':'FLHTCUI','fordf150':'F150'};
+const scheduleKeys=[[/trek.*7200/, 'trek7200'],[/harley.*(ultra|flhtcui)/,'harleydavidsonultra'],[/lifetime.*spitfire/,'lifetimespitfire'],[/keystone.*bullet/,'keystonebullet'],[/stirling|westbrook.*trailer/,'stirling'],[/makdaddy.*legend/,'makdaddylegend'],[/harley.*(roadglide|fltrk)/,'harleydavidsonroad'],[/ram.*3500/,'ram3500'],[/coleman.*(b200|8200)/,'colemanb200'],[/volpam.*sp03/,'volpamsp03'],[/coolster.*3050/,'coolster3050'],[/ford.*f150/,'fordf150'],[/xpro.*jaguar/,'xprojaguar'],[/ford.*mustang/,'fordmustang'],[/toyota.*4runner/,'toyota4runner'],[/chrysler.*aspen/,'chrysleraspen'],[/honda.*civic/,'hondacivic'],[/husqvarna.*122hd4[5s]/,'husqvarna122hd4s'],[/echo.*pb2520/,'echopb2520'],[/dewalt.*aircompressor/,'dewaltaircompressor'],[/dewalt.*dxpw3425|dewalt.*pressurewasher/,'dewaltdxpw3425'],[/craftsman.*18.*chainsaw/,'craftsman18inchchainsaw'],[/craftsman.*10.*polesaw/,'craftsman10polesaw'],[/husqvarna.*yth24k48/,'husqvarnayth24k48'],[/cubcadet.*kohler/,'cubcadetkohler'],[/husqvarna.*330lx|husqvarna.*weedeater/,'husqvarna330lx'],[/stihl.*fs56/,'stihlfs56']];
+const dueDate=value=>{const parts=String(value||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(!parts)return null;const date=new Date(Number(parts[3]),Number(parts[1])-1,Number(parts[2]));return Number.isNaN(date.getTime())?null:date};
 window.thStart=async()=>{
- const [data,meta]=await Promise.all([thFleetData(),thSheets('?fields=sheets.properties.title')]);
- const names=new Set(data.vehicles.map(v=>clean(v.name)));
- const unmatched=data.activeFleet.filter(f=>!names.has(clean(aliases[clean(f.make+' '+f.model)]||f.make+' '+f.model)));
+ const [data,meta,rows]=await Promise.all([thFleetData(),thSheets('?fields=sheets.properties.title'),thValues("'Portal Service Schedules'!A1:I400").catch(()=>null)]);
+ const today=new Date();today.setHours(0,0,0,0);
+ const upcoming=new Date(today);upcoming.setDate(upcoming.getDate()+30);
+ const byKey=new Map();
+ for(const r of rows?.slice(1)||[]){const due=dueDate(r[6]);if(!r[0]||!r[2]||!due||due>upcoming)continue;const group=byKey.get(r[0])||[];group.push({task:r[2],due});byKey.set(r[0],group)}
+ const vehiclesDue=[];
+ for(const a of data.profiles.filter(p=>clean(p.status)==='active')){
+  const name=clean([a.make,a.model,a.name].filter(Boolean).join(' '));const key=scheduleKeys.find(([pattern])=>pattern.test(name))?.[1];
+  const tasks=key?byKey.get(key):null;if(tasks?.length)vehiclesDue.push({name:[a.year,a.make,a.model].filter(Boolean).join(' '),tasks:tasks.sort((x,y)=>x.due-y.due),key});
+ }
+ vehiclesDue.sort((a,b)=>a.tasks[0].due-b.tasks[0].due);
  document.getElementById('activeCount').textContent=data.activeFleet.length;
  document.getElementById('trackedCount').textContent=data.vehicles.length;
- document.getElementById('missingCount').textContent=unmatched.length;
+ document.getElementById('missingCount').textContent=rows?vehiclesDue.length:'—';
  document.getElementById('inactiveCount').textContent=data.inactiveFleet.length;
  document.getElementById('vehicleCardCount').textContent=data.activeFleet.length+' active · '+data.inactiveFleet.length+' inactive';
  document.getElementById('sectionCount').textContent=(meta.sheets?.length||0)+' workbook sections';
- document.getElementById('coverageChip').textContent=unmatched.length ? unmatched.length+' to review' : 'All matched';
- document.getElementById('coverageChip').classList.toggle('clear',!unmatched.length);
- document.getElementById('coverageText').textContent=unmatched.length ? 'These active fleet entries do not match a vehicle in the current mileage log.' : 'Every active fleet entry has a match in the current mileage log.';
- const list=document.getElementById('missingList');
- list.replaceChildren();
- for(const item of unmatched.slice(0,5)){const row=document.createElement('div');row.className='missing-row';const name=document.createElement('strong');name.textContent=[item.year,item.make,item.model].filter(Boolean).join(' ');const label=document.createElement('span');label.textContent='No mileage match';row.append(name,label);list.append(row)}
- if(unmatched.length>5){const more=document.createElement('p');more.className='more';more.textContent='+'+(unmatched.length-5)+' more active entries';list.append(more)}
- document.getElementById('updated').textContent='Mileage log as of '+(data.asOf||'latest entry')+' · Values from your private Google Sheet';
-};
-</script>
-<script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=6"></script><script src="sheets.js?v=15"></script>
+ const chip=document.getElementById('coverageChip'),list=document.getElementById('missingList');list.replaceChildren();
+ chip.textContent=rows?(vehiclesDue.length?vehiclesDue.length+' vehicles':'Nothing due'):'Unavailable';chip.classList.toggle('clear',Boolean(rows&&!vehiclesDue.length));
+ document.getElementById('coverageText').textContent=rows?'Service scheduled for today or within the next 30 days, based on dates in your vehicle service plans.':'Service schedules could not be loaded right now.';
+ for(const a of vehiclesDue.slice(0,5)){
+  const row=document.createElement('div');row.className='missing-row';const name=document.createElement('strong');name.textContent=a.name;
+  const detail=document.createElement('small');detail.textContent=a.tasks[0].task+(a.tasks.length>1?' · +'+(a.tasks.length-1)+' more':'');const label=document.createElement('span');const due=a.tasks[0].due;label.textContent=due<today?'Overdue since '+new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric'}).format(due):'Due '+new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric'}).format(due);const description=document.createElement('div');description.append(name,detail);row.append(description,label);list.append(row)
+ }
+ if(vehiclesDue.length>5){const more=document.createElement('p');more.className='more';more.textContent='+'+(vehiclesDue.length-5)+' more vehicles';list.append(more)}
+ document.getElementById('updated').textContent='Vehicle data as of '+(data.asOf||'latest entry')+' · Values from your private Google Sheet';
+};</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=6"></script><script src="sheets.js?v=17"></script>
 </body></html>
