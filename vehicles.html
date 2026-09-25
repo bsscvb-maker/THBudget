@@ -750,6 +750,7 @@ async function moveAssetTo(next){
  finally{controls.forEach(control=>control.disabled=false)}
 }
 document.getElementById('moveAssetButton').addEventListener('click',()=>moveAssetTo(document.getElementById('moveAssetCategory').value));
+document.getElementById('moveAssetCategory').addEventListener('change',e=>moveAssetTo(e.target.value));
 document.getElementById('unfileAssetButton').addEventListener('click',()=>moveAssetTo('Unfiled'));
 document.getElementById('newVehicleCategory').innerHTML=categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
 for(const addButton of [document.getElementById('addVehicleButton'),document.getElementById('addCategoryVehicleButton'),document.getElementById('addDetailVehicleButton')])addButton.addEventListener('click',()=>{
