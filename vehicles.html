@@ -236,6 +236,8 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 #assetGrid .asset-card{min-height:218px;padding:16px;gap:20px}
 #assetGrid .card-photo{width:clamp(200px,42%,310px);height:184px;background:#102744;display:grid;place-items:center}
 #assetGrid .card-photo img{width:100%;height:100%;object-fit:contain}
+/* The Tacoma photo has its truck low in the frame; lift only this thumbnail. */
+#assetGrid .card-photo--tacoma img{transform:translateY(-12%)}
 #assetGrid .card-copy{flex:1}
 .th-nav-icon.ram-nav-icon{position:relative;overflow:hidden;background:#13243d}
 .ram-nav-icon img{position:absolute;display:block;width:128px;height:72px;max-width:none;left:-7px;top:-20px}
@@ -530,7 +532,8 @@ function renderCategory(){
  document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>{
   const m=mileageFor(a),s=clean(a.status),added=cardNumber(m?.addedMileage),title=[a.year,a.make,a.model].filter(Boolean).join(' ');
   const photo=a.photoObjectUrl||(!a.photoFileId&&a.photo)||'';
-  const picture=a.photoObjectUrl||a.photoFileId||a.photo?'<button type="button" class="card-photo" data-preview="'+esc(a.id)+'" aria-label="Enlarge photo of '+esc(title)+'"'+(!photo?' disabled':'')+'><img src="'+esc(photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true"></button>':'<span class="card-photo"><span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span></span>';
+  const photoClass=String(a.year)==='1998'&&clean(a.make+' '+a.model).includes('toyotatacoma')?' card-photo--tacoma':'';
+  const picture=a.photoObjectUrl||a.photoFileId||a.photo?'<button type="button" class="card-photo'+photoClass+'" data-preview="'+esc(a.id)+'" aria-label="Enlarge photo of '+esc(title)+'"'+(!photo?' disabled':'')+'><img src="'+esc(photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true"></button>':'<span class="card-photo"><span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span></span>';
   return '<div class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-status '+(s==='active'||s==='inactive'?s:'')+'">'+esc(a.status||'Status to review')+'</span>'+picture+'<div class="card-copy"><strong>'+esc(title)+'</strong><span class="card-stat">Engine: <b>'+esc(cardEngine(a))+'</b></span><span class="card-stat">Mileage / reading: <b>'+esc(cardReading(a,m))+'</b></span><span class="card-stat">Miles added: <b>'+esc(added===null?'—':added)+'</b></span><button type="button" class="card-open" data-open-asset="'+esc(a.id)+'" aria-label="Open '+esc(title)+' details">View details</button></div></div>';
  }).join(''):'<div class="asset-note">No vehicles match these filters.</div>';
  const loadCardPhoto=a=>{
