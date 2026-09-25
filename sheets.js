@@ -128,6 +128,19 @@ async function thWriteCell(sheet, cell, value) {
   }
 }
 async function thAppendRow(sheet, values) {
+  if (sheet === 'Mileage-2025.10.16') {
+    // This sheet has other tables below the mileage register. Sheets' :append
+    // finds the last of those tables and shifts a new entry into its columns.
+    const rows = await thValues("'Mileage-2025.10.16'!A1:K");
+    const row = Math.max(5, rows.length + 1);
+    const range = "'Mileage-2025.10.16'!B" + row + ':K' + row;
+    const response = await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + TH_SHEET_ID + '/values/' + encodeURIComponent(range) + '?valueInputOption=USER_ENTERED', {
+      method: 'PUT', headers: {Authorization:'Bearer ' + thToken, 'Content-Type':'application/json'},
+      body: JSON.stringify({range, majorDimension:'ROWS', values:[values.slice(1, 11)]})
+    });
+    if (!response.ok) {const detail=await response.json().catch(()=>({}));throw new Error(detail.error?.message||'Could not add a mileage record.')}
+    return row;
+  }
   const appendRanges={'Mileage-2025.10.16':'A5:K','Portal Service History':'A:G','FreeBirds':'A:P','Portal Asset Profiles':'A:AA'};
   const range="'"+sheet.replace(/'/g,"''")+"'!"+(appendRanges[sheet]||'A:Z');
   const response=await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+TH_SHEET_ID+'/values/'+encodeURIComponent(range)+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{
