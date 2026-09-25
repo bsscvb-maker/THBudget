@@ -697,7 +697,7 @@ document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
  if(tab==='details'&&editing)panel.querySelectorAll('.quick-spec-group').forEach(group=>group.open=true);
  panel.querySelectorAll('input[data-asset-field],textarea[data-spec-field],input[data-mileage-col],input[data-service-row]').forEach(input=>{
   input.readOnly=!editing;
-  if(!editing){const key=input.dataset.assetField;if(key)input.value=key==='ownershipStart'?ownershipText(asset[key]):key==='currentReading'?mileageFor(asset)?.currentMileage??'':key==='reportOdometer'?mileageFor(asset)?.startMileage??asset.reportOdometer??'':asset[key]??'';if(input.dataset.specField)input.value=specRecord(asset).specs[input.dataset.specField]??'';}
+  if(!editing){const key=input.dataset.assetField;if(key)input.value=key==='ownershipStart'?ownershipText(asset[key]):key==='currentReading'?mileageFor(asset)?.currentMileage??'':key==='reportOdometer'?mileageFor(asset)?.startMileage??asset.reportOdometer??'':asset[key]??'';}
  });
  panel.querySelectorAll('[data-ownership-picker]').forEach(input=>input.disabled=!editing);
  if(tab==='details')document.getElementById('assetStatusEdit').disabled=!editing;
@@ -710,10 +710,19 @@ document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
 document.querySelector('.asset-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-asset-tab]');if(b)renderAsset(b.dataset.assetTab)});
 document.getElementById('quickSpecGroups').addEventListener('change',async e=>{
  const input=e.target.closest('[data-spec-field]');if(!input||!asset||!editing)return;
- const a=asset,key=input.dataset.specField,record=specRecord(a),prior=record.specs[key]||'',next=input.value.trim(),message=document.getElementById('assetEditStatus');
+ const a=asset,key=input.dataset.specField,prior=specRecord(a).specs[key]||'',next=input.value.trim(),message=document.getElementById('assetEditStatus');
  if(next===prior)return;
- record.specs[key]=next;input.disabled=true;message.textContent='Saving '+input.getAttribute('aria-label')+'…';message.classList.remove('error');
- try{await ensureProfileRow(a);const saved=JSON.stringify(record);await thWriteCell('Portal Asset Profiles','AB'+a.profileRow,saved);a.reportNotes=saved;input.closest('.quick-spec').classList.toggle('quick-spec-empty',!next);message.textContent='Saved to your workbook.'}
+ input.disabled=true;message.textContent='Saving '+input.getAttribute('aria-label')+'…';message.classList.remove('error');
+ const previous=a.specSaveQueue||Promise.resolve();
+ const saving=previous.catch(()=>{}).then(async()=>{
+  await ensureProfileRow(a);
+  const record=specRecord(a);record.specs[key]=next;
+  const saved=JSON.stringify(record);
+  await thWriteCell('Portal Asset Profiles','AB'+a.profileRow,saved);
+  a.reportNotes=saved;
+ });
+ a.specSaveQueue=saving;
+ try{await saving;input.closest('.quick-spec').classList.toggle('quick-spec-empty',!next);message.textContent='Saved to your workbook.'}
  catch(error){input.value=prior;message.textContent=error.message;message.classList.add('error')}
  finally{input.disabled=false}
 });
