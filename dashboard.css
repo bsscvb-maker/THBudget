@@ -21,6 +21,7 @@ body[data-th-page="home"]{font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI"
 .count-chip.clear{background:#173c30;color:#93edbc}
 .missing-list{border-top:1px solid #30435e}.missing-row{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid #30435e}
 .missing-row strong{font-size:15px;font-weight:650}.missing-row span{font-size:13px;color:#ffc689;white-space:nowrap}.more{font-size:13px;color:#b9c8dc}
+.missing-row small{display:block;color:#a8b8d1;font-size:13px;margin-top:3px}.missing-row>div{min-width:0}.missing-row span{text-align:right}
 .text-link{display:inline-flex;gap:12px;align-items:center;margin-top:20px;font-size:14px;font-weight:750;color:#a8c4ff!important}.text-link:hover{text-decoration:underline}
 .workspaces{padding-bottom:16px}.workspaces .panel-heading{margin-bottom:18px}
 .workspace{display:flex;align-items:center;gap:15px;padding:16px 4px;border-top:1px solid #30435e}
