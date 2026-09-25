@@ -1,17 +1,19 @@
 /* Shared sign-in screen for TisZod workspaces. */
 #th-auth#th-auth{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 35%,#17243a 0%,#0c121d 48%,#080d16 100%);color:#f3f7ff;font:16px/1.5 Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
 #th-auth[hidden]{display:none!important}
-#th-auth#th-auth .th-auth-card{box-sizing:border-box;width:min(100%,470px);padding:38px 42px 34px;border:1px solid #3c4f6b;border-radius:18px;background:#151f2f;box-shadow:0 24px 75px #0008;text-align:left}
-#th-auth .th-auth-brand{display:flex;align-items:center;gap:12px;color:#fff;font-size:18px;font-weight:800;letter-spacing:-.03em}
+#th-auth#th-auth .th-auth-card{box-sizing:border-box;width:min(100%,430px);padding:44px 38px;border:1px solid #3c4f6b;border-radius:18px;background:#151f2f;box-shadow:0 24px 75px #0008;text-align:center}
+#th-auth .th-auth-brand{display:flex;align-items:center;justify-content:center;gap:12px;color:#fff;font-size:18px;font-weight:800;letter-spacing:-.03em;text-align:left}
 #th-auth .th-auth-mark{display:grid;place-items:center;flex:none;width:42px;height:42px;border:0;border-radius:10px;background:#376fe6;color:#fff;font-size:14px;font-weight:850;letter-spacing:0}
 #th-auth .th-auth-brand small{display:block;color:#9fb5d9;font-size:10px;font-weight:800;letter-spacing:.16em;line-height:1.5}
-#th-auth #th-auth-title{margin:37px 0 7px;color:#fff;font:750 clamp(28px,5vw,34px)/1.15 Inter,system-ui,sans-serif;letter-spacing:-.035em}
+#th-auth #th-auth-title{margin:30px 0 26px;color:#fff;font:750 clamp(28px,5vw,34px)/1.15 Inter,system-ui,sans-serif;letter-spacing:-.035em}
 #th-auth .th-auth-intro{margin:0 0 27px;color:#b7c6dc;font-size:15px;line-height:1.5}
-#th-auth #th-sign-in{box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:50px;padding:12px 18px;border:1px solid #6294f3;border-radius:9px;background:#376fe6;color:#fff;font:750 15px/1.3 Inter,system-ui,sans-serif;cursor:pointer;transition:background .15s,transform .15s}
-#th-auth #th-sign-in:hover{background:#4b81eb;transform:translateY(-1px)}
+#th-auth #th-sign-in{box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:50px;padding:12px 18px;border:1px solid #d5dbe4;border-radius:9px;background:#fff;color:#1f2937;font:700 15px/1.3 Inter,system-ui,sans-serif;cursor:pointer;transition:background .15s,transform .15s}
+#th-auth #th-sign-in .th-google-icon{display:block;flex:none;width:20px;height:20px}
+#th-auth #th-sign-in:hover{background:#eef3fb;transform:translateY(-1px)}
 #th-auth #th-sign-in:focus-visible{outline:3px solid #a5c7ff;outline-offset:3px}
 #th-auth #th-sign-in[hidden]{display:none}
-#th-auth #th-auth-message{min-height:2.5em;margin:18px 0 0;padding-top:15px;border-top:1px solid #34435c;color:#aebed5;font:500 13px/1.45 Inter,system-ui,sans-serif;text-align:left;animation:none}
+#th-auth #th-auth-message{margin:0;color:#aebed5;font:500 13px/1.45 Inter,system-ui,sans-serif;text-align:center;animation:none}
+#th-auth #th-auth-message:not(:empty){margin-top:20px}
 #th-auth.th-auth-loading #th-auth-message{color:#e4efff;font-size:17px;font-weight:700;animation:th-sign-in-pulse 1.6s ease-in-out infinite}
 @keyframes th-sign-in-pulse{0%,100%{opacity:1}50%{opacity:.55}}
 @media(max-width:520px){#th-auth#th-auth .th-auth-card{padding:30px 25px}}
