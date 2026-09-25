@@ -460,10 +460,18 @@ function listedCategory(a){const n=clean(a.make+' '+a.model);
 }
 const assets=primary.concat(extras);
 for(const [i,item] of listed.entries())if(!deletedProfiles.some(p=>sameListedAsset(p,item))&&!assets.some(a=>sameListedAsset(a,item)))assets.push({...item,category:listedCategory(item),id:'f'+i});
-const mileage=D.vehicles||[], services=D.services||[];
+const mileage=D.vehicles||[];let services=[],schedules={},serviceLoaded=false,serviceLoad=null;
+async function loadServiceDetails(){
+ if(serviceLoaded)return;
+ serviceLoad ||= thFleetServiceData().then(data=>{services=data.services;schedules=data.schedules;serviceLoaded=true}).finally(()=>{serviceLoad=null});
+ return serviceLoad;
+}
+async function openServiceDetails(a){
+ try{await loadServiceDetails();if(asset===a)renderAsset(document.querySelector('[data-asset-tab].active')?.dataset.assetTab||'details')}
+ catch(error){if(asset===a){document.getElementById('assetMaintenance').innerHTML='<div class="asset-note">'+esc(error.message)+' Select another tab and return to Maintenance to retry.</div>';document.getElementById('assetSchedules').innerHTML='<div class="asset-note">'+esc(error.message)+'</div>'}}
+}
 const serviceKeys={'keystone':'331','ram3500':'3500','toyota4runner':'4Runner','chrysleraspen':'Aspen','hondacivic':'Civic','fordmustang':'Mustang','fordf150':'F150','harleydavidsonultra':'FLHTCUI','harleydavidsonroad':'FLTRK','makdaddy':'Legend','stirling':'Stirling','westbrook':'Stirling','trek':'trek','colemanb200':'B200','volpam':'SP03','coolster':'3050C','xpro':'Xpro'};
 function serviceFor(a){const name=clean(a.make+' '+a.model);const legacy=Object.entries(serviceKeys).find(([prefix])=>name.startsWith(prefix))?.[1];const key=legacy||(a.reportId&&String(a.reportId).startsWith('PDF-')?'report-'+String(a.reportId).slice(4):'');return key?services.filter(s=>clean(s.asset)===clean(key)):[]}
-const schedules=D.schedules||{};
 const scheduleKeys=[[/trek.*7200/, 'trek7200'],[/harley.*(ultra|flhtcui)/,'harleydavidsonultra'],[/lifetime.*spitfire/,'lifetimespitfire'],[/keystone.*bullet/,'keystonebullet'],[/stirling|westbrook.*trailer/,'stirling'],[/makdaddy.*legend/,'makdaddylegend'],[/harley.*(roadglide|fltrk)/,'harleydavidsonroad'],[/ram.*3500/,'ram3500'],[/coleman.*(b200|8200)/,'colemanb200'],[/volpam.*sp03/,'volpamsp03'],[/coolster.*3050/,'coolster3050'],[/ford.*f150/,'fordf150'],[/xpro.*jaguar/,'xprojaguar'],[/ford.*mustang/,'fordmustang'],[/toyota.*4runner/,'toyota4runner'],[/chrysler.*aspen/,'chrysleraspen'],[/honda.*civic/,'hondacivic'],[/husqvarna.*122hd4[5s]/,'husqvarna122hd4s'],[/echo.*pb2520/,'echopb2520'],[/dewalt.*aircompressor/,'dewaltaircompressor'],[/dewalt.*dxpw3425|dewalt.*pressurewasher/,'dewaltdxpw3425'],[/craftsman.*18.*chainsaw/,'craftsman18inchchainsaw'],[/craftsman.*10.*polesaw/,'craftsman10polesaw'],[/husqvarna.*yth24k48/,'husqvarnayth24k48'],[/cubcadet.*kohler/,'cubcadetkohler'],[/husqvarna.*330lx|husqvarna.*weedeater/,'husqvarna330lx'],[/stihl.*fs56/,'stihlfs56']];
 function scheduleFor(a){const name=clean([a.make,a.model,a.name].filter(Boolean).join(' '));const entry=scheduleKeys.find(([pattern])=>pattern.test(name));return entry?schedules[entry[1]]:null}
 function renderSchedule(a){const schedule=scheduleFor(a),panel=document.getElementById('assetSchedules');if(!schedule){panel.innerHTML='<div class="asset-note">No service schedule for this item was included in the September 24, 2026 report.</div>';return}
@@ -499,9 +507,16 @@ function cardReading(a,m){const value=cardNumber(m?.currentMileage)??cardNumber(
 function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>'}
 let category='',asset=null,status='all',yearOrder='oldest',editing=false,vehicleQuery='',missingFilter='all';
 const currentAsset=()=>asset;
+let photoObserver;
+function assetPhoto(a){
+ if(a.photoObjectUrl)return Promise.resolve(a.photoObjectUrl);
+ a.photoLoading ||= thPhotoObjectUrl(a.photoFileId).then(url=>(a.photoObjectUrl=url)).finally(()=>{a.photoLoading=null});
+ return a.photoLoading;
+}
 function show(view){for(const id of ['dashboardView','categoryView','assetView'])document.getElementById(id).hidden=id!==view;window.scrollTo({top:0,behavior:'smooth'})}
 function renderCategories(){document.getElementById('categoryGrid').innerHTML=['All Vehicles',...categories,'Unfiled'].filter(c=>c==='All Vehicles'||c==='Vans'||c==='Personal Watercraft'||assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
 function renderCategory(){
+ photoObserver?.disconnect();
  const items=assets.filter(a=>category==='All Vehicles'||a.category===category).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);const aKnown=Number.isFinite(ay),bKnown=Number.isFinite(by);return (aKnown&&bKnown?(yearOrder==='oldest'?ay-by:by-ay):Number(bKnown)-Number(aKnown))||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))});
  const words=vehicleQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
  const missing=a=>({photo:!(a.photoFileId||a.photo),engine:cardEngine(a)==='Not recorded',mileage:cardReading(a,mileageFor(a))==='Not recorded'});
@@ -518,9 +533,8 @@ function renderCategory(){
   const picture=a.photoObjectUrl||a.photoFileId||a.photo?'<button type="button" class="card-photo" data-preview="'+esc(a.id)+'" aria-label="Enlarge photo of '+esc(title)+'"'+(!photo?' disabled':'')+'><img src="'+esc(photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true"></button>':'<span class="card-photo"><span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span></span>';
   return '<div class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-status '+(s==='active'||s==='inactive'?s:'')+'">'+esc(a.status||'Status to review')+'</span>'+picture+'<div class="card-copy"><strong>'+esc(title)+'</strong><span class="card-stat">Engine: <b>'+esc(cardEngine(a))+'</b></span><span class="card-stat">Mileage / reading: <b>'+esc(cardReading(a,m))+'</b></span><span class="card-stat">Miles added: <b>'+esc(added===null?'—':added)+'</b></span><button type="button" class="card-open" data-open-asset="'+esc(a.id)+'" aria-label="Open '+esc(title)+' details">View details</button></div></div>';
  }).join(''):'<div class="asset-note">No vehicles match these filters.</div>';
- for(const a of shown.filter(a=>a.photoFileId&&!a.photoObjectUrl)){
-  thPhotoObjectUrl(a.photoFileId).then(src=>{
-   a.photoObjectUrl=src;
+ const loadCardPhoto=a=>{
+  assetPhoto(a).then(src=>{
    const card=[...document.querySelectorAll('#assetGrid [data-asset]')].find(el=>el.dataset.asset===a.id);
    const img=card?.querySelector('.card-photo img');
    if(img){img.src=src;img.hidden=false;card.querySelector('[data-preview]').disabled=false}
@@ -529,11 +543,15 @@ function renderCategory(){
    const spot=card?.querySelector('.card-photo');
    if(spot){spot.replaceWith(Object.assign(document.createElement('span'),{className:'card-photo',innerHTML:'<span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span>'}))}
   });
- }
+ };
+ if('IntersectionObserver' in window){
+  const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){observer.unobserve(entry.target);const a=assets.find(item=>item.id===entry.target.dataset.asset);if(a)loadCardPhoto(a)}},{rootMargin:'250px'});photoObserver=observer;
+  for(const card of document.querySelectorAll('#assetGrid [data-asset]')){const a=assets.find(item=>item.id===card.dataset.asset);if(a?.photoFileId&&!a.photoObjectUrl)photoObserver.observe(card)}
+ }else for(const a of shown.filter(a=>a.photoFileId&&!a.photoObjectUrl))loadCardPhoto(a);
 
 }
 function renderAsset(tab='details'){
- const recommended=clean(asset.status)==='active'&&Boolean(scheduleFor(asset));
+ const recommended=clean(asset.status)==='active'&&(!serviceLoaded||Boolean(scheduleFor(asset)));
  document.querySelector('[data-asset-tab="recommended"]').hidden=!recommended;
  if(tab==='recommended'&&!recommended)tab='details';
  editing=false;
@@ -554,15 +572,18 @@ function renderAsset(tab='details'){
   document.getElementById('photoSummary').innerHTML=[['Engine',asset.engine],['VIN / serial number',asset.vin]].map(([label,value])=>'<div><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>').join('');
  const photo=asset.photo||'';
  document.getElementById('assetPhoto').innerHTML=asset.photoFileId?'<div class="photo-empty">Loading photo…</div>':photo?'<img class="asset-photo" src="'+esc(photo)+'" alt="'+esc(asset.make+' '+asset.model)+'" referrerpolicy="no-referrer">':'<div class="photo-empty">No photo yet</div>';
- if(asset.photoObjectUrl){document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(asset.photoObjectUrl)+'" alt="'+esc(asset.make+' '+asset.model)+'">'}else if(asset.photoFileId)thPhotoObjectUrl(asset.photoFileId).then(src=>{if(document.getElementById('assetPhoto')&&asset===currentAsset()){asset.photoObjectUrl=src;document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(src)+'" alt="'+esc(asset.make+' '+asset.model)+'">';}}).catch(()=>{if(asset===currentAsset())document.getElementById('assetPhoto').innerHTML='<div class="photo-empty">Photo unavailable</div>'});
+ if(asset.photoObjectUrl){document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(asset.photoObjectUrl)+'" alt="'+esc(asset.make+' '+asset.model)+'">'}else if(asset.photoFileId)assetPhoto(asset).then(src=>{if(document.getElementById('assetPhoto')&&asset===currentAsset()){document.getElementById('assetPhoto').innerHTML='<img class="asset-photo" src="'+esc(src)+'" alt="'+esc(asset.make+' '+asset.model)+'">';}}).catch(()=>{if(asset===currentAsset())document.getElementById('assetPhoto').innerHTML='<div class="photo-empty">Photo unavailable</div>'});
  document.getElementById('photoUploadStatus').textContent='';
  const m=mileageFor(asset);
  const mileageEditable=m?[['Service start date','serviceStart','D'],['Starting odometer','startMileage','E'],['Current odometer','currentMileage','F']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]||'')+'" readonly></label>').join(''):'';
  document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+mileageEditable+[['Miles added',m.addedMileage],['Miles per month',m.monthlyEstimate],['Estimated miles per year',m.annualEstimate]].map(([k,v])=>fact(k,v)).join('')+'</div>':'<div class="asset-note">No mileage record found for this vehicle.</div>';
- const entries=serviceFor(asset).slice().sort((a,b)=>new Date(b.date)-new Date(a.date)||b.sheetRow-a.sheetRow);
- renderSchedule(asset);
- renderRecommended(asset);
- document.getElementById('assetMaintenance').innerHTML='<button type="button" id="addService">+ Add service entry</button><div class="table-wrap"><table><thead><tr><th>Date</th><th>Service item</th><th>Odometer</th><th>Notes</th></tr></thead><tbody>'+entries.map(e=>'<tr>'+[['date','C'],['item','D'],['odometer','E'],['notes','G']].map(([key,col])=>'<td class="'+(key==='notes'?'notes-cell':'')+'"><input data-service-row="'+e.sheetRow+'" data-service-col="'+col+'" aria-label="'+esc(key)+'" value="'+esc(e[key]||'')+'" readonly></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+ if(!serviceLoaded){for(const id of ['assetMaintenance','assetSchedules','assetRecommended'])document.getElementById(id).innerHTML='<div class="asset-note">Loading service history and schedules…</div>';openServiceDetails(asset)}
+ else{
+  const entries=serviceFor(asset).slice().sort((a,b)=>new Date(b.date)-new Date(a.date)||b.sheetRow-a.sheetRow);
+  renderSchedule(asset);
+  renderRecommended(asset);
+  document.getElementById('assetMaintenance').innerHTML='<button type="button" id="addService">+ Add service entry</button><div class="table-wrap"><table><thead><tr><th>Date</th><th>Service item</th><th>Odometer</th><th>Notes</th></tr></thead><tbody>'+entries.map(e=>'<tr>'+[['date','C'],['item','D'],['odometer','E'],['notes','G']].map(([key,col])=>'<td class="'+(key==='notes'?'notes-cell':'')+'"><input data-service-row="'+e.sheetRow+'" data-service-col="'+col+'" aria-label="'+esc(key)+'" value="'+esc(e[key]||'')+'" readonly></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+ }
  for(const b of document.querySelectorAll('[data-asset-tab]'))b.classList.toggle('active',b.dataset.assetTab===tab);
  for(const [name,id] of [['details','assetDetails'],['mileage','assetMileage'],['maintenance','assetMaintenance'],['recommended','assetRecommended'],['schedules','assetSchedules']])document.getElementById(id).hidden=name!==tab;
 }
@@ -714,4 +735,4 @@ document.getElementById('backCategory').addEventListener('click',()=>{renderCate
 }
 
 window.thStart = async () => renderFleetPage(await thFleetData(), new URL('./',location.href).href);
-</script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=4"></script><script src="sheets.js?v=10"></script></body></html>
+</script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=4"></script><script src="sheets.js?v=11"></script></body></html>
