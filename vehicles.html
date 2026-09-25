@@ -521,7 +521,7 @@ function mileageFor(a){
 }
 function cardNumber(value){const n=Number(String(value??'').replace(/,/g,'').trim());return value!==undefined&&value!==null&&String(value).trim()!==''&&Number.isFinite(n)?n.toLocaleString('en-US',{maximumFractionDigits:1}):null}
 function cardEngine(a){return a.engine&&clean(a.engine)!=='na'?a.engine:'Not recorded'}
-function usesHours(a){return ['Boats','Personal Watercraft','Tractors','Yard Equipment','Outdoor Equipment','Shop Equipment','ATVs & Quads','Mini Bikes'].includes(a.category)||/pressurewasher|aircompressor|chainsaw|brushcutter|weedeater|trimmer|mower|leafblower|generator|jetski|waverunner/.test(clean(a.make+' '+a.model))}
+function usesHours(a){const name=clean(a.make+' '+a.model);if(/colemanb200|xprojaguar200/.test(name))return false;return ['Boats','Personal Watercraft','Tractors','Yard Equipment','Outdoor Equipment','Shop Equipment','ATVs & Quads','Mini Bikes'].includes(a.category)||/pressurewasher|aircompressor|chainsaw|brushcutter|weedeater|trimmer|mower|leafblower|generator|jetski|waverunner/.test(name)}
 function readingName(a){return usesHours(a)?'Hours':'Mileage'}
 function cardReading(a,m){const value=cardNumber(m?.currentMileage)??cardNumber(a.reportOdometer);return value===null?'Not recorded':value+(usesHours(a)?' hours':' mi')}
 function ownershipDate(value){const raw=String(value||'').trim(),iso=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/),us=raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);if(!iso&&!us)return null;const year=Number(iso?iso[1]:us[3]),month=Number(iso?iso[2]:us[1]),day=Number(iso?iso[3]:us[2]),date=new Date(year,month-1,day);return date.getFullYear()===year&&date.getMonth()===month-1&&date.getDate()===day?date:null}
