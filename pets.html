@@ -117,7 +117,10 @@ async function savePetWorkbook(data){
  if(!response.ok){const detail=await response.json().catch(()=>({}));throw new Error(detail.error?.message||'Could not save pet records.')}
 }
 applyPetData(petLocal);
-document.querySelectorAll('[data-pet]').forEach(el=>el.addEventListener('input',refreshPetSummaries));
+document.querySelectorAll('[data-pet]').forEach(el=>el.addEventListener('input',()=>{
+ refreshPetSummaries();
+ const status=document.getElementById('status');status.textContent='Unsaved changes — select Save changes.';
+}));
 document.querySelectorAll('[role="tab"]').forEach(tab=>tab.addEventListener('click',()=>{
  document.querySelectorAll('[role="tab"]').forEach(t=>{
   const selected=t===tab;t.setAttribute('aria-selected',String(selected));
