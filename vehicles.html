@@ -519,7 +519,7 @@ function cardNumber(value){const n=Number(String(value??'').replace(/,/g,'').tri
 function cardEngine(a){return a.engine&&clean(a.engine)!=='na'?a.engine:'Not recorded'}
 function cardReading(a,m){const value=cardNumber(m?.currentMileage)??cardNumber(a.reportOdometer);if(value===null)return 'Not recorded';const road=['Cars','Trucks','SUVs','Vans','Classic','Motorcycles','Scooters & Mopeds'].includes(a.category);return value+(road?' mi':' (report reading)')}
 function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>'}
-let category='',asset=null,status='all',yearOrder='oldest',editing=false,vehicleQuery='',missingFilter='all';
+let category='',asset=null,status='active',yearOrder='oldest',editing=false,vehicleQuery='',missingFilter='all';
 const currentAsset=()=>asset;
 let photoObserver;
 function assetPhoto(a){
@@ -540,7 +540,7 @@ function renderCategory(){
  document.getElementById('vehicleSectionFilter').innerHTML=sections.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
  document.getElementById('vehicleSectionFilter').value=category;
  document.getElementById('vehicleResults').textContent='Showing '+shown.length+' of '+items.length+' in '+category;
- document.getElementById('statusFilters').innerHTML=['all','active','inactive'].map(s=>'<button type="button" class="filter-chip '+(status===s?'active':'')+'" data-status="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' · '+(s==='all'?items.length:items.filter(a=>clean(a.status)===s).length)+'</button>').join('');
+ document.getElementById('statusFilters').innerHTML=['active','inactive','all'].map(s=>'<button type="button" class="filter-chip '+(status===s?'active':'')+'" data-status="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' · '+(s==='all'?items.length:items.filter(a=>clean(a.status)===s).length)+'</button>').join('');
  document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>{
   const m=mileageFor(a),s=clean(a.status),added=cardNumber(m?.addedMileage),title=[a.year,a.make,a.model].filter(Boolean).join(' ');
   const photo=a.photoObjectUrl||(!a.photoFileId&&a.photo)||'';
@@ -606,7 +606,7 @@ document.getElementById('allLink').href=PORTAL+'finance.html';
 document.getElementById('updated').textContent=D.asOf||'latest';
 
 renderCategories();
-document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;status='all';vehicleQuery='';missingFilter='all';document.getElementById('vehicleSearch').value='';document.getElementById('vehicleMissingFilter').value='all';renderCategory();show('categoryView')});
+document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;status='active';vehicleQuery='';missingFilter='all';document.getElementById('vehicleSearch').value='';document.getElementById('vehicleMissingFilter').value='all';renderCategory();show('categoryView')});
 document.getElementById('statusFilters').addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b)return;status=b.dataset.status;renderCategory()});
 document.getElementById('yearSort').addEventListener('change',e=>{yearOrder=e.target.value;renderCategory()});
 document.getElementById('vehicleSearch').addEventListener('input',e=>{vehicleQuery=e.target.value;renderCategory()});
@@ -705,7 +705,7 @@ document.getElementById('addVehicleForm').addEventListener('submit',async e=>{
   const profileRow=await thAppendRow('Portal Asset Profiles',row);
   if(!profileRow)throw new Error('The vehicle was saved, but its row could not be identified. Refresh to see it.');
   const next={...data,name:row[1],profileRow,id:'new'+profileRow,photo:'',photoFileId:''};
-  assets.push(next);category=data.category;status='all';renderCategories();renderCategory();asset=next;renderAsset();show('assetView');
+  assets.push(next);category=data.category;status=clean(data.status)==='inactive'?'inactive':'active';renderCategories();renderCategory();asset=next;renderAsset();show('assetView');
   document.getElementById('addVehicleDialog').close();
  }catch(error){message.textContent=error.message}
  finally{button.disabled=false}
