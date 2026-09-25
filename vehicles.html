@@ -594,7 +594,7 @@ function renderAsset(tab='details'){
  document.getElementById('assetTitle').textContent=[asset.year,asset.make,asset.model].filter(Boolean).join(' ');
  document.getElementById('assetStatus').textContent=asset.status||'Status to review';
  const values=[['Year','year'],['Make','make'],['Model','model'],['VIN / serial number','vin'],['Tag / plate','tag'],['Engine','engine'],['Transmission','transmission'],['Tire size','tireSize'],['Color','color'],['Vehicle number','vehicleNumber'],['Registration renewal','renewal'],['Ownership since','ownershipStart']];
- document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>key==='ownershipStart'?'<div class="asset-fact"><span>Ownership since</span><div class="ownership-date-row"><input data-asset-field="ownershipStart" aria-label="Ownership since, type MM/DD/YYYY" type="text" inputmode="numeric" maxlength="10" autocomplete="off" value="'+esc(ownershipText(asset[key]))+'" placeholder="MM/DD/YYYY" readonly><input data-ownership-picker type="date" aria-label="Choose ownership date from calendar" value="'+esc(ownershipDate(asset[key])?ownershipIso(ownershipDate(asset[key])):'')+'" disabled></div></div>':'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(asset[key]||'')+'" placeholder="Not recorded" readonly></label>').join('')+(asset.reportOdometer!==undefined&&asset.reportOdometer!==''?fact('Report reading · Sep 24, 2026',String(asset.reportOdometer)):'');
+ document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>key==='ownershipStart'?'<div class="asset-fact"><span>Ownership since</span><div class="ownership-date-row"><input data-asset-field="ownershipStart" aria-label="Ownership since, type MM/DD/YYYY" type="text" inputmode="numeric" maxlength="10" autocomplete="off" value="'+esc(ownershipText(asset[key]))+'" placeholder="MM/DD/YYYY" readonly><input data-ownership-picker type="date" aria-label="Choose ownership date from calendar" value="'+esc(ownershipDate(asset[key])?ownershipIso(ownershipDate(asset[key])):'')+'" disabled></div></div>':'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(asset[key]||'')+'" placeholder="Not recorded" readonly></label>').join('')+'<label class="asset-fact"><span>Starting '+(hours?'hours':'mileage')+'</span><input data-asset-field="reportOdometer" aria-label="Starting '+(hours?'hours':'mileage')+'" type="number" min="0" step="any" value="'+esc(asset.reportOdometer??'')+'" placeholder="Not recorded" readonly></label>';
  document.getElementById('assetReportNotes').hidden=!asset.reportNotes;
  document.getElementById('assetReportNotesText').textContent=asset.reportNotes||'';
  document.getElementById('assetEditStatus').textContent='';
@@ -606,7 +606,7 @@ function renderAsset(tab='details'){
  const m=mileageFor(asset);
  const mileageEditable=m?[['Service start date','serviceStart','D'],[hours?'Starting hours':'Starting mileage','startMileage','E'],[hours?'Current hours':'Current mileage','currentMileage','F']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]??'')+'" readonly></label>').join(''):'';
  document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+mileageEditable+[[hours?'Hours added':'Miles added',m.addedMileage],[hours?'Hours per month':'Miles per month',m.monthlyEstimate],[hours?'Estimated hours per year':'Estimated miles per year',m.annualEstimate]].map(([k,v])=>fact(k,v)).join('')+'</div>':'<div class="asset-note">No '+(hours?'hours':'mileage')+' record found for this vehicle. Add the starting and current readings below.</div><form id="newMileageForm" class="asset-facts"><label class="asset-fact"><span>Tracking start date</span><input name="startDate" type="date" required></label><label class="asset-fact"><span>'+(hours?'Starting hours':'Starting mileage')+'</span><input name="start" type="number" min="0" step="any" required></label><label class="asset-fact"><span>'+(hours?'Current hours':'Current mileage')+'</span><input name="current" type="number" min="0" step="any" required></label><div class="asset-fact"><button type="submit">Save readings</button><span role="status" id="newMileageStatus"></span></div></form>';
- if(!m){const date=document.querySelector('#newMileageForm [name="startDate"]'),today=new Date();date.value=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');const current=document.querySelector('#newMileageForm [name="current"]');const reported=Number(String(asset.reportOdometer??'').replace(/,/g,''));if(asset.reportOdometer!==''&&Number.isFinite(reported))current.value=reported}
+ if(!m){const date=document.querySelector('#newMileageForm [name="startDate"]'),today=new Date();date.value=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');const reported=Number(String(asset.reportOdometer??'').replace(/,/g,''));if(asset.reportOdometer!==''&&Number.isFinite(reported))document.querySelector('#newMileageForm [name="start"]').value=reported}
  if(!serviceLoaded){for(const id of ['assetMaintenance','assetRecommended'])document.getElementById(id).innerHTML='<div class="asset-note">Loading service history and schedules…</div>';openServiceDetails(asset)}
  else{
   const entries=serviceFor(asset).slice().sort((a,b)=>new Date(b.date)-new Date(a.date)||b.sheetRow-a.sheetRow);
@@ -678,7 +678,7 @@ document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
  if(!editing&&tab!=='details')renderAsset(tab);
 });
 document.querySelector('.asset-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-asset-tab]');if(b)renderAsset(b.dataset.assetTab)});
-const profileColumns={year:'C',make:'D',model:'E',color:'F',vin:'L',tag:'N',renewal:'O',engine:'P',transmission:'Q',tireSize:'R',vehicleNumber:'M',ownershipStart:'AC'};
+const profileColumns={year:'C',make:'D',model:'E',color:'F',vin:'L',tag:'N',renewal:'O',engine:'P',transmission:'Q',tireSize:'R',vehicleNumber:'M',ownershipStart:'AC',reportOdometer:'K'};
 const registryColumns={year:'B',make:'C',model:'D',vin:'E',tag:'F'};
 async function ensureProfileRow(a){
  if(a.profileRow)return a.profileRow;
@@ -745,17 +745,26 @@ document.getElementById('deleteAssetButton').addEventListener('click',async()=>{
 document.getElementById('assetFacts').addEventListener('change',async e=>{
  if(e.target.matches('[data-ownership-picker]')){const typed=e.currentTarget.querySelector('[data-asset-field="ownershipStart"]');typed.value=ownershipText(e.target.value);typed.dispatchEvent(new Event('change',{bubbles:true}));return}
  const input=e.target.closest('[data-asset-field]');if(!input||!asset||!editing)return;
- const a=asset,key=input.dataset.assetField,prior=a[key]||'',message=document.getElementById('assetEditStatus');let next=input.value.trim();
+ const a=asset,key=input.dataset.assetField,prior=a[key]??'',message=document.getElementById('assetEditStatus');let next=input.value.trim();
+ if(key==='reportOdometer'){
+  const value=Number(next),m=mileageFor(a),current=Number(String(m?.currentMileage??'').replace(/,/g,''));
+  if(next===''||!Number.isFinite(value)||value<0||(m&&Number.isFinite(current)&&value>current)){input.value=prior;message.textContent='Enter a starting reading no higher than the current reading.';message.classList.add('error');return}
+  next=String(value);
+ }
  if(key==='ownershipStart'&&next){const date=ownershipDate(next);if(!date||date>new Date()){input.value=ownershipText(prior);message.textContent='Use a valid past date, like 01/25/2021.';message.classList.add('error');return}next=ownershipIso(date);input.value=ownershipText(next)}
  if(key==='ownershipStart')e.currentTarget.querySelector('[data-ownership-picker]').value=next;
  input.disabled=true;message.textContent='Saving '+input.getAttribute('aria-label')+'…';message.classList.remove('error');
  try{
   await ensureProfileRow(a);
-  await thWriteCell('Portal Asset Profiles',profileColumns[key]+a.profileRow,next);
+  if(key==='reportOdometer'){
+   const m=mileageFor(a);if(m)await thWriteCell('Mileage-2025.10.16','E'+m.sheetRow,next);
+  }
+  try{await thWriteCell('Portal Asset Profiles',profileColumns[key]+a.profileRow,next)}catch(error){if(key==='reportOdometer'){const m=mileageFor(a);if(m)await thWriteCell('Mileage-2025.10.16','E'+m.sheetRow,m.startMileage)}throw error}
+  if(key==='reportOdometer'){const m=mileageFor(a);if(m){m.startMileage=next;m.addedMileage=Number(String(m.currentMileage).replace(/,/g,''))-Number(next)}}
   if(a.registryRow&&registryColumns[key])await thWriteCell('Vehicle Registry',registryColumns[key]+a.registryRow,next);
   a[key]=next;
   message.textContent='Saved to your workbook.';
-  if(['year','make','model','ownershipStart'].includes(key)){document.getElementById('assetTitle').textContent=[a.year,a.make,a.model].filter(Boolean).join(' ');renderCategory()}
+  if(['year','make','model','ownershipStart','reportOdometer'].includes(key)){document.getElementById('assetTitle').textContent=[a.year,a.make,a.model].filter(Boolean).join(' ');renderCategory()}
    if(['engine','vin'].includes(key))document.getElementById('photoSummary').innerHTML=[['Engine',a.engine],['VIN / serial number',a.vin]].map(([label,value])=>'<div><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>').join('');
  }catch(error){input.value=key==='ownershipStart'?ownershipText(prior):prior;message.textContent=error.message;message.classList.add('error')}
  finally{input.disabled=false}
@@ -770,7 +779,7 @@ document.getElementById('assetMileage').addEventListener('change',async e=>{
   input.value=String(value);
  }
  input.disabled=true;
- try{await thWriteCell('Mileage-2025.10.16',col+input.dataset.mileageRow,input.value);if(m){m[{D:'serviceStart',E:'startMileage',F:'currentMileage'}[col]]=input.value;m.addedMileage=Number(String(m.currentMileage).replace(/,/g,''))-Number(String(m.startMileage).replace(/,/g,''))}document.getElementById('assetEditStatus').textContent='Reading saved to your workbook.';renderCategory();}
+ try{await thWriteCell('Mileage-2025.10.16',col+input.dataset.mileageRow,input.value);if(col==='E'){try{await ensureProfileRow(asset);await thWriteCell('Portal Asset Profiles','K'+asset.profileRow,input.value)}catch(error){await thWriteCell('Mileage-2025.10.16','E'+input.dataset.mileageRow,old);throw error}asset.reportOdometer=input.value}if(m){m[{D:'serviceStart',E:'startMileage',F:'currentMileage'}[col]]=input.value;m.addedMileage=Number(String(m.currentMileage).replace(/,/g,''))-Number(String(m.startMileage).replace(/,/g,''))}document.getElementById('assetEditStatus').textContent='Reading saved to your workbook.';renderCategory();}
  catch(error){input.value=old??'';document.getElementById('assetEditStatus').textContent=error.message;document.getElementById('assetEditStatus').classList.add('error')}
  finally{input.disabled=false}
 });
