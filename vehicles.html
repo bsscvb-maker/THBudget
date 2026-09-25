@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b0e13"><title>THBudget · Vehicles</title>
+<meta name="theme-color" content="#0b0e13"><title>TisZod · Vehicles</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0e13;--panel:#131922;--panel2:#19212c;--line:#28313d;--white:#f2f5f8;--muted:#a0abb8;--soft:#738090;--orange:#f28b42;--acid:#d0f279;--blue:#78c7ef;--green:#9ee1aa}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 82% -20%,rgba(120,199,239,.14),transparent 34%),radial-gradient(ellipse at 0% 28%,rgba(242,139,66,.09),transparent 32%),var(--bg);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--white)}
@@ -323,9 +323,9 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 .vehicle-filter-bar input::placeholder{color:#a9bdd7}
 .vehicle-filter-bar input:focus,.vehicle-filter-bar select:focus{outline:2px solid #a9ceff;outline-offset:2px}
 .vehicle-results{margin:12px 0 0;color:#bcd0eb;font-size:14px}
-</style><div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TZ</span><span>TisZod<small>Personal workspace</small></span></a><nav aria-label="THBudget pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link " href="finance.html"><span class="th-nav-icon">◫</span>Finance</a><a class="th-nav-link" href="freebirds.html"><span class="th-nav-icon" style="overflow:hidden"><img src="freebirds-logo.svg" alt="" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 72%"></span>Freebirds</a><a class="th-nav-link active" href="vehicles.html"><span class="th-nav-icon ram-nav-icon"><img src="https://www.onestepgps.com/assets/ram-4lxd-NAa.webp" alt="" referrerpolicy="no-referrer"></span>Vehicles</a><div class="th-nav-label">System</div><a class="th-nav-link" href="admin.html"><span class="th-nav-icon">⚙</span>Administration</a></nav><div class="th-sidebar-foot">© 2026 THBudget<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Vehicles</strong><small>Vehicle dashboard and individual profiles</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="wrap">
+</style><div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TZ</span><span>TisZod<small>Personal workspace</small></span></a><nav aria-label="TisZod pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link " href="finance.html"><span class="th-nav-icon">◫</span>Finance</a><a class="th-nav-link" href="freebirds.html"><span class="th-nav-icon" style="overflow:hidden"><img src="freebirds-logo.svg" alt="" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 72%"></span>Freebirds</a><a class="th-nav-link active" href="vehicles.html"><span class="th-nav-icon ram-nav-icon"><img src="https://www.onestepgps.com/assets/ram-4lxd-NAa.webp" alt="" referrerpolicy="no-referrer"></span>Vehicles</a><div class="th-nav-label">System</div><a class="th-nav-link" href="admin.html"><span class="th-nav-icon">⚙</span>Administration</a></nav><div class="th-sidebar-foot">© 2026 TisZod<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Vehicles</strong><small>Vehicle dashboard and individual profiles</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="wrap">
 <header>
-<a class="brand" id="homeLink" href="#"><span class="logo">TH</span><span>THBudget<small>VEHICLE WORKSPACE</small></span></a>
+<a class="brand" id="homeLink" href="#"><span class="logo">TZ</span><span>TisZod<small>VEHICLE WORKSPACE</small></span></a>
 <nav class="actions"><a class="link primary" id="allLink" href="#">FULL PORTAL ↗</a></nav>
 </header>
 <main>
@@ -356,7 +356,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <section class="asset-tab-panel" id="assetRecommended" hidden></section>
 <section class="asset-tab-panel" id="assetSchedules" hidden></section>
 </div>
-<footer class="foot"><span>THBUDGET · VEHICLES</span><span>PRIVATE SHEET CONNECTION</span></footer>
+<footer class="foot"><span>TisZod · VEHICLES</span><span>PRIVATE SHEET CONNECTION</span></footer>
 </main></div>
 </div></div></div>
 <dialog id="addVehicleDialog" class="add-vehicle-dialog" aria-labelledby="addVehicleTitle"><form id="addVehicleForm"><div class="add-vehicle-head"><h2 id="addVehicleTitle">Add a vehicle</h2><button type="button" id="closeAddVehicle" aria-label="Close">×</button></div><div class="add-vehicle-fields"><label>Year <input name="year" type="number" min="1900" max="2100" required></label><label>Make <input name="make" required maxlength="100"></label><label>Model <input name="model" required maxlength="120"></label><label>Section <select name="category" id="newVehicleCategory" required></select></label><label>Status <select name="status"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></label><label>Engine <input name="engine" maxlength="100"></label><label>VIN / serial number <input name="vin" maxlength="100"></label><label>Tag / plate <input name="tag" maxlength="50"></label><label>Color <input name="color" maxlength="80"></label></div><p id="addVehicleStatus" role="status"></p><div class="add-vehicle-actions"><button type="button" id="cancelAddVehicle">Cancel</button><button type="submit" id="saveVehicle">Save vehicle</button></div></form></dialog>
@@ -735,4 +735,4 @@ document.getElementById('backCategory').addEventListener('click',()=>{renderCate
 }
 
 window.thStart = async () => renderFleetPage(await thFleetData(), new URL('./',location.href).href);
-</script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=4"></script><script src="sheets.js?v=12"></script></body></html>
+</script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=5"></script><script src="sheets.js?v=13"></script></body></html>
