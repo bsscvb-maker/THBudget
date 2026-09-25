@@ -671,7 +671,7 @@ document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
   if(!editing){const key=input.dataset.assetField;if(key)input.value=key==='ownershipStart'?ownershipText(asset[key]):key==='currentReading'?mileageFor(asset)?.currentMileage??'':key==='reportOdometer'?mileageFor(asset)?.startMileage??asset.reportOdometer??'':asset[key]??'';}
  });
  panel.querySelectorAll('[data-ownership-picker]').forEach(input=>input.disabled=!editing);
- if(tab==='details'){const specs=document.getElementById('assetReportNotesText');specs.readOnly=!editing;if(!editing)specs.value=asset.reportNotes||'';}
+ if(tab==='details')document.getElementById('assetReportNotesText').readOnly=!editing;
  const button=document.getElementById('toggleAssetEdit');
  button.setAttribute('aria-pressed',String(editing));
  button.textContent=editing?'Finish editing':'Edit '+tab;
