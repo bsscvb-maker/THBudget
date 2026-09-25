@@ -183,6 +183,7 @@ tr.detail-row td{padding:0 14px 14px;background:#eaf1f2;border-top:0;white-space
 .asset-fact input:not([readonly]):hover{border-color:#415d81}.asset-fact input:focus{outline:2px solid #8cbdff;background:#1b304f}.asset-fact input:disabled{opacity:.65}
 .asset-fact input[readonly],#assetMaintenance input[readonly]{cursor:default;border-color:transparent;background:transparent;pointer-events:none}.asset-fact input:not([readonly]),#assetMaintenance input:not([readonly]){border-color:#7299cc;background:#1b304f}.edit-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0 3px;color:#9fb4d1;font-size:14px}.edit-bar button{padding:10px 16px;border:1px solid #77a6e3;border-radius:6px;background:#244a7b;color:#fff;font-size:14px;font-weight:700}.edit-bar button[aria-pressed="true"]{background:#345b31;border-color:#9bdd9a}.asset-fact input::placeholder{color:#879bb7}.asset-edit-status{min-height:22px;margin:0 0 12px;color:#a9deb9;font-size:14px}.asset-edit-status.error{color:#ffabab}
 #assetMileage .asset-fact input{margin-top:6px}
+.ownership-date-row{display:flex;align-items:center;gap:7px}.ownership-date-row input[data-asset-field]{flex:1;min-width:0}.ownership-date-row input[type=date]{flex:none;width:44px;min-width:44px;padding:6px;color:transparent;cursor:pointer}.ownership-date-row input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer}.ownership-date-row input[type=date]:disabled{opacity:.5;cursor:default}
 #assetMaintenance input{min-width:100px;width:100%;padding:8px;background:#172940;color:#f3f7ff;border:1px solid #526b8c;border-radius:4px}
 #assetMaintenance .notes-cell input{min-width:220px}
 #addService{margin:15px 0;padding:10px 14px;border:1px solid #638ac0;border-radius:5px;background:#244a7b;color:white;font-weight:700}
@@ -590,7 +591,7 @@ function renderAsset(tab='details'){
  document.getElementById('assetTitle').textContent=[asset.year,asset.make,asset.model].filter(Boolean).join(' ');
  document.getElementById('assetStatus').textContent=asset.status||'Status to review';
  const values=[['Year','year'],['Make','make'],['Model','model'],['VIN / serial number','vin'],['Tag / plate','tag'],['Engine','engine'],['Transmission','transmission'],['Tire size','tireSize'],['Color','color'],['Vehicle number','vehicleNumber'],['Registration renewal','renewal'],['Ownership since','ownershipStart']];
- document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'"'+(key==='ownershipStart'?' type="text" inputmode="numeric" maxlength="10" autocomplete="off"':'')+' value="'+esc(key==='ownershipStart'?ownershipText(asset[key]):asset[key]||'')+'" placeholder="'+(key==='ownershipStart'?'MM/DD/YYYY':'Not recorded')+'" readonly></label>').join('')+(asset.reportOdometer!==undefined&&asset.reportOdometer!==''?fact('Report reading · Sep 24, 2026',String(asset.reportOdometer)):'');
+ document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>key==='ownershipStart'?'<div class="asset-fact"><span>Ownership since</span><div class="ownership-date-row"><input data-asset-field="ownershipStart" aria-label="Ownership since, type MM/DD/YYYY" type="text" inputmode="numeric" maxlength="10" autocomplete="off" value="'+esc(ownershipText(asset[key]))+'" placeholder="MM/DD/YYYY" readonly><input data-ownership-picker type="date" aria-label="Choose ownership date from calendar" value="'+esc(ownershipDate(asset[key])?ownershipIso(ownershipDate(asset[key])):'')+'" disabled></div></div>':'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(asset[key]||'')+'" placeholder="Not recorded" readonly></label>').join('')+(asset.reportOdometer!==undefined&&asset.reportOdometer!==''?fact('Report reading · Sep 24, 2026',String(asset.reportOdometer)):'');
  document.getElementById('assetReportNotes').hidden=!asset.reportNotes;
  document.getElementById('assetReportNotesText').textContent=asset.reportNotes||'';
  document.getElementById('assetEditStatus').textContent='';
@@ -662,6 +663,7 @@ document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
   input.readOnly=!editing;
   if(!editing){const key=input.dataset.assetField;if(key)input.value=key==='ownershipStart'?ownershipText(asset[key]):asset[key]||'';}
  });
+ panel.querySelectorAll('[data-ownership-picker]').forEach(input=>input.disabled=!editing);
  const button=document.getElementById('toggleAssetEdit');
  button.setAttribute('aria-pressed',String(editing));
  button.textContent=editing?'Finish editing':'Edit '+tab;
@@ -734,9 +736,11 @@ document.getElementById('deleteAssetButton').addEventListener('click',async()=>{
  }catch(error){message.textContent=error.message;button.disabled=false}
 });
 document.getElementById('assetFacts').addEventListener('change',async e=>{
+ if(e.target.matches('[data-ownership-picker]')){const typed=e.currentTarget.querySelector('[data-asset-field="ownershipStart"]');typed.value=ownershipText(e.target.value);typed.dispatchEvent(new Event('change',{bubbles:true}));return}
  const input=e.target.closest('[data-asset-field]');if(!input||!asset||!editing)return;
  const a=asset,key=input.dataset.assetField,prior=a[key]||'',message=document.getElementById('assetEditStatus');let next=input.value.trim();
  if(key==='ownershipStart'&&next){const date=ownershipDate(next);if(!date||date>new Date()){input.value=ownershipText(prior);message.textContent='Use a valid past date, like 01/25/2021.';message.classList.add('error');return}next=ownershipIso(date);input.value=ownershipText(next)}
+ if(key==='ownershipStart')e.currentTarget.querySelector('[data-ownership-picker]').value=next;
  input.disabled=true;message.textContent='Saving '+input.getAttribute('aria-label')+'…';message.classList.remove('error');
  try{
   await ensureProfileRow(a);
@@ -830,4 +834,4 @@ document.getElementById('backCategory').addEventListener('click',()=>{renderCate
 }
 
 window.thStart = async () => renderFleetPage(await thFleetData(), new URL('./',location.href).href);
-</script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=5"></script><script src="sheets.js?v=15"></script></body></html>
+</script><script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=5"></script><script src="sheets.js?v=16"></script></body></html>
