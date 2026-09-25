@@ -469,7 +469,7 @@ function mileageFor(a){
  return mileage.find(m=>String(m.year)===year&&(byAlias&&clean(m.name).includes(clean(byAlias[1]))||name.includes(clean(m.name))||clean(m.name).includes(clean(a.make))&&name.includes(clean(m.name).slice(0,6))))||null;
 }
 function cardNumber(value){const n=Number(String(value??'').replace(/,/g,'').trim());return value!==undefined&&value!==null&&String(value).trim()!==''&&Number.isFinite(n)?n.toLocaleString('en-US',{maximumFractionDigits:1}):null}
-function cardEngine(a){if(a.engine&&clean(a.engine)!=='na')return a.engine;if(clean(a.make)==='dodge'&&clean(a.model).includes('omni')&&String(a.year)==='1987')return '2.2L (verify)';return 'Not recorded'}
+function cardEngine(a){return a.engine&&clean(a.engine)!=='na'?a.engine:'Not recorded'}
 function cardReading(a,m){const value=cardNumber(m?.currentMileage)??cardNumber(a.reportOdometer);if(value===null)return 'Not recorded';const road=['Cars','Trucks','SUVs','Vans','Classic','Motorcycles','Scooters & Mopeds'].includes(a.category);return value+(road?' mi':' (report reading)')}
 function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>'}
 let category='',asset=null,status='all',yearOrder='oldest',editing=false;
