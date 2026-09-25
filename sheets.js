@@ -27,7 +27,13 @@ function thSignOut() {
 }
 
 function thStatus(message) {
-  document.getElementById('th-auth-message').textContent = message;
+  const loading = message === 'Opening your private workbook…';
+  const auth = document.getElementById('th-auth');
+  auth.classList.toggle('th-auth-loading', loading);
+  document.getElementById('th-sign-in').hidden = loading;
+  document.getElementById('th-auth-message').textContent = loading
+    ? 'Opening your private workbook… Please wait. You are already signed in.'
+    : message;
 }
 function thAuthorized() { return Boolean(thToken); }
 function thSignIn() {
@@ -193,7 +199,7 @@ async function thTab(position) {
 }
 document.getElementById('th-sign-in').addEventListener('click', thSignIn);
 if (thToken) {
-  document.getElementById('th-auth').hidden = true;
+  thStatus('Opening your private workbook…');
   Promise.resolve().then(() => window.thStart()).then(() => {
     document.getElementById('th-auth').hidden = true;
   }).catch(error => {
