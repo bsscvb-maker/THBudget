@@ -199,7 +199,9 @@ async function thTab(position) {
 }
 document.getElementById('th-sign-in').addEventListener('click', thSignIn);
 if (thToken) {
-  thStatus('Opening your private workbook…');
+  // A valid saved session can load each workspace behind its own page content.
+  // Reserve the sign-in overlay for a new login or an actual access error.
+  document.getElementById('th-auth').hidden = true;
   Promise.resolve().then(() => window.thStart()).then(() => {
     document.getElementById('th-auth').hidden = true;
   }).catch(error => {
