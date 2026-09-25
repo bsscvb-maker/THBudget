@@ -520,6 +520,9 @@ function cardEngine(a){return a.engine&&clean(a.engine)!=='na'?a.engine:'Not rec
 function usesHours(a){return ['Boats','Personal Watercraft','Tractors','Yard Equipment','Outdoor Equipment','Shop Equipment','ATVs & Quads','Mini Bikes'].includes(a.category)||/pressurewasher|aircompressor|chainsaw|brushcutter|weedeater|trimmer|mower|leafblower|generator|jetski|waverunner/.test(clean(a.make+' '+a.model))}
 function readingName(a){return usesHours(a)?'Hours':'Mileage'}
 function cardReading(a,m){const value=cardNumber(m?.currentMileage)??cardNumber(a.reportOdometer);return value===null?'Not recorded':value+(usesHours(a)?' hours':' mi')}
+function ownershipDate(value){const raw=String(value||'').trim(),parts=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)||raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(!parts)return null;const iso=raw.includes('-'),year=Number(parts[iso?1:3]),month=Number(parts[iso?2:1]),day=Number(parts[iso?3:2]),date=new Date(year,month-1,day);return date.getFullYear()===year&&date.getMonth()===month-1&&date.getDate()===day?date:null}
+function ownershipDuration(value){const start=ownershipDate(value);if(!start)return '';const today=new Date(),end=new Date(today.getFullYear(),today.getMonth(),today.getDate());if(start>end)return 'Check date';let months=(end.getFullYear()-start.getFullYear())*12+end.getMonth()-start.getMonth();let anchor=new Date(start.getFullYear(),start.getMonth()+months,Math.min(start.getDate(),new Date(start.getFullYear(),start.getMonth()+months+1,0).getDate()));if(anchor>end){months--;anchor=new Date(start.getFullYear(),start.getMonth()+months,Math.min(start.getDate(),new Date(start.getFullYear(),start.getMonth()+months+1,0).getDate()))}const days=Math.round((Date.UTC(end.getFullYear(),end.getMonth(),end.getDate())-Date.UTC(anchor.getFullYear(),anchor.getMonth(),anchor.getDate()))/86400000);return [Math.floor(months/12)?Math.floor(months/12)+' yr':'',months%12?months%12+' mo':'',days||!months?days+' days':''].filter(Boolean).join(' ')}
+function ownershipFor(a,m){const exact=Boolean(a.ownershipStart),date=a.ownershipStart||m?.serviceStart;if(!date)return 'Not recorded';const duration=ownershipDuration(date);return duration+(duration==='Check date'?'':exact?' (since '+date+')':' (since mileage start '+date+')')}
 function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>'}
 let category='',asset=null,status='active',yearOrder='oldest',editing=false,vehicleQuery='',missingFilter='all';
 const currentAsset=()=>asset;
@@ -549,7 +552,7 @@ function renderCategory(){
   const photoClass=String(a.year)==='1998'&&clean(a.make+' '+a.model).includes('toyotatacoma')?' card-photo--tacoma':'';
   const picture=a.photoObjectUrl||a.photoFileId||a.photo?'<button type="button" class="card-photo'+photoClass+'" data-preview="'+esc(a.id)+'" aria-label="Enlarge photo of '+esc(title)+'"'+(!photo?' disabled':'')+'><img src="'+esc(photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true"></button>':'<span class="card-photo"><span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span></span>';
   const hours=usesHours(a);
-  return '<div class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-status '+(s==='active'||s==='inactive'?s:'')+'">'+esc(a.status||'Status to review')+'</span>'+picture+'<div class="card-copy"><strong>'+esc(title)+'</strong><span class="card-stat">Engine: <b>'+esc(cardEngine(a))+'</b></span><span class="card-stat">'+readingName(a)+': <b>'+esc(cardReading(a,m))+'</b></span><span class="card-stat">'+(hours?'Hours added':'Miles added')+': <b>'+esc(added===null?'—':added)+'</b></span><button type="button" class="card-open" data-open-asset="'+esc(a.id)+'" aria-label="Open '+esc(title)+' details">View details</button></div><button type="button" class="card-mileage" data-mileage-asset="'+esc(a.id)+'" aria-label="Update '+(hours?'hours':'mileage')+' for '+esc(title)+'">Update '+(hours?'hours':'mileage')+'</button></div>';
+  return '<div class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-status '+(s==='active'||s==='inactive'?s:'')+'">'+esc(a.status||'Status to review')+'</span>'+picture+'<div class="card-copy"><strong>'+esc(title)+'</strong><span class="card-stat">Engine: <b>'+esc(cardEngine(a))+'</b></span><span class="card-stat">'+readingName(a)+': <b>'+esc(cardReading(a,m))+'</b></span><span class="card-stat">'+(hours?'Hours added':'Miles added')+': <b>'+esc(added===null?'—':added)+'</b></span><span class="card-stat">Ownership: <b>'+esc(ownershipFor(a,m))+'</b></span><button type="button" class="card-open" data-open-asset="'+esc(a.id)+'" aria-label="Open '+esc(title)+' details">View details</button></div><button type="button" class="card-mileage" data-mileage-asset="'+esc(a.id)+'" aria-label="Update '+(hours?'hours':'mileage')+' for '+esc(title)+'">Update '+(hours?'hours':'mileage')+'</button></div>';
  }).join(''):'<div class="asset-note">No vehicles match these filters.</div>';
  const loadCardPhoto=a=>{
   assetPhoto(a).then(src=>{
@@ -584,8 +587,8 @@ function renderAsset(tab='details'){
  document.getElementById('categoryMoveStatus').textContent='';
  document.getElementById('assetTitle').textContent=[asset.year,asset.make,asset.model].filter(Boolean).join(' ');
  document.getElementById('assetStatus').textContent=asset.status||'Status to review';
- const values=[['Year','year'],['Make','make'],['Model','model'],['VIN / serial number','vin'],['Tag / plate','tag'],['Engine','engine'],['Transmission','transmission'],['Tire size','tireSize'],['Color','color'],['Vehicle number','vehicleNumber'],['Registration renewal','renewal']];
- document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(asset[key]||'')+'" placeholder="Not recorded" readonly></label>').join('')+(asset.reportOdometer!==undefined&&asset.reportOdometer!==''?fact('Report reading · Sep 24, 2026',String(asset.reportOdometer)):'');
+ const values=[['Year','year'],['Make','make'],['Model','model'],['VIN / serial number','vin'],['Tag / plate','tag'],['Engine','engine'],['Transmission','transmission'],['Tire size','tireSize'],['Color','color'],['Vehicle number','vehicleNumber'],['Registration renewal','renewal'],['Ownership since','ownershipStart']];
+ document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'"'+(key==='ownershipStart'?' type="date"':'')+' value="'+esc(key==='ownershipStart'?(ownershipDate(asset[key])?[ownershipDate(asset[key]).getFullYear(),String(ownershipDate(asset[key]).getMonth()+1).padStart(2,'0'),String(ownershipDate(asset[key]).getDate()).padStart(2,'0')].join('-'):''):asset[key]||'')+'" placeholder="Not recorded" readonly></label>').join('')+(asset.reportOdometer!==undefined&&asset.reportOdometer!==''?fact('Report reading · Sep 24, 2026',String(asset.reportOdometer)):'');
  document.getElementById('assetReportNotes').hidden=!asset.reportNotes;
  document.getElementById('assetReportNotesText').textContent=asset.reportNotes||'';
  document.getElementById('assetEditStatus').textContent='';
@@ -664,7 +667,7 @@ document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
  if(!editing&&tab!=='details')renderAsset(tab);
 });
 document.querySelector('.asset-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-asset-tab]');if(b)renderAsset(b.dataset.assetTab)});
-const profileColumns={year:'C',make:'D',model:'E',color:'F',vin:'L',tag:'N',renewal:'O',engine:'P',transmission:'Q',tireSize:'R',vehicleNumber:'M'};
+const profileColumns={year:'C',make:'D',model:'E',color:'F',vin:'L',tag:'N',renewal:'O',engine:'P',transmission:'Q',tireSize:'R',vehicleNumber:'M',ownershipStart:'AC'};
 const registryColumns={year:'B',make:'C',model:'D',vin:'E',tag:'F'};
 async function ensureProfileRow(a){
  if(a.profileRow)return a.profileRow;
@@ -738,7 +741,7 @@ document.getElementById('assetFacts').addEventListener('change',async e=>{
   if(a.registryRow&&registryColumns[key])await thWriteCell('Vehicle Registry',registryColumns[key]+a.registryRow,next);
   a[key]=next;
   message.textContent='Saved to your workbook.';
-  if(['year','make','model'].includes(key)){document.getElementById('assetTitle').textContent=[a.year,a.make,a.model].filter(Boolean).join(' ');renderCategory()}
+  if(['year','make','model','ownershipStart'].includes(key)){document.getElementById('assetTitle').textContent=[a.year,a.make,a.model].filter(Boolean).join(' ');renderCategory()}
    if(['engine','vin'].includes(key))document.getElementById('photoSummary').innerHTML=[['Engine',a.engine],['VIN / serial number',a.vin]].map(([label,value])=>'<div><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>').join('');
  }catch(error){input.value=prior;message.textContent=error.message;message.classList.add('error')}
  finally{input.disabled=false}
