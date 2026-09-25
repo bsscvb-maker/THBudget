@@ -300,6 +300,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 #assetRecommended .reading{display:block;margin-top:3px;color:#b5cae5;font-size:13px}
 #assetRecommended .recommend-warning{padding:12px;border:1px solid #987549;border-radius:5px;background:#463921;color:#ffe0a5}
 .asset-report-notes{margin:8px 0 24px;padding:15px 18px;border:1px solid #344968;border-radius:6px;background:#17283d;color:#e3edfa}.asset-report-notes summary{cursor:pointer;font-weight:700}.asset-report-notes textarea{display:block;width:100%;min-height:90px;margin-top:12px;padding:8px;color:#e3edfa;background:transparent;border:1px solid transparent;border-radius:5px;resize:vertical;font:inherit;line-height:1.55;white-space:pre-wrap}.asset-report-notes textarea:not([readonly]){background:#101e30;border-color:#638ac0}.asset-report-notes textarea:focus{outline:2px solid #79aaff}
+.quick-spec-empty{display:none}.editing-specs .quick-spec-empty{display:block}
 #assetGrid .asset-card{position:relative;align-items:center;padding-top:53px}
 #assetGrid .card-copy{flex:1;min-width:0}
 #assetGrid .card-copy strong{margin-bottom:11px;overflow-wrap:anywhere}
@@ -372,7 +373,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <div class="category-manager"><label for="moveAssetCategory">Section</label><select id="moveAssetCategory" aria-label="Move item to section"></select><button type="button" id="moveAssetButton">Move</button><button type="button" id="unfileAssetButton">Remove from section</button><button type="button" class="delete-asset" id="deleteAssetButton">Delete vehicle</button><span id="categoryMoveStatus" role="status"></span></div>
 <div class="edit-bar"><button type="button" id="toggleAssetEdit" aria-pressed="false">Edit details</button><span>Fields are locked until you choose Edit.</span></div>
 <div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="recommended" hidden>Service Schedule</button><button type="button" data-asset-tab="maintenance">Service Log</button></div>
- <section class="asset-tab-panel" id="assetDetails"><div class="photo-manager"><div id="assetPhoto"></div><div class="photo-summary" id="photoSummary"></div><label class="photo-upload">Add or replace photo<input id="assetPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><span id="photoUploadStatus" role="status"></span></div><div id="assetEditStatus" class="asset-edit-status" role="status"></div><div class="asset-facts" id="assetFacts"></div><details id="assetReportNotes" class="asset-report-notes" hidden><summary>Vehicle Specifications</summary><textarea id="assetReportNotesText" aria-label="Vehicle specifications" placeholder="Add vehicle specifications" readonly></textarea></details></section>
+ <section class="asset-tab-panel" id="assetDetails"><div class="photo-manager"><div id="assetPhoto"></div><div class="photo-summary" id="photoSummary"></div><label class="photo-upload">Add or replace photo<input id="assetPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><span id="photoUploadStatus" role="status"></span></div><div class="asset-facts" id="assetFacts"></div><div id="assetEditStatus" class="asset-edit-status" role="status"></div></section>
 <section class="asset-tab-panel" id="assetMileage" hidden></section>
 <section class="asset-tab-panel" id="assetMaintenance" hidden></section>
 <section class="asset-tab-panel" id="assetRecommended" hidden></section>
@@ -530,6 +531,17 @@ function ownershipText(value){const date=ownershipDate(value);return date?[Strin
 function ownershipDuration(value){const start=ownershipDate(value);if(!start)return '';const today=new Date(),end=new Date(today.getFullYear(),today.getMonth(),today.getDate());if(start>end)return 'Check date';let months=(end.getFullYear()-start.getFullYear())*12+end.getMonth()-start.getMonth();let anchor=new Date(start.getFullYear(),start.getMonth()+months,Math.min(start.getDate(),new Date(start.getFullYear(),start.getMonth()+months+1,0).getDate()));if(anchor>end){months--;anchor=new Date(start.getFullYear(),start.getMonth()+months,Math.min(start.getDate(),new Date(start.getFullYear(),start.getMonth()+months+1,0).getDate()))}const days=Math.round((Date.UTC(end.getFullYear(),end.getMonth(),end.getDate())-Date.UTC(anchor.getFullYear(),anchor.getMonth(),anchor.getDate()))/86400000);return [Math.floor(months/12)?Math.floor(months/12)+' yr':'',months%12?months%12+' mo':'',days||!months?days+' days':''].filter(Boolean).join(' ')}
 function ownershipFor(a,m){const exact=Boolean(ownershipDate(a.ownershipStart)),date=exact?a.ownershipStart:m?.serviceStart;return {label:exact?'Date acquired':date?'Mileage tracking began':'Date acquired',date:ownershipText(date)||'Not recorded',duration:date?ownershipDuration(date):'Not recorded',durationLabel:exact?'Time owned':'Time tracked'}}
 function fact(label,value){return '<div class="asset-fact"><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>'}
+// Additional quick-reference values live in the existing profile's AB cell.
+const quickSpecs=[['Length','length'],['Width','width'],['Height','height'],['Weight','weight'],['Ground clearance','groundClearance'],['Cargo bed capacity','cargoBed'],['Seat kit capacity','seatKit'],['Vehicle payload','payload'],['Towing capacity','towing'],['Maximum tongue weight','tongueWeight'],['Tire PSI','tirePsi'],['Lug nut size','lugNutSize']];
+const legendSpecs={length:'116 in',width:'52 in',height:'75 in',weight:'1,248 lb',groundClearance:'16 in',cargoBed:'500 lb',seatKit:'500 lb',payload:'500 lb',towing:'500 lb (flat ground only)',tongueWeight:'150 lb',tirePsi:'20 PSI',lugNutSize:'19 mm'};
+function isLegend(a){return clean(a.make)==='makdaddy'&&clean(a.model).includes('legend')}
+function specRecord(a){
+ const raw=String(a.reportNotes||'');let saved={};
+ if(raw.trim().startsWith('{'))try{const parsed=JSON.parse(raw);if(parsed&&parsed.type==='vehicle-quick-specs-v1')saved=parsed}catch(_){}
+ const specs={...(isLegend(a)?legendSpecs:{}),...(saved.specs||{})};
+ if(!saved.specs){const psi=raw.match(/Tire\s*PSI\s*[:\s]*([\d.]+)\s*(?:lbs?|psi)?/i),lug=raw.match(/Lug\s*Nut\s*Size\s*[:\s]*([\d.]+)\s*mm/i);if(psi)specs.tirePsi=psi[1]+' PSI';if(lug)specs.lugNutSize=lug[1]+' mm'}
+ return {type:'vehicle-quick-specs-v1',specs,legacyNotes:saved.legacyNotes??(saved.type?'':raw)};
+}
 let category='',asset=null,status='active',yearOrder='oldest',editing=false,vehicleQuery='',missingFilter='all';
 const currentAsset=()=>asset;
 let photoObserver;
@@ -584,6 +596,7 @@ function renderAsset(tab='details'){
  document.querySelector('[data-asset-tab="recommended"]').hidden=!recommended;
  if(tab==='recommended'&&!recommended)tab='details';
  editing=false;
+ document.getElementById('assetDetails').classList.remove('editing-specs');
  document.querySelector('.edit-bar').hidden=tab==='recommended';
  document.getElementById('toggleAssetEdit').textContent='Edit '+(tab==='details'?'details':tab);
  document.getElementById('toggleAssetEdit').setAttribute('aria-pressed','false');
@@ -594,9 +607,8 @@ function renderAsset(tab='details'){
  document.getElementById('assetTitle').textContent=[asset.year,asset.make,asset.model].filter(Boolean).join(' ');
  document.getElementById('assetStatus').textContent=asset.status||'Status to review';
  const values=[['Year','year'],['Make','make'],['Model','model'],['VIN / serial number','vin'],['Tag / plate','tag'],['Engine','engine'],['Transmission','transmission'],['Tire size','tireSize'],['Color','color'],['Vehicle number','vehicleNumber'],['Registration renewal','renewal'],['Ownership since','ownershipStart']];
- document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>key==='ownershipStart'?'<div class="asset-fact"><span>Ownership since</span><div class="ownership-date-row"><input data-asset-field="ownershipStart" aria-label="Ownership since, type MM/DD/YYYY" type="text" inputmode="numeric" maxlength="10" autocomplete="off" value="'+esc(ownershipText(asset[key]))+'" placeholder="MM/DD/YYYY" readonly><input data-ownership-picker type="date" aria-label="Choose ownership date from calendar" value="'+esc(ownershipDate(asset[key])?ownershipIso(ownershipDate(asset[key])):'')+'" disabled></div></div>':'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(asset[key]??'')+'" placeholder="Not recorded" readonly></label>').join('')+'<label class="asset-fact"><span>Starting '+(hours?'hours':'mileage')+'</span><input data-asset-field="reportOdometer" aria-label="Starting '+(hours?'hours':'mileage')+'" type="number" min="0" step="any" value="'+esc(mileageFor(asset)?.startMileage??asset.reportOdometer??'')+'" placeholder="Not recorded" readonly></label><label class="asset-fact"><span>Current '+(hours?'hours':'mileage')+'</span><input data-asset-field="currentReading" aria-label="Current '+(hours?'hours':'mileage')+'" type="number" min="0" step="any" value="'+esc(mileageFor(asset)?.currentMileage??'')+'" placeholder="Not recorded" readonly></label>';
- document.getElementById('assetReportNotes').hidden=false;
- document.getElementById('assetReportNotesText').value=asset.reportNotes||'';
+ const specs=specRecord(asset).specs;
+ document.getElementById('assetFacts').innerHTML=values.map(([label,key])=>key==='ownershipStart'?'<div class="asset-fact"><span>Ownership since</span><div class="ownership-date-row"><input data-asset-field="ownershipStart" aria-label="Ownership since, type MM/DD/YYYY" type="text" inputmode="numeric" maxlength="10" autocomplete="off" value="'+esc(ownershipText(asset[key]))+'" placeholder="MM/DD/YYYY" readonly><input data-ownership-picker type="date" aria-label="Choose ownership date from calendar" value="'+esc(ownershipDate(asset[key])?ownershipIso(ownershipDate(asset[key])):'')+'" disabled></div></div>':'<label class="asset-fact"><span>'+esc(label)+'</span><input data-asset-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(asset[key]??'')+'" placeholder="Not recorded" readonly></label>').join('')+'<label class="asset-fact"><span>Starting '+(hours?'hours':'mileage')+'</span><input data-asset-field="reportOdometer" aria-label="Starting '+(hours?'hours':'mileage')+'" type="number" min="0" step="any" value="'+esc(mileageFor(asset)?.startMileage??asset.reportOdometer??'')+'" placeholder="Not recorded" readonly></label><label class="asset-fact"><span>Current '+(hours?'hours':'mileage')+'</span><input data-asset-field="currentReading" aria-label="Current '+(hours?'hours':'mileage')+'" type="number" min="0" step="any" value="'+esc(mileageFor(asset)?.currentMileage??'')+'" placeholder="Not recorded" readonly></label>'+quickSpecs.map(([label,key])=>'<label class="asset-fact quick-spec'+(specs[key]?'':' quick-spec-empty')+'"><span>'+esc(label)+'</span><input data-spec-field="'+key+'" aria-label="'+esc(label)+'" value="'+esc(specs[key]??'')+'" placeholder="Not recorded" readonly></label>').join('');
  document.getElementById('assetEditStatus').textContent='';
   document.getElementById('photoSummary').innerHTML=[['Engine',asset.engine],['VIN / serial number',asset.vin]].map(([label,value])=>'<div><span>'+esc(label)+'</span><strong>'+esc(value||'Not recorded')+'</strong></div>').join('');
  const photo=asset.photo||'';
@@ -666,12 +678,12 @@ document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
  editing=!editing;
  if(tab==='recommended')return;
  const panel=document.getElementById(({details:'assetDetails',mileage:'assetMileage',maintenance:'assetMaintenance'})[tab]);
- panel.querySelectorAll('input[data-asset-field],input[data-mileage-col],input[data-service-row]').forEach(input=>{
+ panel.classList.toggle('editing-specs',editing&&tab==='details');
+ panel.querySelectorAll('input[data-asset-field],input[data-spec-field],input[data-mileage-col],input[data-service-row]').forEach(input=>{
   input.readOnly=!editing;
-  if(!editing){const key=input.dataset.assetField;if(key)input.value=key==='ownershipStart'?ownershipText(asset[key]):key==='currentReading'?mileageFor(asset)?.currentMileage??'':key==='reportOdometer'?mileageFor(asset)?.startMileage??asset.reportOdometer??'':asset[key]??'';}
+  if(!editing){const key=input.dataset.assetField;if(key)input.value=key==='ownershipStart'?ownershipText(asset[key]):key==='currentReading'?mileageFor(asset)?.currentMileage??'':key==='reportOdometer'?mileageFor(asset)?.startMileage??asset.reportOdometer??'':asset[key]??'';if(input.dataset.specField)input.value=specRecord(asset).specs[input.dataset.specField]??'';}
  });
  panel.querySelectorAll('[data-ownership-picker]').forEach(input=>input.disabled=!editing);
- if(tab==='details')document.getElementById('assetReportNotesText').readOnly=!editing;
  const button=document.getElementById('toggleAssetEdit');
  button.setAttribute('aria-pressed',String(editing));
  button.textContent=editing?'Finish editing':'Edit '+tab;
@@ -679,12 +691,12 @@ document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
  if(!editing&&tab!=='details')renderAsset(tab);
 });
 document.querySelector('.asset-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-asset-tab]');if(b)renderAsset(b.dataset.assetTab)});
-document.getElementById('assetReportNotesText').addEventListener('change',async e=>{
- if(!asset||!editing)return;
- const input=e.target,a=asset,prior=a.reportNotes||'',next=input.value.trim(),message=document.getElementById('assetEditStatus');
+document.getElementById('assetFacts').addEventListener('change',async e=>{
+ const input=e.target.closest('[data-spec-field]');if(!input||!asset||!editing)return;
+ const a=asset,key=input.dataset.specField,record=specRecord(a),prior=record.specs[key]||'',next=input.value.trim(),message=document.getElementById('assetEditStatus');
  if(next===prior)return;
- input.disabled=true;message.textContent='Saving vehicle specifications…';message.classList.remove('error');
- try{await ensureProfileRow(a);await thWriteCell('Portal Asset Profiles','AB'+a.profileRow,next);a.reportNotes=next;input.value=next;message.textContent='Vehicle specifications saved to your workbook.'}
+ record.specs[key]=next;input.disabled=true;message.textContent='Saving '+input.getAttribute('aria-label')+'…';message.classList.remove('error');
+ try{await ensureProfileRow(a);const saved=JSON.stringify(record);await thWriteCell('Portal Asset Profiles','AB'+a.profileRow,saved);a.reportNotes=saved;input.closest('.quick-spec').classList.toggle('quick-spec-empty',!next);message.textContent='Saved to your workbook.'}
  catch(error){input.value=prior;message.textContent=error.message;message.classList.add('error')}
  finally{input.disabled=false}
 });
