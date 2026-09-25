@@ -1,8 +1,9 @@
 /* Shared sign-in screen for TisZod workspaces. */
 #th-auth#th-auth{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 35%,#17243a 0%,#0c121d 48%,#080d16 100%);color:#f3f7ff;font:16px/1.5 Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
 #th-auth[hidden]{display:none!important}
-#th-auth#th-auth .th-auth-card{box-sizing:border-box;width:min(100%,430px);padding:42px 38px 46px;border:1px solid #3c4f6b;border-radius:18px;background:#151f2f;box-shadow:0 24px 75px #0008;text-align:center}
-#th-auth .th-auth-brand{display:flex;align-items:center;justify-content:center;gap:17px;margin-bottom:34px;color:#fff;font-size:34px;font-weight:850;letter-spacing:-.045em;line-height:1.15}
+#th-auth#th-auth .th-auth-card{box-sizing:border-box;width:min(100%,440px);padding:36px 38px 44px;border:1px solid #3c4f6b;border-radius:18px;background:#191f29;box-shadow:0 24px 75px #0008;text-align:center}
+#th-auth .th-auth-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;margin-bottom:28px;color:#fff;font-size:32px;font-weight:850;letter-spacing:-.045em;line-height:1.15}
+#th-auth .th-auth-logo{display:block;object-fit:contain;width:225px;height:225px}
 #th-auth .th-auth-mark{display:grid;place-items:center;flex:none;width:62px;height:62px;border:0;border-radius:14px;background:#376fe6;color:#fff;font-size:22px;font-weight:850;letter-spacing:0}
 #th-auth .th-auth-name{font-size:inherit;font-weight:inherit}
 #th-auth .th-auth-brand small{display:block;color:#9fb5d9;font-size:10px;font-weight:800;letter-spacing:.16em;line-height:1.5}
@@ -16,5 +17,5 @@
 #th-auth #th-auth-message:not(:empty){margin-top:20px}
 #th-auth.th-auth-loading #th-auth-message{color:#e4efff;font-size:17px;font-weight:700;animation:th-sign-in-pulse 1.6s ease-in-out infinite}
 @keyframes th-sign-in-pulse{0%,100%{opacity:1}50%{opacity:.55}}
-@media(max-width:520px){#th-auth#th-auth .th-auth-card{padding:36px 25px 40px}#th-auth .th-auth-brand{font-size:30px}#th-auth .th-auth-mark{width:56px;height:56px;font-size:20px}}
+@media(max-width:520px){#th-auth#th-auth .th-auth-card{padding:30px 25px 38px}#th-auth .th-auth-brand{font-size:29px}#th-auth .th-auth-logo{width:195px;height:195px}}
 @media(prefers-reduced-motion:reduce){#th-auth.th-auth-loading #th-auth-message{animation:none}#th-auth #th-sign-in{transition:none}}
