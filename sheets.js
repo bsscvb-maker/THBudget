@@ -81,7 +81,7 @@ async function thFleetData() {
     thValues("'Mileage-2024.06.25'!A1:J100"),
     thValues("'Portal Asset Profiles'!A1:AA1000"),
     thValues("'Vehicle Registry'!A1:G100"),
-    thValues("'Portal Service History'!A1:G2300"),
+    thValues("'Portal Service History'!A1:G5000"),
     thValues("'Portal Service Schedules'!A1:I400")
   ]);
   const activeFleet = fr.slice(1).map(r => ({year:r[0],make:r[1],model:r[2],status:r[3]})).filter(v => v.year || v.make || v.model);
@@ -92,7 +92,7 @@ async function thFleetData() {
     daysDriven:r[7],monthsDriven:r[8],monthlyEstimate:r[9],annualEstimate:r[10]
   }));
   const history = hr.slice(4).filter(r => r[1]).map(r => ({name:r[1],currentMileage:r[4]}));
-  const profiles = pr.slice(1).map((r,i) => ({name:r[1],year:r[2],make:r[3],model:r[4],color:r[5],category:r[7],status:r[8],reportOdometer:r[10],vin:r[11],tag:r[13],engine:r[15],transmission:r[16],tireSize:r[17],photo:r[24],renewal:r[14],vehicleNumber:r[12],sourceType:r[6],department:r[9],insuranceCompany:r[18],driver:r[22],reportText:r[25],reportDate:r[26],photoFileId:r[23],profileRow:i+2})).filter(p => p.name);
+  const profiles = pr.slice(1).map((r,i) => ({reportId:r[0],name:r[1],year:r[2],make:r[3],model:r[4],color:r[5],category:r[7],status:r[8],reportOdometer:r[10],vin:r[11],tag:r[13],engine:r[15],transmission:r[16],tireSize:r[17],photo:r[24],renewal:r[14],vehicleNumber:r[12],sourceType:r[6],department:r[9],insuranceCompany:r[18],driver:r[22],reportText:r[25],reportDate:r[26],photoFileId:r[23],profileRow:i+2})).filter(p => p.name);
   const registry = rr.slice(1).map((r,i)=>({...r,__row:i+2})).filter(r => r[1] && r[2]).map(r => ({registryRow:r.__row,category:r[0],year:r[1],make:r[2],model:r[3],vin:r[4],tag:r[5],status:r[6]}));
   const services = sr.slice(1).map((r,i)=>({...r,__row:i+2})).filter(r => r[0] && r[3]).map(r => ({sheetRow:r.__row,asset:r[0],id:r[1],date:r[2],item:r[3],odometer:r[4],cost:r[5],notes:r[6]}));
   const schedules={};
