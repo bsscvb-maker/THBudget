@@ -71,7 +71,7 @@ async function thSheets(path) {
   });
   if (!response.ok) {
     if (response.status === 401) { const error = new Error('Your sign-in expired. Please sign in again.'); error.status = 401; throw error; }
-    if (response.status === 403 || response.status === 404) throw new Error('This Google account cannot open the TH Budget workbook. Sign in with the account that owns it.');
+    if (response.status === 403 || response.status === 404) throw new Error('This Google account cannot open the TisZod workbook. Sign in with the account that owns it.');
     throw new Error('The workbook could not be loaded. Please try again.');
   }
   return response.json();
