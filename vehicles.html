@@ -271,15 +271,6 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 #th-auth h1{color:#fff;font-size:32px;margin:15px 0}#th-auth p{color:#d0e3e6}#th-sign-in{padding:12px 22px;background:#24c5ce;color:#10252b;border:0;border-radius:6px;font:700 16px system-ui;cursor:pointer}#th-sign-in:focus-visible{outline:3px solid white;outline-offset:3px}
 #th-auth-message{font-size:13px;min-height:2em}
  .report-details{margin-top:18px;border:1px solid var(--line);padding:13px;border-radius:4px}.report-details summary{cursor:pointer;font-weight:700}.report-details p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;color:var(--muted)}.notes-cell{white-space:normal;min-width:180px;max-width:480px}#assetMaintenance table{min-width:700px} #assetView .edit-bar[hidden]{display:none}
-#assetSchedules .schedule-intro{color:#b7c9e1;font-size:14px;margin:0 0 14px;line-height:1.5}
-#assetSchedules .schedule-warning{color:#ffe0a5;background:#463921;border:1px solid #987549;padding:12px;margin:0 0 14px;border-radius:5px}
-#assetSchedules .table-wrap{max-height:min(70vh,740px);overflow:auto;border:1px solid #344968;border-radius:6px}
-#assetSchedules table{width:100%;min-width:820px;border-collapse:collapse}
-#assetSchedules thead th{position:sticky;top:0;z-index:2;background:#223c62;color:#fff;text-align:left;font:800 16px/1.3 Arial,Helvetica,sans-serif;padding:15px 13px;white-space:nowrap}
-#assetSchedules tbody td{padding:13px;border-top:1px solid #344968;vertical-align:top;font-size:15px;line-height:1.45}
-#assetSchedules tbody tr:nth-child(even){background:#17283d}
-#assetSchedules tbody td:first-child{font-weight:700;min-width:240px}
-#assetSchedules .reading{display:block;color:#b5cae5;font-size:14px;margin-top:3px}
 .asset-tabs button[hidden]{display:none}
 #assetRecommended .recommend-intro{font-size:15px;line-height:1.55;color:#b7c9e1;margin:0 0 18px}
 #assetRecommended .recommend-section{margin:18px 0 25px}
@@ -287,6 +278,21 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 #assetRecommended .recommend-section h3 span{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:99px;background:#284567;color:#d8e9ff;font-size:13px}
 #assetRecommended .table-wrap{max-height:460px;overflow:auto;border:1px solid #344968;border-radius:6px}
 #assetRecommended table{min-width:750px}
+#assetRecommended .schedule-action{border:1px solid #79aaff;border-radius:5px;padding:7px 11px;background:#315d99;color:white;font-weight:700;cursor:pointer;white-space:nowrap}
+#assetRecommended .schedule-action:focus-visible{outline:3px solid #a8d3ff;outline-offset:2px}
+#assetRecommended .complete-panel{margin:20px 0;padding:20px;border:1px solid #6386af;border-radius:9px;background:#1b304a}
+#assetRecommended .complete-panel h3{margin:0 0 6px;font-size:20px;color:white}
+#assetRecommended .complete-panel p{margin:0 0 14px;color:#bfd0e7}
+#assetRecommended .complete-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+#assetRecommended .complete-grid label{display:grid;gap:6px;font-size:14px;font-weight:700;color:#d8e7fb}
+#assetRecommended .complete-grid input,#assetRecommended .complete-grid textarea{min-width:0;width:100%;padding:10px;border:1px solid #7293ba;border-radius:5px;background:#102238;color:#fff;font:inherit}
+#assetRecommended .complete-grid .complete-wide{grid-column:1/-1}
+#assetRecommended .complete-actions{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+#assetRecommended .complete-actions button{padding:10px 16px;border-radius:5px;border:1px solid #79aaff;background:#315d99;color:white;font-weight:700;cursor:pointer}
+#assetRecommended .complete-actions button:disabled{opacity:.6;cursor:wait}
+#assetRecommended .complete-actions [type=button]{background:#26394f}
+#assetRecommended .complete-message{min-height:20px;color:#b9edcb}
+@media(max-width:600px){#assetRecommended .complete-grid{grid-template-columns:1fr}}
 #assetRecommended thead th{position:sticky;top:0;z-index:1;background:#223c62;color:#fff;font:800 15px/1.3 Arial,Helvetica,sans-serif;padding:13px}
 #assetRecommended tbody td{font-size:15px;line-height:1.45;vertical-align:top;padding:12px 13px}
 #assetRecommended tbody td:first-child{font-weight:700;white-space:normal;min-width:210px}
@@ -351,12 +357,11 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 <div class="asset-header"><div class="kicker" id="assetCategory"></div><h2 id="assetTitle"></h2><span id="assetStatus"></span><button type="button" class="add-vehicle-button" id="addDetailVehicleButton">+ Add vehicle</button></div>
 <div class="category-manager"><label for="moveAssetCategory">Section</label><select id="moveAssetCategory" aria-label="Move item to section"></select><button type="button" id="moveAssetButton">Move</button><button type="button" id="unfileAssetButton">Remove from section</button><button type="button" class="delete-asset" id="deleteAssetButton">Delete vehicle</button><span id="categoryMoveStatus" role="status"></span></div>
 <div class="edit-bar"><button type="button" id="toggleAssetEdit" aria-pressed="false">Edit details</button><span>Fields are locked until you choose Edit.</span></div>
-<div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Work Performed</button><button type="button" data-asset-tab="recommended" hidden>Due &amp; Upcoming</button><button type="button" data-asset-tab="schedules">Full Maintenance Plan</button></div>
+<div class="asset-tabs" role="tablist" aria-label="Item information"><button type="button" data-asset-tab="details" class="active">Details</button><button type="button" data-asset-tab="mileage">Mileage</button><button type="button" data-asset-tab="maintenance">Service Log</button><button type="button" data-asset-tab="recommended" hidden>Service Schedule</button></div>
  <section class="asset-tab-panel" id="assetDetails"><div class="photo-manager"><div id="assetPhoto"></div><div class="photo-summary" id="photoSummary"></div><label class="photo-upload">Add or replace photo<input id="assetPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></label><span id="photoUploadStatus" role="status"></span></div><div id="assetEditStatus" class="asset-edit-status" role="status"></div><div class="asset-facts" id="assetFacts"></div><details id="assetReportNotes" class="asset-report-notes" hidden><summary>Vehicle notes from report</summary><div id="assetReportNotesText"></div></details></section>
 <section class="asset-tab-panel" id="assetMileage" hidden></section>
 <section class="asset-tab-panel" id="assetMaintenance" hidden></section>
 <section class="asset-tab-panel" id="assetRecommended" hidden></section>
-<section class="asset-tab-panel" id="assetSchedules" hidden></section>
 </div>
 <footer class="foot"><span>TisZod · VEHICLES</span><span>PRIVATE SHEET CONNECTION</span></footer>
 </main></div>
@@ -470,16 +475,12 @@ async function loadServiceDetails(){
 }
 async function openServiceDetails(a){
  try{await loadServiceDetails();if(asset===a)renderAsset(document.querySelector('[data-asset-tab].active')?.dataset.assetTab||'details')}
- catch(error){if(asset===a){document.getElementById('assetMaintenance').innerHTML='<div class="asset-note">'+esc(error.message)+' Select another tab and return to Maintenance to retry.</div>';document.getElementById('assetSchedules').innerHTML='<div class="asset-note">'+esc(error.message)+'</div>'}}
+ catch(error){if(asset===a){document.getElementById('assetMaintenance').innerHTML='<div class="asset-note">'+esc(error.message)+' Select another tab and return to Service Log to retry.</div>';document.getElementById('assetRecommended').innerHTML='<div class="asset-note">'+esc(error.message)+'</div>'}}
 }
 const serviceKeys={'keystone':'331','ram3500':'3500','toyota4runner':'4Runner','chrysleraspen':'Aspen','hondacivic':'Civic','fordmustang':'Mustang','fordf150':'F150','harleydavidsonultra':'FLHTCUI','harleydavidsonroad':'FLTRK','makdaddy':'Legend','stirling':'Stirling','westbrook':'Stirling','trek':'trek','colemanb200':'B200','volpam':'SP03','coolster':'3050C','xpro':'Xpro'};
 function serviceFor(a){const name=clean(a.make+' '+a.model);const legacy=Object.entries(serviceKeys).find(([prefix])=>name.startsWith(prefix))?.[1];const key=legacy||(a.reportId&&String(a.reportId).startsWith('PDF-')?'report-'+String(a.reportId).slice(4):'');return key?services.filter(s=>clean(s.asset)===clean(key)):[]}
 const scheduleKeys=[[/trek.*7200/, 'trek7200'],[/harley.*(ultra|flhtcui)/,'harleydavidsonultra'],[/lifetime.*spitfire/,'lifetimespitfire'],[/keystone.*bullet/,'keystonebullet'],[/stirling|westbrook.*trailer/,'stirling'],[/makdaddy.*legend/,'makdaddylegend'],[/harley.*(roadglide|fltrk)/,'harleydavidsonroad'],[/ram.*3500/,'ram3500'],[/coleman.*(b200|8200)/,'colemanb200'],[/volpam.*sp03/,'volpamsp03'],[/coolster.*3050/,'coolster3050'],[/ford.*f150/,'fordf150'],[/xpro.*jaguar/,'xprojaguar'],[/ford.*mustang/,'fordmustang'],[/toyota.*4runner/,'toyota4runner'],[/chrysler.*aspen/,'chrysleraspen'],[/honda.*civic/,'hondacivic'],[/husqvarna.*122hd4[5s]/,'husqvarna122hd4s'],[/echo.*pb2520/,'echopb2520'],[/dewalt.*aircompressor/,'dewaltaircompressor'],[/dewalt.*dxpw3425|dewalt.*pressurewasher/,'dewaltdxpw3425'],[/craftsman.*18.*chainsaw/,'craftsman18inchchainsaw'],[/craftsman.*10.*polesaw/,'craftsman10polesaw'],[/husqvarna.*yth24k48/,'husqvarnayth24k48'],[/cubcadet.*kohler/,'cubcadetkohler'],[/husqvarna.*330lx|husqvarna.*weedeater/,'husqvarna330lx'],[/stihl.*fs56/,'stihlfs56']];
 function scheduleFor(a){const name=clean([a.make,a.model,a.name].filter(Boolean).join(' '));const entry=scheduleKeys.find(([pattern])=>pattern.test(name));return entry?schedules[entry[1]]:null}
-function renderSchedule(a){const schedule=scheduleFor(a),panel=document.getElementById('assetSchedules');if(!schedule){panel.innerHTML='<div class="asset-note">No service schedule for this item was included in the September 24, 2026 report.</div>';return}
- const warning=clean(a.make+' '+a.model).includes('ram3500')&&String(a.year)!=='2021'?'<p class="schedule-warning">The report identifies this truck as a 2021 Ram 3500, while its vehicle record says '+esc(a.year)+'. Verify that this schedule belongs to your truck before relying on its due dates.</p>':'';
- panel.innerHTML='<p class="schedule-intro">Imported from the service report dated September 24, 2026. This is the full plan: what to do, how often, and the last/next dates recorded in the report. See Work Performed for logged service. '+esc(schedule.tasks.length)+' scheduled items.</p>'+warning+'<div class="table-wrap"><table><thead><tr><th>Service item</th><th>Frequency</th><th>Last completed</th><th>Next due</th></tr></thead><tbody>'+schedule.tasks.map(x=>'<tr><td>'+esc(x.task)+'</td><td>'+esc(x.interval)+'</td><td>'+esc(x.lastDate||'Not recorded')+(x.lastReading?'<span class="reading">'+esc(x.lastReading)+' '+(x.interval.includes('Hours')?'hours':'miles')+'</span>':'')+'</td><td>'+esc(x.nextDate||'Not recorded')+(x.nextReading?'<span class="reading">'+esc(x.nextReading)+' '+(x.interval.includes('Hours')?'hours':'miles')+'</span>':'')+'</td></tr>').join('')+'</tbody></table></div>';
-}
 function renderRecommended(a){
  const panel=document.getElementById('assetRecommended'),schedule=scheduleFor(a);
  if(clean(a.status)!=='active'||!schedule){panel.innerHTML='';return}
@@ -493,9 +494,9 @@ function renderRecommended(a){
  }
  for(const group of groups)group.sort((a,b)=>(a.due?.getTime()??Infinity)-(b.due?.getTime()??Infinity)||a.task.task.localeCompare(b.task.task));
  const titles=['Dates passed in report','Coming up in 60 days','Later or no date listed'];
- const sections=groups.map((group,i)=>group.length?'<section class="recommend-section"><h3>'+titles[i]+' <span>'+group.length+'</span></h3><div class="table-wrap"><table><thead><tr><th>Service item</th><th>Frequency</th><th>Report due date / reading</th></tr></thead><tbody>'+group.map(({task})=>'<tr><td>'+esc(task.task)+'</td><td>'+esc(task.interval)+'</td><td>'+esc(task.nextDate||'No date listed')+(task.nextReading?'<span class="reading">'+esc(task.nextReading)+' '+(task.interval.includes('Hours')?'hours':'miles')+'</span>':'')+'</td></tr>').join('')+'</tbody></table></div></section>':'').join('');
+ const sections=groups.map((group,i)=>group.length?'<section class="recommend-section"><h3>'+titles[i]+' <span>'+group.length+'</span></h3><div class="table-wrap"><table><thead><tr><th>Service item</th><th>Frequency</th><th>Last performed</th><th>Due date</th><th>Due reading</th><th>Action</th></tr></thead><tbody>'+group.map(({task})=>'<tr><td>'+esc(task.task)+'</td><td>'+esc(task.interval)+'</td><td>'+esc(task.lastDate||'Not recorded')+'</td><td>'+esc(task.nextDate||'No date listed')+'</td><td>'+esc(task.nextReading?task.nextReading+' '+(task.interval.includes('Hours')?'hours':'miles'):'Not recorded')+'</td><td><button type="button" class="schedule-action" data-complete-row="'+task.sheetRow+'">Complete</button></td></tr>').join('')+'</tbody></table></div></section>':'').join('');
  const warning=clean(a.make+' '+a.model).includes('ram3500')&&String(a.year)!=='2021'?'<p class="recommend-warning">The report lists this truck as a 2021 Ram 3500; the vehicle record lists a different year. Verify its schedule before using these dates.</p>':'';
- panel.innerHTML='<p class="recommend-intro">Due and upcoming items from the September 24, 2026 maintenance plan, grouped by the dates recorded in that report. This is not a log of completed work. Check Work Performed for recorded service; mileage or hours may make an item due sooner.</p>'+warning+sections;
+ panel.innerHTML='<p class="recommend-intro">Complete service schedule imported from the September 24, 2026 report, grouped by due date. These dates and readings are from that report; mileage or hours may make an item due sooner. Completed work is saved in the Service Log.</p>'+warning+sections+'<div id="completePanel" class="complete-panel" hidden></div>';
 }
 const alias={'ram3500':'3500 DRW','fordmustang':'Mustang','hondacivic':'Civic','harleydavidsonroadglide':'FLTRK','harleydavidsonultra':'FLHTCUI','keystonebullet':'Bullet','makdaddylegend':'Legend','fordf150':'F150','stirlingtrailer':'Stirling'};
 function mileageFor(a){
@@ -558,7 +559,7 @@ function renderAsset(tab='details'){
  document.querySelector('[data-asset-tab="recommended"]').hidden=!recommended;
  if(tab==='recommended'&&!recommended)tab='details';
  editing=false;
- document.querySelector('.edit-bar').hidden=tab==='schedules'||tab==='recommended';
+ document.querySelector('.edit-bar').hidden=tab==='recommended';
  document.getElementById('toggleAssetEdit').textContent='Edit '+(tab==='details'?'details':tab);
  document.getElementById('toggleAssetEdit').setAttribute('aria-pressed','false');
  document.querySelector('.edit-bar span').textContent='Fields are locked until you choose Edit.';
@@ -580,15 +581,14 @@ function renderAsset(tab='details'){
  const m=mileageFor(asset);
  const mileageEditable=m?[['Service start date','serviceStart','D'],['Starting odometer','startMileage','E'],['Current odometer','currentMileage','F']].map(([label,key,col])=>'<label class="asset-fact"><span>'+esc(label)+'</span><input data-mileage-col="'+col+'" data-mileage-row="'+m.sheetRow+'" aria-label="'+esc(label)+'" value="'+esc(m[key]||'')+'" readonly></label>').join(''):'';
  document.getElementById('assetMileage').innerHTML=m?'<div class="asset-facts">'+mileageEditable+[['Miles added',m.addedMileage],['Miles per month',m.monthlyEstimate],['Estimated miles per year',m.annualEstimate]].map(([k,v])=>fact(k,v)).join('')+'</div>':'<div class="asset-note">No mileage record found for this vehicle.</div>';
- if(!serviceLoaded){for(const id of ['assetMaintenance','assetSchedules','assetRecommended'])document.getElementById(id).innerHTML='<div class="asset-note">Loading service history and schedules…</div>';openServiceDetails(asset)}
+ if(!serviceLoaded){for(const id of ['assetMaintenance','assetRecommended'])document.getElementById(id).innerHTML='<div class="asset-note">Loading service history and schedules…</div>';openServiceDetails(asset)}
  else{
   const entries=serviceFor(asset).slice().sort((a,b)=>new Date(b.date)-new Date(a.date)||b.sheetRow-a.sheetRow);
-  renderSchedule(asset);
   renderRecommended(asset);
   document.getElementById('assetMaintenance').innerHTML='<button type="button" id="addService">+ Add service entry</button><div class="table-wrap"><table><thead><tr><th>Date</th><th>Service item</th><th>Odometer</th><th>Notes</th></tr></thead><tbody>'+entries.map(e=>'<tr>'+[['date','C'],['item','D'],['odometer','E'],['notes','G']].map(([key,col])=>'<td class="'+(key==='notes'?'notes-cell':'')+'"><input data-service-row="'+e.sheetRow+'" data-service-col="'+col+'" aria-label="'+esc(key)+'" value="'+esc(e[key]||'')+'" readonly></td>').join('')+'</tr>').join('')+'</tbody></table></div>';
  }
  for(const b of document.querySelectorAll('[data-asset-tab]'))b.classList.toggle('active',b.dataset.assetTab===tab);
- for(const [name,id] of [['details','assetDetails'],['mileage','assetMileage'],['maintenance','assetMaintenance'],['recommended','assetRecommended'],['schedules','assetSchedules']])document.getElementById(id).hidden=name!==tab;
+ for(const [name,id] of [['details','assetDetails'],['mileage','assetMileage'],['maintenance','assetMaintenance'],['recommended','assetRecommended']])document.getElementById(id).hidden=name!==tab;
 }
 document.getElementById('homeLink').href=PORTAL;
 document.getElementById('allLink').href=PORTAL+'finance.html';
@@ -609,7 +609,7 @@ document.getElementById('photoPreview').addEventListener('click',e=>{if(e.target
 document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
  const tab=document.querySelector('[data-asset-tab].active')?.dataset.assetTab||'details';
  editing=!editing;
- if(tab==='schedules'||tab==='recommended')return;
+ if(tab==='recommended')return;
  const panel=document.getElementById(({details:'assetDetails',mileage:'assetMileage',maintenance:'assetMaintenance'})[tab]);
  panel.querySelectorAll('input[data-asset-field],input[data-mileage-col],input[data-service-row]').forEach(input=>{
   input.readOnly=!editing;
@@ -724,6 +724,50 @@ document.getElementById('assetMaintenance').addEventListener('click',async e=>{
   renderAsset('maintenance');document.getElementById('assetEditStatus').textContent='Service entry added. Edit its details below.';
  }catch(error){document.getElementById('assetEditStatus').textContent=error.message;document.getElementById('assetEditStatus').classList.add('error')}
  finally{button.disabled=false}
+});
+function nextScheduleValues(task,date,reading){
+ const interval=task.interval||'';
+ const unit=interval.match(/(?:every\s+)?(\d+)?\s*(daily|weekly|monthly|yearly|days?|weeks?|months?|years?)/i);
+ let nextDate='';
+ if(unit&&date){const d=new Date(date+'T12:00:00'),amount=Number(unit[1]||1);if(/day|daily/i.test(unit[2]))d.setDate(d.getDate()+amount);else if(/week/i.test(unit[2]))d.setDate(d.getDate()+7*amount);else if(/month/i.test(unit[2]))d.setMonth(d.getMonth()+amount);else d.setFullYear(d.getFullYear()+amount);nextDate=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+ const distance=interval.match(/(?:or\s+)?(?:every\s+)?([\d,]+)\s*(miles?|hours?)/i);
+ const base=Number(String(reading).replace(/,/g,''));
+ const nextReading=distance&&String(reading).trim()!==''&&Number.isFinite(base)?String(base+Number(distance[1].replace(/,/g,''))):'';
+ return {nextDate,nextReading};
+}
+document.getElementById('assetRecommended').addEventListener('click',e=>{
+ const button=e.target.closest('[data-complete-row]');
+ if(e.target.id==='cancelComplete'){document.getElementById('completePanel').hidden=true;return}
+ if(!button||!asset)return;
+ const task=scheduleFor(asset)?.tasks.find(x=>x.sheetRow===Number(button.dataset.completeRow));if(!task)return;
+ const panel=document.getElementById('completePanel'),today=new Date(),date=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
+ const reading=mileageFor(asset)?.currentMileage||asset.reportOdometer||'';
+ const next=nextScheduleValues(task,date,reading);
+ panel.hidden=false;
+ panel.innerHTML='<h3>Complete: '+esc(task.task)+'</h3><p>Frequency: '+esc(task.interval||'Not recorded')+'. Confirm the work and the next due date or reading before saving.</p><form id="completeServiceForm" data-schedule-row="'+task.sheetRow+'"><div class="complete-grid"><label>Completed date<input name="date" type="date" value="'+date+'" required></label><label>Odometer / hour reading<input name="reading" inputmode="decimal" value="'+esc(reading)+'" placeholder="Optional"></label><label>Next due date<input name="nextDate" type="date" value="'+esc(next.nextDate)+'"></label><label>Next due reading<input name="nextReading" inputmode="decimal" value="'+esc(next.nextReading)+'" placeholder="Optional"></label><label class="complete-wide">Notes<textarea name="notes" rows="2" placeholder="What was done? Parts used?"></textarea></label></div><div class="complete-actions"><button type="submit">Save completed service</button><button id="cancelComplete" type="button">Cancel</button><span class="complete-message" role="status"></span></div></form>';
+ panel.scrollIntoView({block:'nearest',behavior:'smooth'});
+});
+document.getElementById('assetRecommended').addEventListener('change',e=>{
+ const input=e.target;if(!['date','reading'].includes(input.name))return;
+ const form=input.closest('#completeServiceForm'),task=scheduleFor(asset)?.tasks.find(x=>x.sheetRow===Number(form?.dataset.scheduleRow));if(!task)return;
+ const next=nextScheduleValues(task,form.elements.date.value,form.elements.reading.value);
+ if(!form.elements.nextDate.dataset.custom)form.elements.nextDate.value=next.nextDate;
+ if(!form.elements.nextReading.dataset.custom)form.elements.nextReading.value=next.nextReading;
+});
+document.getElementById('assetRecommended').addEventListener('input',e=>{if(['nextDate','nextReading'].includes(e.target.name))e.target.dataset.custom='true'});
+document.getElementById('assetRecommended').addEventListener('submit',async e=>{
+ if(e.target.id!=='completeServiceForm'||!asset)return;
+ e.preventDefault();const form=e.target,button=form.querySelector('[type=submit]'),message=form.querySelector('.complete-message'),task=scheduleFor(asset)?.tasks.find(x=>x.sheetRow===Number(form.dataset.scheduleRow));if(!task)return;
+ const data=Object.fromEntries(new FormData(form));button.disabled=true;message.textContent='Saving completed service…';
+ const serviceAsset=serviceFor(asset)[0]?.asset||Object.entries(serviceKeys).find(([prefix])=>clean(asset.make+' '+asset.model).startsWith(prefix))?.[1]||asset.model;
+ try{
+  const row=await thAppendRow('Portal Service History',[serviceAsset,'',data.date,task.task,data.reading,'',data.notes]);
+  services.push({asset:serviceAsset,id:'',date:data.date,item:task.task,odometer:data.reading,cost:'',notes:data.notes,sheetRow:row});
+  button.disabled=true;message.textContent='Saved to Service Log. Updating schedule…';
+  for(const [column,value] of [['E',data.date],['F',data.reading],['G',data.nextDate],['H',data.nextReading]])await thWriteCell('Portal Service Schedules',column+task.sheetRow,value);
+  Object.assign(task,{lastDate:data.date,lastReading:data.reading,nextDate:data.nextDate,nextReading:data.nextReading});
+  renderAsset('recommended');const newPanel=document.getElementById('completePanel');newPanel.hidden=false;newPanel.innerHTML='<p role="status">Completed service saved to Service Log and the schedule updated.</p>';
+ }catch(error){message.textContent=error.message+' Check the Service Log before trying again.';button.disabled=true}
 });
 document.getElementById('assetPhotoInput').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file||!asset)return;const current=asset;
