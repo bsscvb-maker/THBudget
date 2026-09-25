@@ -301,6 +301,21 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 #assetGrid .card-status.active:before{background:#5fe188;box-shadow:0 0 0 2px #5fe18822}
 #assetGrid .card-status.inactive:before{background:#ff6767;box-shadow:0 0 0 2px #ff676722}
 @media(max-width:620px){#assetGrid .asset-card{padding-top:51px}#assetGrid .card-status{right:12px;top:11px}#assetGrid .card-copy .card-stat{font-size:13px}}
+#assetGrid .asset-card{cursor:default}
+#assetGrid .asset-card:hover{transform:none;box-shadow:0 5px 18px #0005;background:linear-gradient(145deg,#214e91,#132c55)}
+#assetGrid .card-photo{padding:0;border:0;cursor:pointer}
+#assetGrid button.card-photo:hover{outline:2px solid #9fc9ff;outline-offset:2px}
+#assetGrid button.card-photo:disabled{cursor:wait;outline:0}
+#assetGrid .card-open{display:inline-block;margin-top:13px;padding:9px 15px;border:1px solid #a4c9ff;border-radius:6px;background:#e3efff;color:#17365a;font-size:14px;font-weight:800;cursor:pointer}
+#assetGrid .card-open:hover{background:#fff}
+#assetGrid button:focus-visible,#assetPhoto img:focus-visible{outline:3px solid #b5d5ff;outline-offset:3px}
+#assetPhoto img{cursor:zoom-in}
+.photo-preview{width:min(900px,calc(100vw - 36px));max-height:90vh;padding:18px;border:1px solid #6489b7;border-radius:12px;background:#142236;color:#f2f7ff;box-shadow:0 24px 70px #000b}
+.photo-preview::backdrop{background:#020713c9}
+.photo-preview-head{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:12px}
+.photo-preview-head strong{font-size:18px;line-height:1.3}
+.photo-preview-head button{padding:8px 14px;border:1px solid #8bb7ef;border-radius:6px;background:#244a7b;color:white;font-size:16px;font-weight:750;cursor:pointer}
+.photo-preview img{display:block;width:100%;max-height:calc(90vh - 105px);object-fit:contain;border-radius:6px;background:#0e1b2d}
 </style><div class="th-app"><aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark">TH</span><span>THBudget<small>Personal command center</small></span></a><nav aria-label="THBudget pages"><div class="th-nav-label">Main</div><a class="th-nav-link " href="./"><span class="th-nav-icon">⌂</span>Home</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link " href="finance.html"><span class="th-nav-icon">◫</span>Finance</a><a class="th-nav-link" href="freebirds.html"><span class="th-nav-icon" style="overflow:hidden"><img src="freebirds-logo.svg" alt="" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 72%"></span>Freebirds</a><a class="th-nav-link active" href="vehicles.html"><span class="th-nav-icon ram-nav-icon"><img src="https://www.onestepgps.com/assets/ram-4lxd-NAa.webp" alt="" referrerpolicy="no-referrer"></span>Vehicles</a></nav><div class="th-sidebar-foot">© 2026 THBudget<br>Private personal workspace</div></aside><div class="th-app-main"><header class="th-app-topbar"><div><strong>Vehicles</strong><small>Vehicle dashboard and individual profiles</small></div><span class="th-connection" id="th-connection">Connecting…</span></header><div class="th-page-content"><div class="wrap">
 <header>
 <a class="brand" id="homeLink" href="#"><span class="logo">TH</span><span>THBudget<small>VEHICLE WORKSPACE</small></span></a>
@@ -336,6 +351,7 @@ body[data-th-page="fleet"] .th-page-content{background:#080d15}
 </main></div>
 </div></div></div>
 <dialog id="addVehicleDialog" class="add-vehicle-dialog" aria-labelledby="addVehicleTitle"><form id="addVehicleForm"><div class="add-vehicle-head"><h2 id="addVehicleTitle">Add a vehicle</h2><button type="button" id="closeAddVehicle" aria-label="Close">×</button></div><div class="add-vehicle-fields"><label>Year <input name="year" type="number" min="1900" max="2100" required></label><label>Make <input name="make" required maxlength="100"></label><label>Model <input name="model" required maxlength="120"></label><label>Section <select name="category" id="newVehicleCategory" required></select></label><label>Status <select name="status"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></label><label>Engine <input name="engine" maxlength="100"></label><label>VIN / serial number <input name="vin" maxlength="100"></label><label>Tag / plate <input name="tag" maxlength="50"></label><label>Color <input name="color" maxlength="80"></label></div><p id="addVehicleStatus" role="status"></p><div class="add-vehicle-actions"><button type="button" id="cancelAddVehicle">Cancel</button><button type="submit" id="saveVehicle">Save vehicle</button></div></form></dialog>
+<dialog id="photoPreview" class="photo-preview" aria-labelledby="photoPreviewTitle"><div class="photo-preview-head"><strong id="photoPreviewTitle"></strong><button type="button" id="closePhotoPreview">Close</button></div><img id="photoPreviewImage" alt=""></dialog>
 <script>
 function renderFleetPage(D,PORTAL) {
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -480,17 +496,22 @@ function renderCategory(){
  const items=assets.filter(a=>category==='All Vehicles'||a.category===category).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);const aKnown=Number.isFinite(ay),bKnown=Number.isFinite(by);return (aKnown&&bKnown?(yearOrder==='oldest'?ay-by:by-ay):Number(bKnown)-Number(aKnown))||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))}), shown=items.filter(a=>status==='all'||clean(a.status)===status);
  document.getElementById('categoryTitle').textContent=category;
  document.getElementById('statusFilters').innerHTML=['all','active','inactive'].map(s=>'<button type="button" class="filter-chip '+(status===s?'active':'')+'" data-status="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' · '+(s==='all'?items.length:items.filter(a=>clean(a.status)===s).length)+'</button>').join('');
- document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>{const m=mileageFor(a),s=clean(a.status),added=cardNumber(m?.addedMileage);return '<button type="button" class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-status '+(s==='active'||s==='inactive'?s:'')+'">'+esc(a.status||'Status to review')+'</span><span class="card-photo">'+(a.photoObjectUrl||a.photoFileId||a.photo?'<img src="'+esc(a.photoObjectUrl||(!a.photoFileId?a.photo:''))+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">':'<span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span>')+'</span><span class="card-copy"><strong>'+esc([a.year,a.make,a.model].filter(Boolean).join(' '))+'</strong><span class="card-stat">Engine: <b>'+esc(cardEngine(a))+'</b></span><span class="card-stat">Mileage / reading: <b>'+esc(cardReading(a,m))+'</b></span><span class="card-stat">Miles added: <b>'+esc(added===null?'—':added)+'</b></span></span></button>'}).join(''):'<div class="asset-note">No items in this view yet.</div>';
+ document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>{
+  const m=mileageFor(a),s=clean(a.status),added=cardNumber(m?.addedMileage),title=[a.year,a.make,a.model].filter(Boolean).join(' ');
+  const photo=a.photoObjectUrl||(!a.photoFileId&&a.photo)||'';
+  const picture=a.photoObjectUrl||a.photoFileId||a.photo?'<button type="button" class="card-photo" data-preview="'+esc(a.id)+'" aria-label="Enlarge photo of '+esc(title)+'"'+(!photo?' disabled':'')+'><img src="'+esc(photo)+'" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true"></button>':'<span class="card-photo"><span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span></span>';
+  return '<div class="asset-card" data-asset="'+esc(a.id)+'"><span class="card-status '+(s==='active'||s==='inactive'?s:'')+'">'+esc(a.status||'Status to review')+'</span>'+picture+'<div class="card-copy"><strong>'+esc(title)+'</strong><span class="card-stat">Engine: <b>'+esc(cardEngine(a))+'</b></span><span class="card-stat">Mileage / reading: <b>'+esc(cardReading(a,m))+'</b></span><span class="card-stat">Miles added: <b>'+esc(added===null?'—':added)+'</b></span><button type="button" class="card-open" data-open-asset="'+esc(a.id)+'" aria-label="Open '+esc(title)+' details">View details</button></div></div>';
+ }).join(''):'<div class="asset-note">No items in this view yet.</div>';
  for(const a of shown.filter(a=>a.photoFileId&&!a.photoObjectUrl)){
   thPhotoObjectUrl(a.photoFileId).then(src=>{
    a.photoObjectUrl=src;
    const card=[...document.querySelectorAll('#assetGrid [data-asset]')].find(el=>el.dataset.asset===a.id);
    const img=card?.querySelector('.card-photo img');
-   if(img){img.src=src;img.hidden=false}
+   if(img){img.src=src;img.hidden=false;card.querySelector('[data-preview]').disabled=false}
   }).catch(()=>{
    const card=[...document.querySelectorAll('#assetGrid [data-asset]')].find(el=>el.dataset.asset===a.id);
    const spot=card?.querySelector('.card-photo');
-   if(spot)spot.innerHTML='<span class="category-icon" aria-hidden="true">'+icon(category)+'</span>';
+   if(spot){spot.replaceWith(Object.assign(document.createElement('span'),{className:'card-photo',innerHTML:'<span class="category-icon" aria-hidden="true">'+icon(a.category)+'</span>'}))}
   });
  }
 
@@ -537,7 +558,11 @@ renderCategories();
 document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;status='all';renderCategory();show('categoryView')});
 document.getElementById('statusFilters').addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b)return;status=b.dataset.status;renderCategory()});
 document.getElementById('yearSort').addEventListener('change',e=>{yearOrder=e.target.value;renderCategory()});
-document.getElementById('assetGrid').addEventListener('click',e=>{const b=e.target.closest('[data-asset]');if(!b)return;asset=assets.find(a=>a.id===b.dataset.asset);if(!asset)return;renderAsset();show('assetView')});
+function previewPhoto(a,src){if(!src)return;const dialog=document.getElementById('photoPreview');document.getElementById('photoPreviewTitle').textContent=[a.year,a.make,a.model].filter(Boolean).join(' ');const img=document.getElementById('photoPreviewImage');img.src=src;img.alt='Photo of '+document.getElementById('photoPreviewTitle').textContent;dialog.showModal()}
+document.getElementById('assetGrid').addEventListener('click',e=>{const preview=e.target.closest('[data-preview]'),open=e.target.closest('[data-open-asset]');if(preview){const a=assets.find(x=>x.id===preview.dataset.preview);if(a)previewPhoto(a,a.photoObjectUrl||a.photo);return}if(!open)return;asset=assets.find(a=>a.id===open.dataset.openAsset);if(!asset)return;renderAsset();show('assetView')});
+document.getElementById('assetPhoto').addEventListener('click',e=>{if(e.target.matches('img')&&asset)previewPhoto(asset,asset.photoObjectUrl||asset.photo)});
+document.getElementById('closePhotoPreview').addEventListener('click',()=>document.getElementById('photoPreview').close());
+document.getElementById('photoPreview').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close()});
 document.getElementById('toggleAssetEdit').addEventListener('click',()=>{
  const tab=document.querySelector('[data-asset-tab].active')?.dataset.assetTab||'details';
  editing=!editing;
