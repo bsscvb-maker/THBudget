@@ -26,7 +26,7 @@ button,input,select{font:inherit}button{cursor:pointer}.th-page-content{padding:
 .finance-tabs{display:flex;gap:8px;margin:12px 0 22px;border-bottom:1px solid #3a526f;padding-bottom:12px}.finance-tabs button{border:1px solid #52749f;border-radius:6px;padding:10px 16px;background:#1c304b;color:#c9d9ee;font-weight:700}.finance-tabs button.active{background:#315e9b;color:white;border-color:#83b8ff}
 .register-table{width:100%;border-collapse:collapse;min-width:960px}.register-table th{padding:11px;text-align:left;background:#213e68;color:#f4f8ff;font-size:14px}.register-table td{border-top:1px solid #2a3b54}.register-table td input{min-width:0;width:100%;padding:10px 8px;border:0;background:transparent;color:#f1f5fc}.register-table td input:focus{outline:2px solid #8bbcff;background:#203b5f}.register-table td input[readonly]{color:#aac0da}.register-table .balance{color:#c7e7cf}.register-table th:nth-child(3){min-width:210px}
 .register-summary{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 20px}.register-summary span{padding:12px 17px;background:#172b46;border:1px solid #385c84;border-radius:7px}.register-summary strong{display:block;font-size:20px}
-</style><link rel="stylesheet" href="auth.css?v=1"></head>
+</style><link rel="stylesheet" href="auth.css?v=1"><style>html.th-session-pending #th-auth{display:none!important}</style><script>try{const saved=JSON.parse(localStorage.getItem('thbudget-session-photos-v1')||sessionStorage.getItem('thbudget-session-photos-v1')||'null');if(saved?.expiresAt>Date.now()+30000){document.documentElement.classList.add('th-session-pending');setTimeout(()=>document.documentElement.classList.remove('th-session-pending'),15000)}}catch(_){}</script></head>
 <body data-th-page="budget">
 <div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-brand"><span class="th-auth-mark" aria-hidden="true">TZ</span><span>TisZod<small>PRIVATE WORKSPACE</small></span></div><h1 id="th-auth-title">Welcome back</h1><p class="th-auth-intro">Sign in to open your private workspace.</p><button type="button" id="th-sign-in">Continue with Google <span aria-hidden="true">→</span></button><p id="th-auth-message" role="status">Use the Google account with access to your workbook.</p></div></div>
 <style>#th-auth{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:#101d24;color:#e9f5f6;font:16px/1.5 system-ui,sans-serif}#th-auth[hidden]{display:none}#th-auth .th-auth-card{width:min(100%,440px);padding:40px;border:1px solid #35656d;border-radius:14px;background:#173039;text-align:center}#th-auth h1{font-size:30px}#th-sign-in{padding:12px 22px;background:#24c5ce;border:0;border-radius:6px;font-weight:700;cursor:pointer}</style>
@@ -130,5 +130,5 @@ window.thStart=async()=>{
  await readBudget();
 };
 </script>
-<script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=5"></script><script src="sheets.js?v=14"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=5"></script><script src="sheets.js?v=15"></script>
 </body></html>
