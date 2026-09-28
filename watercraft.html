@@ -439,6 +439,7 @@ function icon(c){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 function normalizeCategory(p){
  const source=String(p.category||'').toLowerCase(), name=clean([p.make,p.model,p.name].filter(Boolean).join(' '));
  if(p.category==='Unfiled')return 'Unfiled';
+ if(categories.includes(p.category))return p.category; // The saved section takes priority over automatic guesses.
  // Identify distinctive models first, even when an old profile has a valid but incorrect section.
  if(/seadoo|jetski|personalwatercraft|yamaha.*(lst|waverunner|vx|fx)|kawasaki.*(jf650|jetski|stx)/.test(name)||/jet ski|jetski|personal watercraft/.test(source))return 'Personal Watercraft';
  if(/sienna|caravan|townandcountry|pacifica|odyssey|sedona|carnival|transit|sprinter|promaster|expressvan|savana|astrovan|van$/.test(name))return 'Vans';
@@ -478,8 +479,8 @@ function matchingProfile(r){
  });
 }
 const used=new Set(), deletedProfiles=profiles.filter(p=>clean(p.status)==='deleted');
-const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);if(p&&clean(p.status)==='deleted')return null;return {...p,...r,category:p?.category?normalizeCategory(p):normalizeCategory(r),id:'r'+i,photo:p?.photo||''}}).filter(Boolean);
-const extras=profiles.filter(p=>!used.has(p)&&clean(p.status)!=='deleted').map((p,i)=>({...p,category:normalizeCategory(p),id:'p'+i}));
+const primary=registry.map((r,i)=>{const p=matchingProfile(r);if(p)used.add(p);if(p&&clean(p.status)==='deleted')return null;return {...p,...r,status:p?.status||r.status||'Active',category:p?.category?normalizeCategory(p):normalizeCategory(r),id:'r'+i,photo:p?.photo||''}}).filter(Boolean);
+const extras=profiles.filter(p=>!used.has(p)&&clean(p.status)!=='deleted').map((p,i)=>({...p,status:p.status||'Active',category:normalizeCategory(p),id:'p'+i}));
 const listed=[...(D.activeFleet||[]),...(D.inactiveFleet||[])];
 function sameListedAsset(a,b){
  const am=clean(a.make),bm=clean(b.make),an=clean(a.model),bn=clean(b.model);
@@ -507,7 +508,7 @@ function listedCategory(a){const n=clean(a.make+' '+a.model);
  return 'Cars';
 }
 const assets=primary.concat(extras);
-for(const [i,item] of listed.entries())if(!deletedProfiles.some(p=>sameListedAsset(p,item))&&!assets.some(a=>sameListedAsset(a,item)))assets.push({...item,category:listedCategory(item),id:'f'+i});
+for(const [i,item] of listed.entries())if(!deletedProfiles.some(p=>sameListedAsset(p,item))&&!assets.some(a=>sameListedAsset(a,item)))assets.push({...item,status:item.status||'Active',category:listedCategory(item),id:'f'+i});
 assets.splice(0,assets.length,...assets.filter(belongsHere));
 document.querySelector('.th-app-topbar strong').textContent=workspaceTitle;
 document.querySelectorAll('.th-sidebar [href$=".html"]').forEach(link=>link.classList.toggle('active',link.getAttribute('href')===(workspace==='vehicles'?'vehicles.html':workspace+'.html')));
@@ -530,7 +531,8 @@ async function openServiceDetails(a){
  catch(error){if(asset===a){document.getElementById('assetMaintenance').innerHTML='<div class="asset-note">'+esc(error.message)+' Select another tab and return to Service Log to retry.</div>';document.getElementById('assetRecommended').innerHTML='<div class="asset-note">'+esc(error.message)+'</div>'}}
 }
 const serviceKeys={'keystone':'331','ram3500':'3500','toyota4runner':'4Runner','chrysleraspen':'Aspen','hondacivic':'Civic','fordmustang':'Mustang','fordf150':'F150','harleydavidsonultra':'FLHTCUI','harleydavidsonroad':'FLTRK','makdaddy':'Legend','stirling':'Stirling','westbrook':'Stirling','trek':'trek','colemanb200':'B200','volpam':'SP03','coolster':'3050C','xpro':'Xpro'};
-function serviceFor(a){const name=clean(a.make+' '+a.model);const legacy=Object.entries(serviceKeys).find(([prefix])=>name.startsWith(prefix))?.[1];const key=legacy||(a.reportId&&String(a.reportId).startsWith('PDF-')?'report-'+String(a.reportId).slice(4):'');return key?services.filter(s=>clean(s.asset)===clean(key)):[]}
+function serviceAssetKey(a){const name=clean(a.make+' '+a.model),legacy=Object.entries(serviceKeys).find(([prefix])=>name.startsWith(prefix))?.[1];return legacy||(a.reportId&&String(a.reportId).startsWith('PDF-')?'report-'+String(a.reportId).slice(4):'')||(a.profileRow?'profile-'+a.profileRow:'item-'+clean(a.year+' '+a.make+' '+a.model))}
+function serviceFor(a){const key=serviceAssetKey(a);return services.filter(s=>clean(s.asset)===clean(key))}
 const scheduleKeys=[[/trek.*7200/, 'trek7200'],[/harley.*(ultra|flhtcui)/,'harleydavidsonultra'],[/lifetime.*spitfire/,'lifetimespitfire'],[/keystone.*bullet/,'keystonebullet'],[/stirling|westbrook.*trailer/,'stirling'],[/makdaddy.*legend/,'makdaddylegend'],[/harley.*(roadglide|fltrk)/,'harleydavidsonroad'],[/ram.*3500/,'ram3500'],[/coleman.*(b200|8200)/,'colemanb200'],[/volpam.*sp03/,'volpamsp03'],[/coolster.*3050/,'coolster3050'],[/ford.*f150/,'fordf150'],[/xpro.*jaguar/,'xprojaguar'],[/ford.*mustang/,'fordmustang'],[/toyota.*4runner/,'toyota4runner'],[/chrysler.*aspen/,'chrysleraspen'],[/honda.*civic/,'hondacivic'],[/husqvarna.*122hd4[5s]/,'husqvarna122hd4s'],[/echo.*pb2520/,'echopb2520'],[/dewalt.*aircompressor/,'dewaltaircompressor'],[/dewalt.*dxpw3425|dewalt.*pressurewasher/,'dewaltdxpw3425'],[/craftsman.*18.*chainsaw/,'craftsman18inchchainsaw'],[/craftsman.*10.*polesaw/,'craftsman10polesaw'],[/husqvarna.*yth24k48/,'husqvarnayth24k48'],[/cubcadet.*kohler/,'cubcadetkohler'],[/husqvarna.*330lx|husqvarna.*weedeater/,'husqvarna330lx'],[/stihl.*fs56/,'stihlfs56']];
 function scheduleFor(a){const name=clean([a.make,a.model,a.name].filter(Boolean).join(' '));const entry=scheduleKeys.find(([pattern])=>pattern.test(name));return entry?schedules[entry[1]]:null}
 function renderRecommended(a){
@@ -751,7 +753,7 @@ document.getElementById('assetGrid').addEventListener('change',async e=>{
  const a=assets.find(x=>x.id===input.dataset.cardStatus);if(!a)return;
  const prior=a.status||'Active',next=input.value;if(next===prior)return;
  input.disabled=true;input.parentElement.querySelector('.card-status-error')?.remove();
- try{await ensureProfileRow(a);await thWriteCell('Portal Asset Profiles','I'+a.profileRow,next);a.status=next;renderCategory();renderGarageStats()}
+ try{await saveAssetStatus(a,next);renderCategory();renderGarageStats()}
  catch(error){input.value=prior;const message=document.createElement('span');message.className='card-status-error';message.setAttribute('role','alert');message.textContent=error.message||'Could not save status.';input.parentElement.append(message)}
  finally{input.disabled=false}
 });
@@ -830,12 +832,33 @@ document.getElementById('assetFacts').addEventListener('change',async e=>{
  if(e.target.id!=='assetStatusEdit'||!asset||!editing)return;
  const input=e.target,a=asset,prior=a.status||'Active',message=document.getElementById('assetEditStatus');
  input.disabled=true;message.textContent='Saving status…';message.classList.remove('error');
- try{await ensureProfileRow(a);await thWriteCell('Portal Asset Profiles','I'+a.profileRow,input.value);a.status=input.value;document.getElementById('assetStatus').textContent=a.status;renderCategory();message.textContent='Status saved to your workbook.'}
+ try{await saveAssetStatus(a,input.value);document.getElementById('assetStatus').textContent=a.status;renderCategory();renderGarageStats();message.textContent='Status saved and verified in your workbook.'}
  catch(error){input.value=prior;message.textContent=error.message;message.classList.add('error')}
  finally{input.disabled=!editing}
 });
 const profileColumns={year:'C',make:'D',model:'E',color:'F',vin:'L',tag:'N',renewal:'O',engine:'P',transmission:'Q',tireSize:'R',vehicleNumber:'M',ownershipStart:'AC',reportOdometer:'K'};
 const registryColumns={year:'B',make:'C',model:'D',vin:'E',tag:'F'};
+async function saveAssetStatus(a,next){
+ const prior=a.status||'Active';
+ await ensureProfileRow(a);
+ await thWriteCell('Portal Asset Profiles','I'+a.profileRow,next);
+ try{
+  if(a.registryRow)await thWriteCell('Vehicle Registry','G'+a.registryRow,next);
+  const [profile,registry]=await Promise.all([
+   thValues("'Portal Asset Profiles'!I"+a.profileRow),
+   a.registryRow?thValues("'Vehicle Registry'!G"+a.registryRow):Promise.resolve([[next]])
+  ]);
+  if(profile[0]?.[0]!==next||registry[0]?.[0]!==next)throw new Error('The status was not confirmed in the workbook. Try again.');
+ }catch(error){
+  // Do not leave the two source tabs disagreeing after a partial save.
+  await Promise.allSettled([
+   thWriteCell('Portal Asset Profiles','I'+a.profileRow,prior),
+   a.registryRow?thWriteCell('Vehicle Registry','G'+a.registryRow,prior):Promise.resolve()
+  ]);
+  throw error;
+ }
+ a.status=next;
+}
 async function ensureProfileRow(a){
  if(a.profileRow)return a.profileRow;
  const row=Array(29).fill('');
@@ -881,7 +904,7 @@ document.getElementById('addVehicleForm').addEventListener('submit',async e=>{
   const profileRow=await thAppendRow('Portal Asset Profiles',row);
   if(!profileRow)throw new Error('The vehicle was saved, but its row could not be identified. Refresh to see it.');
   const next={...data,name:row[1],profileRow,id:'new'+profileRow,photo:'',photoFileId:''};
-  assets.push(next);category=data.category;status=clean(data.status)==='inactive'?'inactive':'active';renderCategories();renderCategory();asset=next;renderAsset();show('assetView');
+  assets.push(next);category=data.category;status=clean(data.status);renderCategories();renderCategory();asset=next;renderAsset();show('assetView');
   document.getElementById('addVehicleDialog').close();
  }catch(error){message.textContent=error.message}
  finally{button.disabled=false}
@@ -935,7 +958,7 @@ document.getElementById('assetFacts').addEventListener('change',async e=>{
   }
   try{await thWriteCell('Portal Asset Profiles',profileColumns[key]+a.profileRow,next)}catch(error){if(key==='reportOdometer'){const m=mileageFor(a);if(m)await thWriteCell('Mileage-2025.10.16','E'+m.sheetRow,m.startMileage)}throw error}
   if(key==='reportOdometer'){const m=mileageFor(a);if(m){m.startMileage=next;m.addedMileage=Number(String(m.currentMileage).replace(/,/g,''))-Number(next)}}
-  if(a.registryRow&&registryColumns[key])await thWriteCell('Vehicle Registry',registryColumns[key]+a.registryRow,next);
+  if(a.registryRow&&registryColumns[key]){try{await thWriteCell('Vehicle Registry',registryColumns[key]+a.registryRow,next)}catch(error){await thWriteCell('Portal Asset Profiles',profileColumns[key]+a.profileRow,prior).catch(()=>{});throw error}}
   a[key]=next;
   message.textContent='Saved to your workbook.';
   if(['year','make','model','ownershipStart','reportOdometer'].includes(key)){document.getElementById('assetTitle').textContent=[a.year,a.make,a.model].filter(Boolean).join(' ');renderCategory()}
@@ -973,16 +996,17 @@ document.getElementById('assetMileage').addEventListener('submit',async e=>{
 document.getElementById('assetMaintenance').addEventListener('change',async e=>{
  const input=e.target.closest('[data-service-row]');if(!input||!editing)return;
  input.disabled=true;
- try{await thWriteCell('Portal Service History',input.dataset.serviceCol+input.dataset.serviceRow,input.value);document.getElementById('assetEditStatus').textContent='Service entry saved.'}
- catch(error){document.getElementById('assetEditStatus').textContent=error.message;document.getElementById('assetEditStatus').classList.add('error')}
+ try{await thWriteCell('Portal Service History',input.dataset.serviceCol+input.dataset.serviceRow,input.value);const entry=services.find(item=>item.sheetRow===Number(input.dataset.serviceRow));if(entry)entry[{C:'date',D:'item',E:'odometer',G:'notes'}[input.dataset.serviceCol]]=input.value;document.getElementById('assetEditStatus').textContent='Service entry saved.'}
+ catch(error){const entry=services.find(item=>item.sheetRow===Number(input.dataset.serviceRow));if(entry)input.value=entry[{C:'date',D:'item',E:'odometer',G:'notes'}[input.dataset.serviceCol]]||'';document.getElementById('assetEditStatus').textContent=error.message;document.getElementById('assetEditStatus').classList.add('error')}
  finally{input.disabled=false}
 });
 document.getElementById('assetMaintenance').addEventListener('click',async e=>{
  if(e.target.id!=='addService'||!asset)return;
  const button=e.target;button.disabled=true;
  try{
-  const row=await thAppendRow('Portal Service History',[serviceFor(asset)[0]?.asset||Object.entries(serviceKeys).find(([prefix])=>clean(asset.make+' '+asset.model).startsWith(prefix))?.[1]||asset.model,'',new Date().toISOString().slice(0,10),'New service','','','']);
-  services.push({asset:serviceFor(asset)[0]?.asset||asset.model,id:'',date:new Date().toISOString().slice(0,10),item:'New service',odometer:'',cost:'',notes:'',sheetRow:row});
+  await ensureProfileRow(asset);const serviceAsset=serviceAssetKey(asset),today=new Date().toISOString().slice(0,10);
+  const row=await thAppendRow('Portal Service History',[serviceAsset,'',today,'New service','','','']);
+  services.push({asset:serviceAsset,id:'',date:today,item:'New service',odometer:'',cost:'',notes:'',sheetRow:row});
   renderAsset('maintenance');document.getElementById('assetEditStatus').textContent='Service entry added. Edit its details below.';
  }catch(error){document.getElementById('assetEditStatus').textContent=error.message;document.getElementById('assetEditStatus').classList.add('error')}
  finally{button.disabled=false}
@@ -1021,8 +1045,8 @@ document.getElementById('assetRecommended').addEventListener('submit',async e=>{
  if(e.target.id!=='completeServiceForm'||!asset)return;
  e.preventDefault();const form=e.target,button=form.querySelector('[type=submit]'),message=form.querySelector('.complete-message'),task=scheduleFor(asset)?.tasks.find(x=>x.sheetRow===Number(form.dataset.scheduleRow));if(!task)return;
  const data=Object.fromEntries(new FormData(form));button.disabled=true;message.textContent='Saving completed service…';
- const serviceAsset=serviceFor(asset)[0]?.asset||Object.entries(serviceKeys).find(([prefix])=>clean(asset.make+' '+asset.model).startsWith(prefix))?.[1]||asset.model;
  try{
+  await ensureProfileRow(asset);const serviceAsset=serviceAssetKey(asset);
   const row=await thAppendRow('Portal Service History',[serviceAsset,'',data.date,task.task,data.reading,'',data.notes]);
   services.push({asset:serviceAsset,id:'',date:data.date,item:task.task,odometer:data.reading,cost:'',notes:data.notes,sheetRow:row});
   button.disabled=true;message.textContent='Saved to Service Log. Updating schedule…';

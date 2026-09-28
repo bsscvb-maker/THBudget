@@ -141,7 +141,7 @@ async function thAppendRow(sheet, values) {
     if (!response.ok) {const detail=await response.json().catch(()=>({}));throw new Error(detail.error?.message||'Could not add a mileage record.')}
     return row;
   }
-  const appendRanges={'Mileage-2025.10.16':'A5:K','Portal Service History':'A:G','FreeBirds':'A:P','Portal Asset Profiles':'A:AA'};
+  const appendRanges={'Mileage-2025.10.16':'A5:K','Portal Service History':'A:G','FreeBirds':'A:P','Portal Asset Profiles':'A:AC'};
   const range="'"+sheet.replace(/'/g,"''")+"'!"+(appendRanges[sheet]||'A:Z');
   const response=await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+TH_SHEET_ID+'/values/'+encodeURIComponent(range)+':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',{
     method:'POST',headers:{Authorization:'Bearer '+thToken,'Content-Type':'application/json'},
