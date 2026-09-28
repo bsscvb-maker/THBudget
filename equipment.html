@@ -413,7 +413,7 @@ const workspace=location.pathname.endsWith('/equipment.html')?'equipment':locati
 const workspaceCategories=workspace==='equipment'?equipmentSections:workspace==='watercraft'?waterSections:categories.filter(c=>!equipmentSections.includes(c)&&!waterSections.includes(c));
 const belongsHere=a=>workspaceCategories.includes(a.category)||workspace==='vehicles'&&a.category==='Unfiled';
 const workspaceTitle=workspace==='equipment'?'Equipment':workspace==='watercraft'?'Watercraft':'Vehicles';
-const inSection=(a,section)=>section==='All Vehicles'||(section===equipmentGroup?equipmentSections.includes(a.category):a.category===section);
+const inSection=(a,section)=>section==='All Equipment'||(section===equipmentGroup?equipmentSections.includes(a.category):a.category===section);
 const paths={
 'Cars':'<path d="M4 15h16l-2-6H6l-2 6Zm2-6 2-3h8l2 3M5 15v3m14-3v3M7 18h10"/>',
 'Trucks':'<path d="M2 7h12v10H2zM14 11h4l4 4v2h-8M6 17a2 2 0 1 0 4 0m8 0a2 2 0 1 0 4 0"/>',
@@ -517,6 +517,11 @@ document.querySelector('#menuView .garage-panel h3').textContent=workspaceTitle;
 document.querySelector('#menuView .garage-panel p').textContent='Explore your '+workspaceTitle.toLowerCase()+' and open individual profiles.';
 document.querySelector('#openVehicles').textContent='Browse '+workspaceTitle.toLowerCase()+' →';
 document.querySelector('#dashboardView h2').textContent=workspaceTitle+' directory';
+ if(workspace==='equipment'){
+  document.querySelector('#reportVehicle').parentElement.firstChild.textContent='Equipment';
+  document.querySelector('[data-report-link="inventory"]').textContent='Equipment inventory →';
+  document.querySelector('#assetStatusEdit')?.setAttribute('aria-label','Equipment status');
+ }
 document.querySelectorAll('.add-vehicle-button').forEach(b=>b.textContent='+ Add '+(workspace==='vehicles'?'vehicle':'item'));
 document.querySelector('#addVehicleTitle').textContent='Add '+(workspace==='vehicles'?'a vehicle':'an item');
 document.querySelector('#saveVehicle').textContent='Save '+(workspace==='vehicles'?'vehicle':'item');
@@ -598,7 +603,7 @@ function specRecord(a){
  if(!saved.specs){const psi=raw.match(/Tire\s*PSI\s*[:\s]*([\d.]+)\s*(?:lbs?|psi)?/i),lug=raw.match(/Lug\s*Nut\s*Size\s*[:\s]*([\d.]+)\s*mm/i);if(psi)specs.tirePsi=psi[1]+' PSI';if(lug)specs.lugNutSize=lug[1]+' mm'}
  return {type:'vehicle-quick-specs-v1',specs,legacyNotes:saved.legacyNotes??(saved.type?'':raw)};
 }
-let category='',asset=null,status='active',yearOrder='oldest',editing=false,vehicleQuery='',missingFilter='all';
+let category='',asset=null,status='all',yearOrder='oldest',editing=false,vehicleQuery='',missingFilter='all';
 const currentAsset=()=>asset;
 let photoObserver;
 function assetPhoto(a){
@@ -607,18 +612,18 @@ function assetPhoto(a){
  return a.photoLoading;
 }
 function show(view){if(view==='menuView')renderGarageStats();for(const id of ['menuView','reportsView','dashboardView','categoryView','assetView'])document.getElementById(id).hidden=id!==view;window.scrollTo({top:0,behavior:'smooth'})}
-function renderCategories(){document.getElementById('categoryGrid').innerHTML=['All Vehicles',...workspaceCategories.filter(c=>workspace!=='equipment'||!equipmentSections.includes(c)),...(workspace==='equipment'?[equipmentGroup]:[]),...(workspace==='vehicles'?['Unfiled']:[])].filter(c=>c==='All Vehicles'||c===equipmentGroup||c==='Vans'||assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c===equipmentGroup?'Tractors':c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
+function renderCategories(){document.getElementById('categoryGrid').innerHTML=['All Equipment',...workspaceCategories.filter(c=>workspace!=='equipment'||!equipmentSections.includes(c)),...(workspace==='equipment'?[equipmentGroup]:[]),...(workspace==='vehicles'?['Unfiled']:[])].filter(c=>c==='All Equipment'||c===equipmentGroup||c==='Vans'||assets.some(a=>a.category===c)).map(c=>'<button type="button" class="category-card" data-category="'+esc(c)+'"><span class="category-icon">'+icon(c===equipmentGroup?'Tractors':c)+'</span><strong>'+esc(c)+'</strong></button>').join('')}
 function renderCategory(){
  photoObserver?.disconnect();
  const items=assets.filter(a=>inSection(a,category)).sort((a,b)=>{const ay=Number.parseInt(a.year,10),by=Number.parseInt(b.year,10);const aKnown=Number.isFinite(ay),bKnown=Number.isFinite(by);return (aKnown&&bKnown?(yearOrder==='oldest'?ay-by:by-ay):Number(bKnown)-Number(aKnown))||String(a.make||'').localeCompare(String(b.make||''))||String(a.model||'').localeCompare(String(b.model||''))});
  const words=vehicleQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
  const missing=a=>({photo:!(a.photoFileId||a.photo),engine:cardEngine(a)==='Not recorded',mileage:cardReading(a,mileageFor(a))==='Not recorded'});
  const shown=items.filter(a=>{if(status!=='all'&&clean(a.status)!==status)return false;if(words.length&&!words.every(w=>[a.year,a.make,a.model,a.vin,a.tag,a.vehicleNumber,a.engine,a.category].join(' ').toLowerCase().includes(w)))return false;const gaps=missing(a);return missingFilter==='all'||missingFilter==='any'&&Object.values(gaps).some(Boolean)||Boolean(gaps[missingFilter])});
- document.getElementById('categoryTitle').textContent=category==='All Vehicles'?'All '+workspaceTitle:category;
- const sections=['All Vehicles',...(workspace==='equipment'?[equipmentGroup]:[]),...workspaceCategories,...(workspace==='vehicles'?['Unfiled']:[])].filter(c=>c==='All Vehicles'||c===equipmentGroup||c==='Vans'||assets.some(a=>a.category===c));
+ document.getElementById('categoryTitle').textContent=category==='All Equipment'?'All '+workspaceTitle:category;
+ const sections=['All Equipment',...(workspace==='equipment'?[equipmentGroup]:[]),...workspaceCategories,...(workspace==='vehicles'?['Unfiled']:[])].filter(c=>c==='All Equipment'||c===equipmentGroup||c==='Vans'||assets.some(a=>a.category===c));
  document.getElementById('vehicleSectionFilter').innerHTML=sections.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
  document.getElementById('vehicleSectionFilter').value=category;
- document.getElementById('vehicleResults').textContent='Showing '+shown.length+' of '+items.length+' in '+(category==='All Vehicles'?'All '+workspaceTitle:category);
+ document.getElementById('vehicleResults').textContent='Showing '+shown.length+' of '+items.length+' in '+(category==='All Equipment'?'All '+workspaceTitle:category);
  document.getElementById('statusFilters').innerHTML=['active','inactive','managed','sold','all'].map(s=>'<button type="button" class="filter-chip '+(status===s?'active':'')+'" data-status="'+s+'">'+s[0].toUpperCase()+s.slice(1)+' · '+(s==='all'?items.length:items.filter(a=>clean(a.status)===s).length)+'</button>').join('');
  document.getElementById('assetGrid').innerHTML=shown.length?shown.map(a=>{
   const m=mileageFor(a),s=clean(a.status),added=cardNumber(m?.addedMileage),title=[a.year,a.make,a.model].filter(Boolean).join(' ');
@@ -741,7 +746,7 @@ document.getElementById('allLink').href=PORTAL+'finance.html';
 document.getElementById('updated').textContent=D.asOf||'latest';
 
 renderCategories();
-document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;status='active';vehicleQuery='';missingFilter='all';document.getElementById('vehicleSearch').value='';document.getElementById('vehicleMissingFilter').value='all';renderCategory();show('categoryView')});
+document.getElementById('categoryGrid').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;status='all';vehicleQuery='';missingFilter='all';document.getElementById('vehicleSearch').value='';document.getElementById('vehicleMissingFilter').value='all';renderCategory();show('categoryView')});
 document.getElementById('statusFilters').addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b)return;status=b.dataset.status;renderCategory()});
 document.getElementById('yearSort').addEventListener('change',e=>{yearOrder=e.target.value;renderCategory()});
 document.getElementById('vehicleSearch').addEventListener('input',e=>{vehicleQuery=e.target.value;renderCategory()});
@@ -753,7 +758,7 @@ document.getElementById('assetGrid').addEventListener('change',async e=>{
  const a=assets.find(x=>x.id===input.dataset.cardStatus);if(!a)return;
  const prior=a.status||'Active',next=input.value;if(next===prior)return;
  input.disabled=true;input.parentElement.querySelector('.card-status-error')?.remove();
- try{await saveAssetStatus(a,next);renderCategory();renderGarageStats()}
+ try{await saveAssetStatus(a,next);status='all';renderCategory();renderGarageStats()}
  catch(error){input.value=prior;const message=document.createElement('span');message.className='card-status-error';message.setAttribute('role','alert');message.textContent=error.message||'Could not save status.';input.parentElement.append(message)}
  finally{input.disabled=false}
 });
@@ -832,7 +837,7 @@ document.getElementById('assetFacts').addEventListener('change',async e=>{
  if(e.target.id!=='assetStatusEdit'||!asset||!editing)return;
  const input=e.target,a=asset,prior=a.status||'Active',message=document.getElementById('assetEditStatus');
  input.disabled=true;message.textContent='Saving status…';message.classList.remove('error');
- try{await saveAssetStatus(a,input.value);document.getElementById('assetStatus').textContent=a.status;renderCategory();renderGarageStats();message.textContent='Status saved and verified in your workbook.'}
+ try{await saveAssetStatus(a,input.value);document.getElementById('assetStatus').textContent=a.status;status='all';renderCategory();renderGarageStats();message.textContent='Status saved and verified in your workbook.'}
  catch(error){input.value=prior;message.textContent=error.message;message.classList.add('error')}
  finally{input.disabled=!editing}
 });
