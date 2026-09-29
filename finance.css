@@ -109,3 +109,8 @@ body[data-th-page="finance"] .control-box.red h3{background:#ffd4da;border-color
 #finance-order .finance-order-actions{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 #finance-order .tab-visibility{display:inline-flex;align-items:center;gap:6px;font-size:14px;white-space:nowrap;font-weight:600}
 #finance-order .tab-visibility input{width:18px;height:18px;accent-color:#2874e3}
+
+/* Pending transactions remain easy to spot across the entire ledger row. */
+body[data-th-page="finance"] .transaction-table tr.pending-transaction td,
+body[data-th-page="finance"] .transaction-table tr.pending-transaction:nth-child(even) td{background:#fff0f1;color:#172331;border-bottom-color:#edcbd0}
+body[data-th-page="finance"] .transaction-table tr.pending-transaction.selected td{background:#f9dfe4}
