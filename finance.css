@@ -14,3 +14,5 @@
 .transaction-amount{white-space:nowrap;text-align:right;font-weight:800}.transaction-amount.negative{color:#a71832}.transaction-amount.positive{color:#136541}
 
 .method-select{width:100%;min-width:115px;padding:6px;border:1px solid #b5bdc6;border-radius:5px;background:#fff;color:#111;font:12px Arial}
+
+.category-help{color:#cbdcf2;font-size:13px;margin:14px 0 0}
