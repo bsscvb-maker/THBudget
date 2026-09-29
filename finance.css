@@ -12,3 +12,5 @@
 @media(max-width:1300px){.filter-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:700px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.finance-head{padding:18px}.finance-tabs,.finance-panel{padding-left:14px;padding-right:14px}}
 
 .transaction-amount{white-space:nowrap;text-align:right;font-weight:800}.transaction-amount.negative{color:#a71832}.transaction-amount.positive{color:#136541}
+
+.method-select{width:100%;min-width:115px;padding:6px;border:1px solid #b5bdc6;border-radius:5px;background:#fff;color:#111;font:12px Arial}
