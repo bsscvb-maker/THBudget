@@ -1,5 +1,16 @@
 /* Shared account controls and workbook connection state. */
 (() => {
+  const nav = document.querySelector('.th-sidebar nav');
+  if (nav && !nav.querySelector('[href="black-mild.html"]')) {
+    const link = document.createElement('a');
+    const isCurrent = location.pathname.endsWith('/black-mild.html');
+    link.className = 'th-nav-link' + (isCurrent ? ' active' : '');
+    link.href = 'black-mild.html';
+    if (isCurrent) link.setAttribute('aria-current', 'page');
+    link.innerHTML = '<span class="th-nav-icon" style="font-family:Georgia,serif;color:#f0d18d">B&amp;M</span>Black &amp; Mild';
+    const systemLabel = [...nav.querySelectorAll('.th-nav-label')].find(el => el.textContent.trim() === 'System');
+    nav.insertBefore(link, systemLabel || null);
+  }
   const header = document.querySelector('.th-app-topbar');
   const status = document.querySelector('#th-connection, #connectionStatus');
   if (header && status) {
