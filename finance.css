@@ -85,3 +85,17 @@ body[data-th-page="finance"] .control-box.gold{background:#fff8de;border-color:#
 body[data-th-page="finance"] .control-box.gold h3{background:#ffe49c;border-color:#c99411;color:#0c1913}
 body[data-th-page="finance"] .control-edit-hint{background:#f0f8f3;border-color:#20ae5d;color:#135d39}
 body[data-th-page="finance"] .control-balance-input{background:#fff;border-color:#20ae5d;color:#171717}
+
+/* White work areas for Transactions and Reconciliation, framed by the blue finance shell. */
+body[data-th-page="finance"] .transaction-workspace,body[data-th-page="finance"] .reconcile-workspace{background:#fff;color:#172331}
+body[data-th-page="finance"] .transaction-count,body[data-th-page="finance"] .transaction-filters p,body[data-th-page="finance"] .reconcile-table small{color:#526174}
+body[data-th-page="finance"] .transaction-filters{background:#f5f8fc;border-color:#cbd8e8;color:#172331}
+body[data-th-page="finance"] .transaction-search,body[data-th-page="finance"] .reconcile-search,body[data-th-page="finance"] .filter-grid input,body[data-th-page="finance"] .filter-grid select,body[data-th-page="finance"] .method-select{background:#fff;border-color:#aebed3;color:#172331}
+body[data-th-page="finance"] .transaction-search input,body[data-th-page="finance"] .reconcile-search input{color:#172331}
+body[data-th-page="finance"] .transaction-workspace input::placeholder,body[data-th-page="finance"] .reconcile-workspace input::placeholder{color:#66778e}
+body[data-th-page="finance"] .transaction-table table,body[data-th-page="finance"] .reconcile-table table{color:#172331}
+body[data-th-page="finance"] .transaction-table td,body[data-th-page="finance"] .reconcile-table td{background:#fff;border-color:#d9e2ed;color:#172331}
+body[data-th-page="finance"] .transaction-table tr:nth-child(even) td,body[data-th-page="finance"] .reconcile-table tr:nth-child(even) td{background:#f5f8fc}
+body[data-th-page="finance"] .transaction-table tr.selected td{background:#dbe9ff}
+body[data-th-page="finance"] .transaction-table .transaction-amount.negative{color:#a71832}
+body[data-th-page="finance"] .transaction-table .transaction-amount.positive{color:#136541}
