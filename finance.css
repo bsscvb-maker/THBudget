@@ -71,3 +71,17 @@ body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input) spa
 body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input) strong{flex:0 0 220px;text-align:left;white-space:normal}
 body[data-th-page="finance"] .control-balance-input{display:block;width:220px;max-width:100%;min-width:180px;padding:10px 12px;text-align:left;font-size:18px}
 @media(max-width:600px){body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input){flex-wrap:wrap;gap:8px}body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input) span{flex:1 0 100%}body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input) strong{flex:1 1 100%}}
+
+/* Dashboard and Control retain their original light financial cards inside the blue finance frame. */
+body[data-th-page="finance"] .snapshot{background:#fff;border:1px solid #c9d5e2;color:#111}
+body[data-th-page="finance"] .snapshot>p{color:#536477}
+body[data-th-page="finance"] .snapshot-tile{background:#daf3e5;border:2px solid #20a958;color:#08633d}
+body[data-th-page="finance"] .snapshot-tile small{color:#172e26}
+body[data-th-page="finance"] .live-marker{background:#0b2519;border-color:#275e41;color:#98e6ae}
+body[data-th-page="finance"] .control-box{background:#edf8f1;border-color:#71c292;color:#16251d}
+body[data-th-page="finance"] .control-box h3{background:#b5ddcb;border-color:#20ae5d;color:#0c1913}
+body[data-th-page="finance"] .control-box p{border-color:#c5d5cc}
+body[data-th-page="finance"] .control-box.gold{background:#fff8de;border-color:#efb92c;color:#16251d}
+body[data-th-page="finance"] .control-box.gold h3{background:#ffe49c;border-color:#c99411;color:#0c1913}
+body[data-th-page="finance"] .control-edit-hint{background:#f0f8f3;border-color:#20ae5d;color:#135d39}
+body[data-th-page="finance"] .control-balance-input{background:#fff;border-color:#20ae5d;color:#171717}
