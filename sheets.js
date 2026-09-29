@@ -31,9 +31,14 @@ function thStatus(message) {
   const auth = document.getElementById('th-auth');
   auth.classList.toggle('th-auth-loading', loading);
   document.getElementById('th-sign-in').hidden = loading;
-  document.getElementById('th-auth-message').textContent = loading
-    ? 'Opening your private workbook… Please wait. You are already signed in.'
-    : message;
+  const authMessage = document.getElementById('th-auth-message');
+  if (loading) {
+    authMessage.innerHTML = '<span class="th-wait-label">Please wait</span><span class="th-wait-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>';
+    authMessage.setAttribute('aria-label', 'Please wait. Signing you in.');
+  } else {
+    authMessage.textContent = message;
+    authMessage.removeAttribute('aria-label');
+  }
 }
 function thAuthorized() { return Boolean(thToken); }
 function thSignIn() {
