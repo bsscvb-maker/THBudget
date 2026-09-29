@@ -22,3 +22,5 @@
 #activity-label select{margin-bottom:7px}#activity-label input{margin-top:0}
 
 #editor-status{min-height:20px;color:#b8f1d1;font-size:14px;font-weight:700;margin:12px 0 0}#editor-status.error{color:#ffc3c3}
+
+.transaction-table .vehicle-column{text-align:center}.add-fin-option{float:right;border:1px solid #94b8e6;border-radius:5px;background:#244b78;color:#fff;padding:3px 7px;font:700 12px Arial;cursor:pointer;margin:-3px 0 5px 6px}.add-fin-option:hover,.add-fin-option:focus-visible{background:#366da8}
