@@ -24,3 +24,41 @@
 #editor-status{min-height:20px;color:#b8f1d1;font-size:14px;font-weight:700;margin:12px 0 0}#editor-status.error{color:#ffc3c3}
 
 .transaction-table .vehicle-column{text-align:center}.add-fin-option{float:right;border:1px solid #94b8e6;border-radius:5px;background:#244b78;color:#fff;padding:3px 7px;font:700 12px Arial;cursor:pointer;margin:-3px 0 5px 6px}.add-fin-option:hover,.add-fin-option:focus-visible{background:#366da8}
+
+/* Finance uses the same navy and royal-blue palette as the TisZod portal. */
+body[data-th-page="finance"] .finance-head{background:linear-gradient(120deg,#14213a,#1d3e86);border:1px solid #3259a3;border-bottom:5px solid var(--th-blue);color:var(--th-text)}
+body[data-th-page="finance"] .finance-head p{color:#cedef8}
+body[data-th-page="finance"] .finance-tabs,body[data-th-page="finance"] .finance-panel{background:var(--th-panel);color:var(--th-text)}
+body[data-th-page="finance"] .finance-tabs button{background:var(--th-raised);border-color:var(--th-line);color:var(--th-muted)}
+body[data-th-page="finance"] .finance-tabs button.active,body[data-th-page="finance"] .finance-tabs button:hover{background:var(--th-blue);border-color:var(--th-blue);color:#fff}
+body[data-th-page="finance"] .finance-actions #finance-admin,body[data-th-page="finance"] .finance-actions #add,body[data-th-page="finance"] .transaction-toolbar button,body[data-th-page="finance"] .transaction-toolbar button:nth-of-type(2),body[data-th-page="finance"] .transaction-toolbar button:nth-of-type(3),body[data-th-page="finance"] .transaction-toolbar button:nth-of-type(4),body[data-th-page="finance"] .transaction-filters button,body[data-th-page="finance"] .bulk-actions button,body[data-th-page="finance"] .transaction-table .row-edit,body[data-th-page="finance"] .control-action button,body[data-th-page="finance"] .dialog-actions [type=submit],body[data-th-page="finance"] .empty-finance button,body[data-th-page="finance"] #finance-admin-dialog .dialog-actions #finance-admin-save{background:var(--th-blue);border:1px solid var(--th-blue-light);color:#fff}
+body[data-th-page="finance"] .finance-actions button:hover,body[data-th-page="finance"] .transaction-toolbar button:hover,body[data-th-page="finance"] .transaction-filters button:hover,body[data-th-page="finance"] .bulk-actions button:hover,body[data-th-page="finance"] .dialog-actions button:hover,body[data-th-page="finance"] .row-edit:hover{filter:brightness(1.18)}
+body[data-th-page="finance"] .transaction-workspace,body[data-th-page="finance"] .reconcile-workspace,body[data-th-page="finance"] .transaction-filters{background:var(--th-panel);border-color:var(--th-line);color:var(--th-text)}
+body[data-th-page="finance"] .transaction-count,body[data-th-page="finance"] .transaction-filters p,body[data-th-page="finance"] .reconcile-table small{color:var(--th-muted)}
+body[data-th-page="finance"] .transaction-search,body[data-th-page="finance"] .reconcile-search,body[data-th-page="finance"] .filter-grid input,body[data-th-page="finance"] .filter-grid select,body[data-th-page="finance"] .method-select,body[data-th-page="finance"] .panel-head input{background:var(--th-raised);border-color:var(--th-line);color:var(--th-text)}
+body[data-th-page="finance"] .transaction-search input,body[data-th-page="finance"] .reconcile-search input{background:transparent;color:var(--th-text)}
+body[data-th-page="finance"] input::placeholder{color:#9aafce;opacity:1}
+body[data-th-page="finance"] .table-scroll{border-color:var(--th-line)}
+body[data-th-page="finance"] .transaction-table table,body[data-th-page="finance"] .reconcile-table table{color:var(--th-text)}
+body[data-th-page="finance"] .transaction-table th,body[data-th-page="finance"] .reconcile-table th,body[data-th-page="finance"] th{background:#0b1424;border-bottom:3px solid var(--th-blue);color:#d4e2fb}
+body[data-th-page="finance"] .transaction-table td,body[data-th-page="finance"] .reconcile-table td,body[data-th-page="finance"] td{background:var(--th-panel);border-color:var(--th-line);color:var(--th-text)}
+body[data-th-page="finance"] .transaction-table tr:nth-child(even) td,body[data-th-page="finance"] .reconcile-table tr:nth-child(even) td,body[data-th-page="finance"] tr:nth-child(even) td{background:var(--th-raised)}
+body[data-th-page="finance"] .transaction-table tr.selected td{background:#264583}
+body[data-th-page="finance"] .transaction-table input[type=checkbox],body[data-th-page="finance"] .clear-check input{accent-color:var(--th-blue)}
+body[data-th-page="finance"] .snapshot{background:var(--th-side);border:1px solid var(--th-line)}
+body[data-th-page="finance"] .snapshot-tile{background:#1b3154;border:2px solid var(--th-blue);color:var(--th-text)}
+body[data-th-page="finance"] .snapshot-tile small{color:#c1d6f8}
+body[data-th-page="finance"] .live-marker{background:#183759;border-color:var(--th-blue);color:#bcd4ff}
+body[data-th-page="finance"] .control-intro{background:linear-gradient(120deg,#14213a,#1d3e86);border-bottom-color:var(--th-blue-light)}
+body[data-th-page="finance"] .control-box,body[data-th-page="finance"] .control-box.gold{background:var(--th-raised);border-color:var(--th-line);color:var(--th-text)}
+body[data-th-page="finance"] .control-box h3,body[data-th-page="finance"] .control-box.gold h3{background:#203b6c;border-color:var(--th-blue);color:var(--th-text)}
+body[data-th-page="finance"] .control-box p{border-color:var(--th-line)}
+body[data-th-page="finance"] .control-edit-hint{background:#1b3154;border-color:var(--th-blue);color:#d8e6ff}
+body[data-th-page="finance"] .control-balance-input{background:#12243e;border-color:var(--th-blue-light);color:#fff}
+body[data-th-page="finance"] #finance-admin-dialog{background:var(--th-panel);border-color:var(--th-line);color:var(--th-text)}
+body[data-th-page="finance"] #finance-admin-dialog p{color:var(--th-muted)}
+body[data-th-page="finance"] #finance-order li{border-color:var(--th-line)}
+body[data-th-page="finance"] #finance-order button,body[data-th-page="finance"] #finance-admin-dialog .dialog-actions button{background:var(--th-raised);border-color:var(--th-line);color:var(--th-text)}
+body[data-th-page="finance"] #finance-admin-dialog .dialog-actions #finance-admin-save{background:var(--th-blue);border-color:var(--th-blue-light);color:#fff}
+body[data-th-page="finance"] .add-fin-option{background:var(--th-blue);border-color:var(--th-blue-light)}
+body[data-th-page="finance"] :focus-visible{outline:2px solid var(--th-blue-light);outline-offset:2px}
