@@ -20,7 +20,7 @@ const FIN_CATEGORY_OPTIONS={
  'Savings':['Emergency fund','Retirement','Transfer to savings'],
  'Shopping':['Clothing','Electronics','Home goods','Personal care'],
  'Pets':['Veterinarian','Medication','Food','Grooming','Supplies','Boarding'],
- 'Family':['Child care','School','Activities','Support'],
+ 'Family':['Child care','Child support','School','Activities','Support'],
  'Entertainment':['Movies','Games','Concerts','Hobbies','Subscriptions'],
  'Travel':['Lodging','Flights','Fuel','Meals','Attractions'],
  'Taxes':['Federal','State','Local','Tax preparation'],
