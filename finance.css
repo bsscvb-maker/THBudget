@@ -62,3 +62,5 @@ body[data-th-page="finance"] #finance-order button,body[data-th-page="finance"] 
 body[data-th-page="finance"] #finance-admin-dialog .dialog-actions #finance-admin-save{background:var(--th-blue);border-color:var(--th-blue-light);color:#fff}
 body[data-th-page="finance"] .add-fin-option{background:var(--th-blue);border-color:var(--th-blue-light)}
 body[data-th-page="finance"] :focus-visible{outline:2px solid var(--th-blue-light);outline-offset:2px}
+
+#event-picker{margin-bottom:7px}#editor .form-grid label input[name=event]{margin-top:0}#editor .form-grid .club-related{display:flex;align-items:center;gap:10px;padding:14px;background:#1b3154;border:1px solid var(--th-line);border-radius:7px}#editor .form-grid .club-related input{width:20px;height:20px;margin:0;accent-color:var(--th-blue);flex:none}
