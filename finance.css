@@ -99,3 +99,13 @@ body[data-th-page="finance"] .transaction-table tr:nth-child(even) td,body[data-
 body[data-th-page="finance"] .transaction-table tr.selected td{background:#dbe9ff}
 body[data-th-page="finance"] .transaction-table .transaction-amount.negative{color:#a71832}
 body[data-th-page="finance"] .transaction-table .transaction-amount.positive{color:#136541}
+
+/* Financial status follows the value inside the blue Finance frame. */
+body[data-th-page="finance"] .snapshot-tile.negative{background:#ffe2e5;border-color:#c9253e;color:#9a1529}
+body[data-th-page="finance"] .snapshot-tile.balanced{background:#d8f3e3;border-color:#138c4b;color:#075c34}
+body[data-th-page="finance"] .snapshot-tile .tile-detail{display:block;margin-top:5px;font-size:12px;line-height:1.35;color:#405168}
+body[data-th-page="finance"] .control-box.red{background:#fff0f2;border-color:#d34a5f}
+body[data-th-page="finance"] .control-box.red h3{background:#ffd4da;border-color:#bc263d}
+#finance-order .finance-order-actions{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+#finance-order .tab-visibility{display:inline-flex;align-items:center;gap:6px;font-size:14px;white-space:nowrap;font-weight:600}
+#finance-order .tab-visibility input{width:18px;height:18px;accent-color:#2874e3}
