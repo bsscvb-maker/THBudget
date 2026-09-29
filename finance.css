@@ -64,3 +64,10 @@ body[data-th-page="finance"] .add-fin-option{background:var(--th-blue);border-co
 body[data-th-page="finance"] :focus-visible{outline:2px solid var(--th-blue-light);outline-offset:2px}
 
 #event-picker{margin-bottom:7px}#editor .form-grid label input[name=event]{margin-top:0}#editor .form-grid .club-related{display:flex;align-items:center;gap:10px;padding:14px;background:#1b3154;border:1px solid var(--th-line);border-radius:7px}#editor .form-grid .club-related input{width:20px;height:20px;margin:0;accent-color:var(--th-blue);flex:none}
+
+/* Keep bank balance entries readable instead of squeezing them at the card edge. */
+body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input){justify-content:flex-start;align-items:center;gap:18px}
+body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input) span{flex:0 1 42%}
+body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input) strong{flex:0 0 220px;text-align:left;white-space:normal}
+body[data-th-page="finance"] .control-balance-input{display:block;width:220px;max-width:100%;min-width:180px;padding:10px 12px;text-align:left;font-size:18px}
+@media(max-width:600px){body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input){flex-wrap:wrap;gap:8px}body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input) span{flex:1 0 100%}body[data-th-page="finance"] .control-box.gold p:has(.control-balance-input) strong{flex:1 1 100%}}
