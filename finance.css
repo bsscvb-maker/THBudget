@@ -20,3 +20,5 @@
 #editor #category-picker,#editor #subcategory-picker{margin-bottom:7px}#editor .form-grid label input[name=category],#editor .form-grid label input[name=subcategory]{margin-top:0}
 
 #activity-label select{margin-bottom:7px}#activity-label input{margin-top:0}
+
+#editor-status{min-height:20px;color:#b8f1d1;font-size:14px;font-weight:700;margin:12px 0 0}#editor-status.error{color:#ffc3c3}
