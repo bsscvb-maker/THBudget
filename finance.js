@@ -6,6 +6,36 @@ const FIN_ACCOUNT=FIN_SAVINGS?'Capital One 360 Savings':'Personal';
 const FIN_METHODS=['Credit card','Check','Cash','ATM','EFT','AR','ACH','Digital','Debit','Zelle','Deposit'];
 function finInferMethod(description){const d=String(description||'').toLowerCase();if(/zelle/.test(d))return 'Zelle';if(/credit card/.test(d))return 'Credit card';if(/digital card purchase/.test(d))return 'Digital';if(/debit card|card purchase/.test(d))return 'Debit';if(/\batm\b/.test(d))return 'ATM';if(/\bach\b/.test(d))return 'ACH';if(/\beft\b|transfer|withdrawal to/.test(d))return 'EFT';if(/\bcheck\b/.test(d))return 'Check';if(/deposit|interest paid/.test(d))return 'Deposit';if(/\bcash\b/.test(d))return 'Cash';if(/accounts receivable|\ba\/?r\b/.test(d))return 'AR';return ''}
 const finPayee=description=>String(description||'').replace(/^(?:digital card purchase|debit card purchase)\s*[-–—:]\s*/i,'').replace(/^zelle money sent to\s+/i,'').replace(/^zelle money received from\s+/i,'').replace(/^deposit from\s+/i,'').trim();
+// Match repeat merchants while ignoring bank prefixes and 7-Eleven store numbers.
+function finMerchantKey(description){const name=finPayee(description).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();if(/^7 eleven\b|^7eleven\b|^seven eleven\b/.test(name))return '7-eleven';return name.replace(/\s+(?:store\s*)?\d+$/,'').trim()}
+function finMerchantDefaults(description,rows=finRows){
+ const key=finMerchantKey(description);if(!key)return null;
+ const matches=rows.filter(x=>finMerchantKey(x.r[3])===key).sort((a,b)=>String(b.r[1]).localeCompare(String(a.r[1]))||b.sheetRow-a.sheetRow);
+ const classified=matches.find(x=>x.r[4]&&x.r[5]&&x.r[5]!=='Needs review')||matches.find(x=>x.r[4]&&x.r[5])||matches.find(x=>x.r[4]);
+ const method=matches.find(x=>x.r[11]);
+ return {category:classified?.r[4]||(key==='7-eleven'?'Groceries':''),subcategory:classified?.r[5]||(key==='7-eleven'?'Food':''),method:finInferMethod(description)||method?.r[11]||'',type:classified?finType(classified.r):'Expense'};
+}
+function finMissingDefaults(item,rows=finRows){
+ const r=item.r,d=finMerchantDefaults(r[3],rows),updates=[];
+ const category=r[4]||d?.category||'Other';
+ if(!r[4])updates.push([4,category]);
+ if(!r[5])updates.push([5,d?.category===category&&d?.subcategory?d.subcategory:'Needs review']);
+ if(!r[11]&&(finInferMethod(r[3])||d?.method))updates.push([11,finInferMethod(r[3])||d.method]);
+ if(!r[12])updates.push([12,finType(r)]);
+ return updates;
+}
+let finAutoFields={};
+function finApplyMerchantDefaults(){
+ if(finEdit!==-1)return;
+ const f=$('transaction-form'),d=finMerchantDefaults(f.elements.payee.value);
+ for(const field of ['category','subcategory','method','type']){
+  const input=f.elements[field],previous=finAutoFields[field];
+  if(input.value===''||input.value===previous||(field==='type'&&previous===undefined&&input.value==='Expense')){
+   input.value=d?.[field]|| (field==='type'?'Expense':'');finAutoFields[field]=input.value;
+  }
+ }
+ finCategoryOptions();
+}
 const finDate=date=>{const m=String(date||'').match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);return m?Number(m[2])+'/'+Number(m[3])+'/'+m[1]:String(date||'')};
 const FIN_HEADERS=['ID','Date','Account','Payee / Description','Category','Subcategory','Vehicle','Money In','Money Out','Status','Notes','Transaction Method','Type','Event / Activity','Club related'];
 const FIN_TABS=[['dashboard','Dashboard'],['control','Control'],['lineitem','Line-Item Budget'],['baseline','Budget Baseline'],['transactions2026','Transactions'],['reconciliation','Reconciliation'],['transactionlist','Transaction List']];
@@ -70,7 +100,7 @@ async function finInit(){
  try{const assets=await thValues("'Portal Asset Profiles'!B2:I135");finVehicleNames=[...new Set(assets.filter(r=>r[0]&&String(r[7]||'').toLowerCase()!=='deleted').map(r=>String(r[0]).replace(/\s*-\s*\d+\s*PSI\s*$/i,'').trim()))]}catch(err){console.warn('Vehicle choices could not load',err)}
  await finLoad();
 }
-async function finLoad(){const data=await finRequest(finRange('A2:O')+'?valueRenderOption=UNFORMATTED_VALUE');finRows=(data.values||[]).map((r,i)=>({r:r.concat(Array(15).fill('')).slice(0,15),sheetRow:i+2})).filter(x=>x.r[0]&&!['void','voided','deleted'].includes(String(x.r[9]).trim().toLowerCase()));const methodUpdates=finRows.filter(x=>{const inferred=finInferMethod(x.r[3]);return inferred&&(!x.r[11]||(inferred==='Digital'&&x.r[11]==='Debit'))});if(methodUpdates.length){await finRequest('/values:batchUpdate','POST',{valueInputOption:'RAW',data:methodUpdates.map(x=>({range:"'"+FIN_SHEET+"'!L"+x.sheetRow,values:[[finInferMethod(x.r[3])]]}))});methodUpdates.forEach(x=>{x.r[11]=finInferMethod(x.r[3])})}$('categories').innerHTML=[...new Set([...Object.keys(FIN_CATEGORY_OPTIONS),...finRows.map(x=>String(x.r[4]||'').trim()).filter(Boolean)])].sort().map(v=>'<option value="'+fe(v)+'"></option>').join('');finPopulateCategoryPicker();finCategoryOptions();finEventOptions();finRender();}
+async function finLoad(){const data=await finRequest(finRange('A2:O')+'?valueRenderOption=UNFORMATTED_VALUE');finRows=(data.values||[]).map((r,i)=>({r:r.concat(Array(15).fill('')).slice(0,15),sheetRow:i+2})).filter(x=>x.r[0]&&!['void','voided','deleted'].includes(String(x.r[9]).trim().toLowerCase()));const defaultUpdates=finRows.flatMap(x=>finMissingDefaults(x).map(([col,value])=>({item:x,col,value})));if(defaultUpdates.length){await finRequest('/values:batchUpdate','POST',{valueInputOption:'RAW',data:defaultUpdates.map(x=>({range:"'"+FIN_SHEET+"'!"+String.fromCharCode(65+x.col)+x.item.sheetRow,values:[[x.value]]}))});defaultUpdates.forEach(x=>{x.item.r[x.col]=x.value})}$('categories').innerHTML=[...new Set([...Object.keys(FIN_CATEGORY_OPTIONS),...finRows.map(x=>String(x.r[4]||'').trim()).filter(Boolean)])].sort().map(v=>'<option value="'+fe(v)+'"></option>').join('');finPopulateCategoryPicker();finCategoryOptions();finEventOptions();finRender();}
 function finVisible(){let rows=finRows;
  if(finTab==='reconciliation')rows=rows.filter(x=>String(x.r[9]).trim().toLowerCase()!=='cleared');
  if(finFilter)rows=rows.filter(x=>x.r.join(' ').toLowerCase().includes(finFilter.toLowerCase()));return rows;
@@ -113,7 +143,7 @@ function finRender(){const tabs=$('finance-tabs');tabs.innerHTML=finTabOrder.fil
  else{content+=finCards(rows);if(!finRows.length)content+='<div class="empty-finance"><h3>Starting fresh at $0.00</h3><p>Add your first personal transaction.</p><button type="button" id="first-add">Add first transaction</button></div>';else if(!rows.length)content+='<p class="empty-finance">No records in this section yet.</p>';else content+=grouping!==undefined?finGroup(rows,grouping):finTable(rows)}
  $('finance-content').innerHTML=content+'</section>';const search=$('finance-search');search?.addEventListener('input',e=>{finFilter=e.target.value;const at=e.target.selectionStart;finRender();$('finance-search').focus();$('finance-search').setSelectionRange(at,at)});$('first-add')?.addEventListener('click',()=>finOpen());}
 function finEditorStatus(message,error=false){const el=$('editor-status');el.textContent=message;el.classList.toggle('error',error)}
-function finOpen(sheetRow){finEditorStatus('');finEdit=sheetRow||-1;const form=$('transaction-form');form.reset();form.elements.account.value=FIN_ACCOUNT;const item=finRows.find(x=>x.sheetRow===sheetRow);const fields=['date','account','payee','category','subcategory','activity'];if(item){fields.forEach((f,i)=>form.elements[f].value=item.r[i+1]??'');form.elements.payee.value=finPayee(item.r[3]);form.elements.amount.value=num(item.r[8])?-num(item.r[8]):num(item.r[7]);form.elements.type.value=finType(item.r);form.elements.cleared.value=item.r[9]||'Pending';form.elements.notes.value=item.r[10]||'';form.elements.event.value=item.r[13]||'';form.elements.club.checked=String(item.r[14]).toLowerCase()==='yes';form.elements.method.value=(finInferMethod(item.r[3])==='Digital'&&item.r[11]==='Debit'?'Digital':item.r[11])||finInferMethod(item.r[3])||''}else{form.elements.date.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);form.elements.cleared.value='Pending'}finCategoryOptions();finVehicleOptions();finEventOptions();$('editor-title').textContent=item?'Edit transaction':'Add transaction';$('editor').showModal()}
+function finOpen(sheetRow){finEditorStatus('');finEdit=sheetRow||-1;finAutoFields={};const form=$('transaction-form');form.reset();form.elements.account.value=FIN_ACCOUNT;const item=finRows.find(x=>x.sheetRow===sheetRow);const fields=['date','account','payee','category','subcategory','activity'];if(item){fields.forEach((f,i)=>form.elements[f].value=item.r[i+1]??'');form.elements.payee.value=finPayee(item.r[3]);form.elements.amount.value=num(item.r[8])?-num(item.r[8]):num(item.r[7]);form.elements.type.value=finType(item.r);form.elements.cleared.value=item.r[9]||'Pending';form.elements.notes.value=item.r[10]||'';form.elements.event.value=item.r[13]||'';form.elements.club.checked=String(item.r[14]).toLowerCase()==='yes';form.elements.method.value=item.r[11]||finInferMethod(item.r[3])||''}else{form.elements.date.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);form.elements.cleared.value='Pending'}finCategoryOptions();finVehicleOptions();finEventOptions();$('editor-title').textContent=item?'Edit transaction':'Add transaction';$('editor').showModal()}
 function finAdminRender(){ $('finance-order').innerHTML=finTabOrder.map((id,i)=>'<li><span>'+fe(FIN_TABS.find(x=>x[0]===id)[1])+'</span><div class="finance-order-actions"><label class="tab-visibility"><input type="checkbox" data-visible="'+id+'" '+(finHiddenTabs.has(id)?'':'checked')+'> Show</label><button type="button" data-move="'+id+':up" '+(i===0?'disabled':'')+' aria-label="Move '+fe(id)+' up">↑</button><button type="button" data-move="'+id+':down" '+(i===finTabOrder.length-1?'disabled':'')+' aria-label="Move '+fe(id)+' down">↓</button></div></li>').join('') }
 $('finance-admin').addEventListener('click',()=>{finAdminRender();$('finance-admin-dialog').showModal()});
 $('finance-admin-close').addEventListener('click',()=>{finTabOrder=[...finSavedOrder];finHiddenTabs=new Set(finSavedHidden);$('finance-admin-dialog').close()});
@@ -126,6 +156,8 @@ $('finance-content').addEventListener('change',async e=>{const method=e.target.c
 $('finance-content').addEventListener('input',e=>{const field=e.target.closest('[data-fin-filter]:not(select)');if(!field)return;finFilters[field.dataset.finFilter]=field.value;localStorage.setItem(FIN_FILTER_KEY,JSON.stringify(finFilters))});
 
 $('categories').innerHTML=[...new Set([...Object.keys(FIN_CATEGORY_OPTIONS),...finRows.map(x=>String(x.r[4]||'').trim()).filter(Boolean)])].sort().map(v=>'<option value="'+fe(v)+'"></option>').join('');finPopulateCategoryPicker();$('transaction-form').elements.category.addEventListener('input',finCategoryOptions);$('transaction-form').elements.subcategory.addEventListener('input',()=>{$('subcategory-picker').value=$('transaction-form').elements.subcategory.value.trim()});$('category-picker').addEventListener('change',e=>{$('transaction-form').elements.category.value=e.target.value;$('transaction-form').elements.subcategory.value='';finCategoryOptions()});$('subcategory-picker').addEventListener('change',e=>{$('transaction-form').elements.subcategory.value=e.target.value});
+$('transaction-form').elements.payee.addEventListener('input',finApplyMerchantDefaults);
+$('transaction-form').elements.payee.addEventListener('change',finApplyMerchantDefaults);
 $('add-category').addEventListener('click',()=>{const input=$('transaction-form').elements.category;input.focus();input.select()});$('add-subcategory').addEventListener('click',()=>{const input=$('transaction-form').elements.subcategory;input.focus();input.select()});
 $('event-picker').addEventListener('change',e=>{const f=$('transaction-form');f.elements.event.value=e.target.value;if(e.target.value)f.elements.club.checked=true});$('transaction-form').elements.event.addEventListener('input',e=>{$('event-picker').value=e.target.value;if(e.target.value.trim())$('transaction-form').elements.club.checked=true});
 $('vehicle-picker').addEventListener('change',e=>{$('transaction-form').elements.activity.value=e.target.value});$('transaction-form').elements.activity.addEventListener('input',e=>{$('vehicle-picker').value=e.target.value});
