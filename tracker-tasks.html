@@ -140,7 +140,7 @@ body.dashboard-only .focus-dashboard{margin-top:18px}
 .focus-card[data-status="working"] h2,.metric[data-status="working"] strong,.metric[data-status="working"] span{color:#4da6ff}
 .focus-card[data-status="waiting"] h2,.metric[data-status="waiting"] strong,.metric[data-status="waiting"] span{color:#ffd24d}
 .metric[data-status="done"] strong,.metric[data-status="done"] span{color:#5cff5c}
-</style></head>
+</style><style>.row{grid-template-columns:24px minmax(180px,1fr) 120px 140px}button.edit-task-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:87px;min-height:42px;background:#000!important;color:#fff!important;border:1px solid #555!important;font-size:16px}button.edit-task-button span{color:#fff!important;font-size:14px;font-weight:700}button.edit-task-button:hover{background:#171717!important}@media(max-width:700px){.row{grid-template-columns:24px minmax(0,1fr) 94px}.row .btns{align-items:stretch}.edit-task-button{min-width:86px}}</style></head>
 
 <body>
 <header>
@@ -511,9 +511,9 @@ const tierTasks = visible
       btnWrap.className="btns";
 
       const editBtn = document.createElement("button");
-      editBtn.className="iconBtn";
+      editBtn.className="iconBtn edit-task-button";
       editBtn.type="button";
-      editBtn.textContent="✏️";
+      editBtn.textContent="✏️";const editLabel=document.createElement("span");editLabel.textContent="Edit";editBtn.append(editLabel);
       editBtn.title="Edit task";
       editBtn.onclick=()=>openModal("edit", task);
 
