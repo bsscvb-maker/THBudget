@@ -132,6 +132,14 @@
 body.dashboard-only header,body.dashboard-only .tracker-tools,body.dashboard-only #board{display:none}
 body.dashboard-only .wrap{padding:16px}
 body.dashboard-only .focus-dashboard{margin-top:18px}
+</style><style>
+.focus-card[data-status="ready"]{border-top:3px solid #ff4d4d}
+.focus-card[data-status="working"]{border-top:3px solid #4da6ff}
+.focus-card[data-status="waiting"]{border-top:3px solid #ffd24d}
+.focus-card[data-status="ready"] h2,.metric[data-status="ready"] strong,.metric[data-status="ready"] span{color:#ff4d4d}
+.focus-card[data-status="working"] h2,.metric[data-status="working"] strong,.metric[data-status="working"] span{color:#4da6ff}
+.focus-card[data-status="waiting"] h2,.metric[data-status="waiting"] strong,.metric[data-status="waiting"] span{color:#ffd24d}
+.metric[data-status="done"] strong,.metric[data-status="done"] span{color:#5cff5c}
 </style></head>
 
 <body>
@@ -403,10 +411,10 @@ function pickNonRepeatingMessage(tierId){
 function render(){
 
   const counts=Object.fromEntries(["ready","working","waiting","done"].map(status=>[status,tasks.filter(t=>t.status===status).length]));
-  document.getElementById("trackerSummary").innerHTML=[["Open tasks",tasks.length-counts.done],["Working",counts.working],["Waiting",counts.waiting],["Done",counts.done]].map(([label,n])=>'<div class="metric"><strong>'+(loadingState?"—":n)+'</strong><span>'+label+'</span></div>').join("");
+  document.getElementById("trackerSummary").innerHTML=[["Ready",counts.ready],["Working",counts.working],["Waiting",counts.waiting],["Done",counts.done]].map(([label,n])=>'<div class="metric" data-status="'+label.toLowerCase()+'"><strong>'+(loadingState?"—":n)+'</strong><span>'+label+'</span></div>').join("");
   const focus=document.getElementById("focusDashboard");focus.replaceChildren();
   [["Ready","ready"],["Working","working"],["Waiting","waiting"]].forEach(([title,status])=>{
-   const card=document.createElement("section");card.className="focus-card";const heading=document.createElement("h2");heading.textContent=title;card.append(heading);
+   const card=document.createElement("section");card.className="focus-card";card.dataset.status=status;const heading=document.createElement("h2");heading.textContent=title;card.append(heading);
    const items=tasks.filter(t=>t.status===status).sort((a,b)=>TIERS.findIndex(t=>t.id===a.tier)-TIERS.findIndex(t=>t.id===b.tier)).slice(0,3);
    if(items.length)items.forEach(t=>{const button=document.createElement("button");button.textContent=t.text;button.disabled=!sheetReady;button.onclick=()=>openModal("edit",t);card.append(button);});
    else{const p=document.createElement("p");p.textContent=loadingState?"Loading…":sheetReady?"No tasks in this section.":"Waiting for saved tasks";card.append(p);}focus.append(card);
