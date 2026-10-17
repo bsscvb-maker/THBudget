@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TH41 Plan Tracker</title>
+
+<style>
+  body{margin:0;background:#000;color:#fff;font-family:Verdana,Arial,sans-serif;}
+  header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 18px;border-bottom:1px solid #222;background:#050505;
+    position:sticky;top:0;z-index:50;
+  }
+  h1{margin:0;font-size:20px;}
+  .sub{opacity:.75;font-size:12px;margin-top:2px;}
+  #addTaskBtn{
+    background:#1a73e8;color:#fff;border:none;border-radius:10px;
+    padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;
+  }
+  #addTaskBtn:hover{background:#2b7de9;}
+
+  .wrap{max-width:1200px;margin:auto;padding:18px;}
+
+  .note{
+    border:1px solid #2a2a2a;background:#0d0d0d;border-radius:12px;
+    padding:12px 14px;margin:0 0 14px;font-size:12px;line-height:1.45;opacity:.92;
+  }
+
+  /* ===== Savage Banner ===== */
+  #savageZone{display:none;margin:0 0 14px;}
+  .savage{
+    border:2px solid #7a0000;background:#2b0000;border-radius:12px;
+    padding:14px;
+  }
+  .savage h3{margin:0 0 6px;color:#ffb3b3;font-size:16px;}
+  .savage p{margin:6px 0;font-size:13px;line-height:1.4;}
+  .savage .meta{opacity:.85;font-size:12px;}
+  .savage .actions{margin-top:10px;}
+  .savage button{
+    background:#000;color:#fff;border:1px solid #555;border-radius:10px;
+    padding:7px 10px;margin-right:8px;cursor:pointer;font-size:12px;
+  }
+  .savage button:hover{border-color:#aaa;}
+
+  /* ===== Board ===== */
+  .tier{
+    border:1px solid #333;border-radius:14px;padding:14px;margin:0 0 16px;background:#111;
+  }
+  .tier h2{margin:0 0 10px;font-size:18px;}
+  .tier .tierHint{opacity:.75;font-size:12px;margin-bottom:10px;}
+  .row{
+    display:grid;
+    grid-template-columns: 28px 1fr 130px 230px 70px;
+    gap:26px;
+    align-items:center;
+    margin:8px 0;
+  }
+  input[type="checkbox"]{width:18px;height:18px;cursor:pointer;}
+  .taskText{
+    font-weight:600;font-size:13px;line-height:1.3;
+  }
+  .taskText.done{text-decoration:line-through;opacity:.45;}
+  .taskText.waiting{opacity:.70;font-style:italic;}
+
+  select, input[type="text"]{
+    background:#0f0f0f;color:#fff;border:1px solid #444;border-radius:10px;
+    padding:7px 10px;font-size:12px;
+  }
+
+  .status-ready{color:#ff4d4d;font-weight:800;}
+  .status-working{color:#4da6ff;font-weight:800;}
+  .status-waiting{color:#ffd24d;font-weight:800;}
+  .status-done{color:#5cff5c;font-weight:800;}
+
+  .btns{display:flex;gap:8px;justify-content:flex-end;}
+  .iconBtn{
+    background:#000;border:1px solid #555;color:#fff;border-radius:10px;
+    padding:7px 10px;cursor:pointer;font-size:12px;
+  }
+  .iconBtn:hover{border-color:#aaa;}
+  .danger:hover{border-color:#ff6b6b;}
+
+  /* ===== Hall of Shame ===== */
+  .hall{
+    border:1px solid #333;border-radius:14px;padding:12px;background:#0b0b0b;
+    margin-top:12px;
+  }
+  .hall h3{margin:0 0 10px;}
+  .log{font-size:11px;opacity:.92;border-bottom:1px solid #222;padding:7px 0;}
+  .pill{
+    display:inline-block;padding:2px 7px;border:1px solid #444;border-radius:999px;
+    font-size:10px;margin-right:6px;opacity:.95;
+  }
+
+  /* ===== Modal ===== */
+  #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;}
+  #modalBox{
+    width:390px;max-width:92vw;margin:110px auto;background:#111;border:1px solid #444;
+    border-radius:14px;padding:16px;
+  }
+  #modalBox h3{margin:0 0 12px;}
+  #modalBox label{display:block;font-size:12px;opacity:.85;margin:8px 0 6px;}
+  #modalBox .error{
+    display:none;color:#ff6b6b;font-size:12px;margin:0 0 6px;
+  }
+  #modalActions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
+  #modalActions button{
+    background:#000;color:#fff;border:1px solid #555;border-radius:10px;
+    padding:8px 12px;cursor:pointer;font-size:12px;
+  }
+  #modalActions button:hover{border-color:#aaa;}
+
+  /* Small screens */
+  @media(max-width:900px){
+    .row{grid-template-columns: 28px 1fr 120px 1fr 70px;}
+  }
+  @media(max-width:650px){
+    .row{grid-template-columns: 28px 1fr;}
+    .row > *:nth-child(3),
+    .row > *:nth-child(4),
+    .row > *:nth-child(5){grid-column:2;}
+    .btns{justify-content:flex-start;}
+  }
+</style>
+<style>
+*{box-sizing:border-box}body{background:#0b1019;color:#e8edf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}header{background:#101722;padding:20px 24px;border-color:#273244;gap:16px}h1{font-size:23px}.sub{line-height:1.5;color:#9aacc1}button{min-height:40px;cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid #60d5cd;outline-offset:3px}#addTaskBtn,#saveBtn{background:#3bc7bb;color:#062c29;border:0;font-weight:750}.wrap{max-width:1160px;padding:24px}.tracker-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.metric{padding:16px 18px;background:#131d2b;border:1px solid #29364a;border-radius:14px}.metric strong{display:block;font-size:27px}.metric span{font-size:12px;color:#a7b8ce}.tracker-tools{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}.tracker-tools input{flex:1;min-width:180px;padding:12px;background:#111c2a;border:1px solid #35445b;border-radius:10px;color:#fff}.filter-buttons{display:flex;gap:5px;flex-wrap:wrap}.filter-buttons button{background:#152132;color:#aebed2;border:1px solid #314056;padding:8px 12px;border-radius:9px}.filter-buttons button.active{background:#224943;color:#9ef4e9;border-color:#46b7a9}.note{background:#111a27;border-color:#29364a;color:#aabbd0;margin-top:16px}.note summary{cursor:pointer;font-weight:600}.note p{line-height:1.8}.tier{background:#111a27;border-color:#29364a;padding:0;overflow:hidden;scroll-margin-top:90px}.tier>summary{display:flex;align-items:center;gap:12px;cursor:pointer;padding:18px;list-style:none}.tier>summary:before{content:"›";font-size:22px;color:#93a9c2}.tier[open]>summary:before{transform:rotate(90deg)}.tier h2{font-size:15px;margin:0;flex:1}.tier-count{font-size:12px;border:1px solid #35445b;border-radius:20px;padding:3px 9px;color:#adc1d7}.tierHint{padding:0 18px;color:#869ab3}.row{grid-template-columns:24px minmax(180px,1fr) 120px 88px;gap:14px;margin:0;padding:16px 18px;border-top:1px solid #243146}.taskText{font-size:14px;font-weight:550;line-height:1.55;overflow-wrap:anywhere}.row select{width:100%;background:#172335;border-color:#34455d;padding:8px;font-size:11px}.row .move-tier{display:none}.iconBtn{background:#172335;border-color:#34455d;padding:7px 10px}.row input[type=checkbox]{accent-color:#3bc7bb}.empty-tier{padding:4px 18px 20px;color:#8297b1;font-size:13px}.empty-results{padding:36px;text-align:center;border:1px dashed #34455d;border-radius:14px}.hall{background:#111a27;border-color:#29364a;padding:16px}.hall summary{cursor:pointer;color:#aebed2;font-size:13px}.hall .log{padding:12px 0;line-height:1.7;border-color:#29364a}.savage{background:#2b2020;border:1px solid #7b5048}.savage .actions{display:flex;gap:8px;flex-wrap:wrap}.savage button{margin:0;background:#302729;border-color:#70504c}#modal{padding:24px;overflow:auto}#modalBox{margin:7vh auto;width:480px;max-width:100%;background:#142031;border-color:#3a4e69;padding:24px}#modalBox input,#modalBox select{width:100%;font-size:14px;padding:12px;background:#0d1623;border-color:#41536d}#modalBox label{margin-top:18px}#modalActions{margin-top:24px}#modalActions button{padding:10px 20px}
+@media(max-width:700px){header{padding:16px}.wrap{padding:14px}.tracker-summary{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:24px minmax(0,1fr) 88px;gap:10px;padding:14px}.row>*:nth-child(3){grid-column:2;grid-row:2;width:125px}.row>*:nth-child(5){grid-column:3;grid-row:1 / span 2}.row .btns{flex-direction:column}.taskText{grid-column:2}.sub{font-size:11px;max-width:230px}.tier h2{font-size:13px}.tracker-tools input{flex-basis:100%}.filter-buttons{width:100%}.filter-buttons button{flex:1;font-size:12px;padding:7px}}
+</style></head>
+
+<body>
+<header>
+  <div>
+    <h1>Your tasks</h1>
+    <div class="sub">Choose a priority. Move one thing forward.</div>
+  </div>
+  <button id="addTaskBtn">Add Task</button>
+</header>
+
+<div class="wrap">
+
+<div id="trackerSummary" class="tracker-summary" aria-live="polite"></div><div class="tracker-tools"><input id="taskSearch" type="search" aria-label="Search tasks" placeholder="Search your tasks…"><div class="filter-buttons"><button type="button" data-filter="all" class="active" aria-pressed="true">All</button><button type="button" data-filter="ready" class="" aria-pressed="false">Ready</button><button type="button" data-filter="working" class="" aria-pressed="false">Working</button><button type="button" data-filter="waiting" class="" aria-pressed="false">Waiting</button><button type="button" data-filter="done" class="" aria-pressed="false">Done</button></div></div>  <div id="savageZone"></div>
+
+  <div id="board"></div>
+
+  <div class="hall">
+    <h3>Hall of Shame</h3>
+    <div id="logs"></div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="modal">
+  <div id="modalBox" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Add Task</h3>
+    <div id="modalError" class="error">Type something. Telepathy isn’t enabled.</div>
+
+    <label for="taskInput">Task</label>
+    <input id="taskInput" type="text" placeholder="Enter task here…" />
+
+    <label for="tierSelect">Tier</label>
+    <select id="tierSelect"></select>
+
+    <label for="statusSelect">Status</label>
+    <select id="statusSelect">
+      <option value="working">WORKING</option>
+      <option value="ready">READY</option>
+      <option value="waiting">WAITING</option>
+      <option value="done">DONE</option>
+    </select>
+
+    <div id="modalActions">
+      <button id="cancelBtn" type="button">Cancel</button>
+      <button id="saveBtn" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   OPTION B STORAGE (PERSIST)
+   ========================= */
+
+let taskFilter="all",taskSearch="",collapsedTiers={};
+document.getElementById("taskSearch").addEventListener("input",e=>{taskSearch=e.target.value;render();});
+document.querySelectorAll("[data-filter]").forEach(button=>button.addEventListener("click",()=>{taskFilter=button.dataset.filter;document.querySelectorAll("[data-filter]").forEach(b=>{b.classList.toggle("active",b===button);b.setAttribute("aria-pressed",String(b===button));});render();}));
+let tasks = [];
+let touched = {};
+let snoozeUntil = {};
+let naggedDate = {};
+let logs = [];
+let msgHist = {};
+  
+const STORAGE = {
+  TASKS:  "TH41_PLAN_TASKS_V1",
+  TOUCHED:"TH41_PLAN_TIER_TOUCHED_V1",
+  NAGGED:"TH41_PLAN_TIER_NAGGEDDATE_V1",
+  SNOOZE:"TH41_PLAN_TIER_SNOOZE_V1",
+  LOGS:  "TH41_PLAN_LOG_V1",
+  MSGHIST:"TH41_PLAN_MSG_HIST_V1"
+};
+
+// This is the separate Apps Script attached to Todd's personal TH41 Sheet.
+const TH41_BACKEND_URL = "https://script.google.com/macros/s/AKfycbx9nruVEhEGyygWwdAknNRRvDCC7vIVnTxtWUq44_NCqoV9t3sDhAVP3CMmEAsbYA2XTQ/exec";
+
+const DAY_MS = 24*60*60*1000;
+
+const TIERS = [
+  { id:"tier1", title:"🔴 Tier 1 — Critical / Must Do First", cadenceDays:1 },
+  { id:"tier2", title:"🟠 Tier 2 — High Impact Operations", cadenceDays:1 },
+  { id:"tier3", title:"🟡 Tier 3 — Revenue & Program Growth", cadenceDays:2 },
+  { id:"tier4", title:"🔵 Tier 4 — Brand / Identity", cadenceDays:2 },
+  { id:"tier5", title:"🟣 Tier 5 — Content / Nice-to-Have", cadenceDays:7 },
+  { id:"parked",title:"🟢 Done", cadenceDays:null }
+];
+
+// Todd's tracker begins empty. Add personal tasks with the Add Task button.
+const DEFAULT_TASKS = [];
+
+/* =========================
+   SAVAGE MESSAGE ENGINE
+   ========================= */
+const ROAST = {
+  tier1: [
+    "Tier 1 is still open. That’s not a vibe. That’s a problem.",
+    "Tier 1 overdue. Congratulations, you’ve invented chaos again.",
+    "This is critical. Pretending it’s fine does not count as progress.",
+    "Tier 1 ignored long enough to qualify as negligence."
+  ],
+  tier2: [
+    "Tier 2 is aging like milk. You gonna do anything or nah?",
+    "High-impact stuff doesn’t complete itself. Tragically.",
+    "Tier 2 is overdue. That’s how good systems become ‘later problems’."
+  ],
+  tier3: [
+    "Tier 3 called. Growth is not happening by vibes.",
+    "We should be arrested for this level of tomfoolery.",
+    "This is not blocked. This is being avoided professionally."
+  ],
+  tier4: [
+    "Tier 4 sitting there like a neglected haircut appointment.",
+    "Brand work ignored = redo everything later. Pick your pain.",
+    "Tier 4 overdue. This is how you end up with 'random branding.'"
+  ],
+  tier5: [
+    "Tier 5 has been ignored so long it’s basically a historical site.",
+    "Tier 5 overdue. This is peak nonsense. Elite procrastination.",
+    "Tier 5 is still waiting. Patient little thing, isn’t it?"
+  ]
+};
+
+
+function todayKey(){ return new Date().toDateString(); }
+function stamp(){
+  const d=new Date();
+  const p=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function randPick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* =========================
+   STATE LOAD
+   ========================= */
+function readStored(key, fallback){
+  try{
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch(err){
+    return fallback;
+  }
+}
+
+function applyState(state){
+  tasks = Array.isArray(state && state.tasks) ? state.tasks : [];
+  touched = (state && state.touched) || {};
+  naggedDate = (state && state.naggedDate) || {};
+  snoozeUntil = (state && state.snoozeUntil) || {};
+  logs = Array.isArray(state && state.logs) ? state.logs : [];
+  msgHist = (state && state.msgHist) || {};
+}
+
+function currentState(){
+  return { tasks, touched, naggedDate, snoozeUntil, logs, msgHist };
+}
+
+function loadLocal(){
+  applyState({
+    tasks: readStored(STORAGE.TASKS, []),
+    touched: readStored(STORAGE.TOUCHED, {}),
+    naggedDate: readStored(STORAGE.NAGGED, {}),
+    snoozeUntil: readStored(STORAGE.SNOOZE, {}),
+    logs: readStored(STORAGE.LOGS, []),
+    msgHist: readStored(STORAGE.MSGHIST, {})
+  });
+  render();
+}
+
+async function loadFromPersonalSheet(){
+  try{
+    const response = await fetch(TH41_BACKEND_URL + "?action=getAll", { cache: "no-store" });
+    const state = await response.json();
+    applyState(state);
+    saveLocal();
+    render();
+  } catch(error){
+    console.warn("Personal TH41 Sheet unavailable; using this device's saved copy.", error);
+    loadLocal();
+  }
+}
+
+function saveLocal(){
+  localStorage.setItem(STORAGE.TASKS, JSON.stringify(tasks));
+  localStorage.setItem(STORAGE.TOUCHED, JSON.stringify(touched));
+  localStorage.setItem(STORAGE.NAGGED, JSON.stringify(naggedDate));
+  localStorage.setItem(STORAGE.SNOOZE, JSON.stringify(snoozeUntil));
+  localStorage.setItem(STORAGE.LOGS, JSON.stringify(logs));
+  localStorage.setItem(STORAGE.MSGHIST, JSON.stringify(msgHist));
+}
+
+// Bootstrap tasks once if empty
+if(!tasks || !Array.isArray(tasks) || tasks.length === 0){
+  tasks = DEFAULT_TASKS.map((t, idx)=>({
+    id: "t_"+Date.now()+"_"+idx,
+    tier: t[0],
+    text: t[1],
+    status: "ready",
+    createdAt: Date.now()
+  }));
+}
+
+// Ensure touched exists for each tier (backdated so nags can work)
+(function initTouched(){
+  const now = Date.now();
+  TIERS.forEach(t=>{
+    if(t.cadenceDays == null) return;
+    if(!touched[t.id]){
+      touched[t.id] = now - (t.cadenceDays + 1)*DAY_MS;
+    }
+  });
+})();
+
+function saveAll(){
+  saveLocal();
+  fetch(TH41_BACKEND_URL, {
+    method: "POST",
+    body: new URLSearchParams({ data: JSON.stringify(currentState()) })
+  }).catch(error => console.warn("Could not save to personal TH41 Sheet.", error));
+}
+
+/* =========================
+   HELPERS
+   ========================= */
+function touchTier(tierId){
+  touched[tierId] = Date.now();
+  saveAll();
+}
+
+function statusClass(status){
+  if(status==="ready") return "status-ready";
+  if(status==="working") return "status-working";
+  if(status==="waiting") return "status-waiting";
+  return "status-done";
+}
+
+function taskTextClass(status){
+  if(status==="done") return "taskText done";
+  if(status==="waiting") return "taskText waiting";
+  return "taskText";
+}
+
+/* =========================
+   SAVAGE CHECK (PHASE 3 + 4)
+   ========================= */
+function tierHasActionableWork(tierId){
+  return tasks.some(t => t.tier===tierId && t.status==="ready");
+}
+
+function daysSince(ms){
+  return Math.floor((Date.now()-ms)/DAY_MS);
+}
+
+function recordLog(tierTitle, sinceDays, msg){
+  logs.unshift({
+    time: stamp(),
+    tier: tierTitle,
+    sinceDays,
+    msg
+  });
+  if(logs.length>250) logs = logs.slice(0,250);
+}
+
+function pickNonRepeatingMessage(tierId){
+  const pool = ROAST[tierId] || ["Do the thing."];
+  const hist = msgHist[tierId] || [];
+  // prefer a message not recently used
+  const candidates = pool.filter(m => !hist.includes(m));
+  const chosen = candidates.length ? randPick(candidates) : randPick(pool);
+  const nextHist = [chosen].concat(hist).slice(0,6);
+  msgHist[tierId] = nextHist;
+  return chosen;
+}
+
+function buildSavageBanner(){
+  const zone = document.getElementById("savageZone");
+  zone.innerHTML="";
+  zone.style.display="none";
+
+  const now = Date.now();
+  const today = todayKey();
+
+  // Build list of overdue tiers (excluding parked)
+  const overdue = [];
+  TIERS.forEach(t=>{
+    if(t.cadenceDays == null) return;
+    if(snoozeUntil[t.id] && snoozeUntil[t.id] > now) return;
+    if(!tierHasActionableWork(t.id)) return; // only nag if READY work exists
+    const last = touched[t.id] || 0;
+    const since = daysSince(last);
+    if(since >= t.cadenceDays){
+      overdue.push({ tier:t, since });
+    }
+  });
+
+  if(!overdue.length) return;
+
+  // Show one banner per load cycle, prefer the most overdue tier
+  overdue.sort((a,b)=> b.since - a.since);
+  const pick = overdue[0];
+  const tierId = pick.tier.id;
+
+  // Only fire a new “daily” nag once per tier per day (but still show banner if already nagged today)
+  let msg;
+  if(naggedDate[tierId] !== today){
+    msg = pickNonRepeatingMessage(tierId);
+    naggedDate[tierId] = today;
+    recordLog(pick.tier.title, pick.since, msg);
+    saveAll();
+  } else {
+    // already nagged today: still show something (use last used message if available)
+    const hist = msgHist[tierId] || [];
+    msg = hist[0] || pickNonRepeatingMessage(tierId);
+  }
+
+  zone.style.display="block";
+  const card = document.createElement("div");
+  card.className="savage";
+  card.innerHTML = `
+    <h3>Accountability Alert</h3>
+    <div class="meta"><b>${pick.tier.title}</b> • You haven’t touched this tier in <b>${pick.since}</b> day(s).</div>
+    <p>${msg}</p>
+    <div class="actions">
+      <button type="button" data-snooze="1">Snooze 1 day</button>
+      <button type="button" data-snooze="3">Snooze 3 days</button>
+      <button type="button" data-snooze="7">Snooze 7 days</button>
+      <button type="button" data-jump="1">Jump to Tier</button>
+    </div>
+  `;
+  card.querySelectorAll("button[data-snooze]").forEach(btn=>{
+    btn.onclick=()=>{
+      const d = Number(btn.getAttribute("data-snooze"));
+      snoozeUntil[tierId] = Date.now() + d*DAY_MS;
+      saveAll();
+      render();
+    };
+  });
+  card.querySelector("button[data-jump]").onclick=()=>{
+    const el = document.getElementById(tierId);
+    if(el && el.scrollIntoView){el.open=true;el.scrollIntoView({behavior:"smooth"});}
+  };
+
+  zone.appendChild(card);
+}
+
+/* =========================
+   RENDER BOARD
+   ========================= */
+function render(){
+  buildSavageBanner();
+
+  const board = document.getElementById("board");
+  board.innerHTML="";
+
+  TIERS.forEach(tier=>{
+    const card = document.createElement("div");
+    card.className="tier";
+    card.id = tier.id;
+
+    const hint = tier.cadenceDays==null
+      ? "Done items never trigger reminders."
+      : `Reminder cadence: every ${tier.cadenceDays} day(s) if READY work exists.`;
+
+    card.innerHTML = `<summary><h2>${tier.title}</h2><span class="tier-count">${tierVisible.length}</span></summary><div class="tierHint">${hint}</div>`;
+
+const tierTasks = visible
+  .filter(x => x.tier === tier.id)
+  .sort((a, b) => {
+    const order = { working: 0, ready: 1, waiting: 2, done: 3 };
+    return order[a.status] - order[b.status];
+  });
+    tierTasks.forEach(task=>{
+      const row = document.createElement("div");
+      row.className="row";
+
+      // Checkbox toggles DONE / READY
+      const cb = document.createElement("input");
+      cb.type="checkbox";
+      cb.setAttribute("aria-label","Complete "+task.text);
+      cb.checked = (task.status==="done");
+      cb.onchange = ()=>{
+        task.status = cb.checked ? "done" : "ready";
+        touchTier(task.tier);
+        saveAll();
+        render();
+      };
+
+      // Text
+      const text = document.createElement("div");
+      text.className = taskTextClass(task.status);
+      text.textContent = task.text;
+
+      // Status dropdown
+      const status = document.createElement("select");
+      ["working","ready","waiting","done"].forEach(s=>{
+        const opt=document.createElement("option");
+        opt.value=s;
+        opt.textContent=s.toUpperCase();
+        if(task.status===s) opt.selected=true;
+        status.appendChild(opt);
+      });
+      status.className = statusClass(task.status);
+      status.setAttribute("aria-label","Status for "+task.text);
+      status.onchange = ()=>{
+        task.status = status.value;
+        touchTier(task.tier);
+        saveAll();
+        render();
+      };
+
+      // Move tier dropdown
+      const move = document.createElement("select");
+      TIERS.forEach(tt=>{
+        const opt=document.createElement("option");
+        opt.value=tt.id;
+        opt.textContent=tt.title;
+        if(task.tier===tt.id) opt.selected=true;
+        move.appendChild(opt);
+      });
+      move.className="move-tier";
+      move.onchange = ()=>{
+        const oldTier = task.tier;
+        task.tier = move.value;
+        touchTier(oldTier);
+        touchTier(task.tier);
+        saveAll();
+        render();
+      };
+
+      // Edit / Delete buttons
+      const btnWrap = document.createElement("div");
+      btnWrap.className="btns";
+
+      const editBtn = document.createElement("button");
+      editBtn.className="iconBtn";
+      editBtn.type="button";
+      editBtn.textContent="✏️";
+      editBtn.title="Edit task";
+      editBtn.onclick=()=>openModal("edit", task);
+
+      const delBtn = document.createElement("button");
+      delBtn.className="iconBtn danger";
+      delBtn.type="button";
+      delBtn.textContent="🗑️";
+      delBtn.title="Delete task";
+      delBtn.onclick=()=>{
+        const ok = confirm("Delete this task?\n\n" + task.text);
+        if(!ok) return;
+        tasks = tasks.filter(x=>x.id !== task.id);
+        touchTier(task.tier);
+        saveAll();
+        render();
+      };
+
+      btnWrap.appendChild(editBtn);
+      btnWrap.appendChild(delBtn);
+
+      // Spacer (for grid alignment)
+      const spacer = document.createElement("div");
+
+      row.appendChild(cb);
+      row.appendChild(text);
+      row.appendChild(status);
+      row.appendChild(move);
+      row.appendChild(btnWrap);
+
+      card.appendChild(row);
+    });
+
+    if(!tierTasks.length){const empty=document.createElement("p");empty.className="empty-tier";empty.textContent="No tasks here. Add one when you’re ready.";card.appendChild(empty);}
+    board.appendChild(card);
+  });
+
+  if(!visible.length&&(taskSearch||taskFilter!=="all"))board.innerHTML='<div class="empty-results">No tasks match. Try another status or search.</div>';
+  renderLogs();
+}
+
+/* =========================
+   HALL OF SHAME
+   ========================= */
+function renderLogs(){
+  const el = document.getElementById("logs");
+  if(!logs.length){
+    el.innerHTML = `<div class="log">No shame logged yet. Suspiciously quiet.</div>`;
+    return;
+  }
+  el.innerHTML = logs.map(l=>{
+    return `<div class="log">
+      <span class="pill">${l.time}</span>
+      <span class="pill">${l.tier}</span>
+      <span class="pill">${l.sinceDays}d</span>
+      ${l.msg}
+    </div>`;
+  }).join("");
+}
+
+/* =========================
+   ADD/EDIT MODAL + DELETE SUPPORT
+   ========================= */
+const modal = document.getElementById("modal");
+const modalTitle = document.getElementById("modalTitle");
+const modalError = document.getElementById("modalError");
+const taskInput = document.getElementById("taskInput");
+const tierSelect = document.getElementById("tierSelect");
+const statusSelect = document.getElementById("statusSelect");
+const cancelBtn = document.getElementById("cancelBtn");
+const saveBtn = document.getElementById("saveBtn");
+const addTaskBtn = document.getElementById("addTaskBtn");
+
+let modalMode = "add"; // add | edit
+let editTaskId = null;
+
+function fillTierOptions(){
+  tierSelect.innerHTML="";
+  TIERS.forEach(t=>{
+    const opt=document.createElement("option");
+    opt.value=t.id;
+    opt.textContent=t.title;
+    tierSelect.appendChild(opt);
+  });
+}
+fillTierOptions();
+
+function openModal(mode, task){
+  modalMode = mode;
+  modalError.style.display="none";
+
+  if(mode==="add"){
+    modalTitle.textContent="Add Task";
+    editTaskId = null;
+    taskInput.value="";
+    tierSelect.value="tier1";
+    statusSelect.value="ready";
+  } else {
+    modalTitle.textContent="Edit Task";
+    editTaskId = task.id;
+    taskInput.value = task.text;
+    tierSelect.value = task.tier;
+    statusSelect.value = task.status;
+  }
+
+  modal.style.display="block";
+  setTimeout(()=>taskInput.focus(), 50);
+}
+
+function closeModal(){
+  modal.style.display="none";
+}
+
+function saveModal(){
+  const text = (taskInput.value||"").trim();
+  if(!text){
+    modalError.textContent = "Type something. Telepathy isn’t enabled.";
+    modalError.style.display="block";
+    taskInput.focus();
+    return;
+  }
+
+  if(modalMode==="add"){
+    const newTask = {
+      id: "t_"+Date.now()+"_"+Math.floor(Math.random()*100000),
+      tier: tierSelect.value,
+      text,
+      status: statusSelect.value,
+      createdAt: Date.now()
+    };
+    tasks.push(newTask);
+    touchTier(newTask.tier);
+  } else {
+    const t = tasks.find(x=>x.id===editTaskId);
+    if(t){
+      const oldTier = t.tier;
+      t.text = text;
+      t.tier = tierSelect.value;
+      t.status = statusSelect.value;
+      touchTier(oldTier);
+      touchTier(t.tier);
+    }
+  }
+
+  saveAll();
+  closeModal();
+  render();
+
+  // Scroll to the relevant tier after save
+  const dest = document.getElementById(tierSelect.value);
+  if(dest && dest.scrollIntoView){dest.open=true;dest.scrollIntoView({behavior:"smooth"});}
+}
+
+addTaskBtn.onclick = ()=>openModal("add");
+cancelBtn.onclick = closeModal;
+saveBtn.onclick = saveModal;
+
+taskInput.addEventListener("keydown", (e)=>{
+  if(e.key==="Enter") saveModal();
+  if(e.key==="Escape") closeModal();
+});
+document.addEventListener("keydown",e=>{
+ if(modal.style.display!=="block")return;
+ if(e.key==="Escape")closeModal();
+ if(e.key==="Tab"){const nodes=[...modal.querySelectorAll('input,select,button')];const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+});
+modal.addEventListener("click", (e)=>{
+  if(e.target === modal) closeModal();
+});
+
+/* =========================
+   REMINDER TICK (keep it alive)
+   ========================= */
+loadFromPersonalSheet();
+// Re-check every 60 seconds while the page is open
+setInterval(()=>{ buildSavageBanner(); }, 60000);
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
