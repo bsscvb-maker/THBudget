@@ -6,19 +6,662 @@
 <title>TisZod — Plan Tracker</title>
 <link rel="stylesheet" href="portal-dark.css?v=8">
 <link rel="stylesheet" href="dashboard.css?v=2">
-<link rel="stylesheet" href="auth.css?v=5"><style>html.th-session-pending #th-auth{display:none!important}</style><script>try{const saved=JSON.parse(localStorage.getItem('thbudget-session-photos-v1')||sessionStorage.getItem('thbudget-session-photos-v1')||'null');if(saved?.expiresAt>Date.now()+30000){document.documentElement.classList.add('th-session-pending');setTimeout(()=>document.documentElement.classList.remove('th-session-pending'),15000)}}catch(_){}</script><link rel="icon" type="image/svg+xml" href="tiszod-crest.svg?v=1"></head>
+<link rel="stylesheet" href="auth.css?v=5"><style>html.th-session-pending #th-auth{display:none!important}</style><script>try{const saved=JSON.parse(localStorage.getItem('thbudget-session-photos-v1')||sessionStorage.getItem('thbudget-session-photos-v1')||'null');if(saved?.expiresAt>Date.now()+30000){document.documentElement.classList.add('th-session-pending');setTimeout(()=>document.documentElement.classList.remove('th-session-pending'),15000)}}catch(_){}</script><link rel="icon" type="image/svg+xml" href="tiszod-crest.svg?v=1"><style>@scope (.tracker-native){
+  :scope{margin:0;background:#000;color:#fff;font-family:Verdana,Arial,sans-serif;}
+  header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 18px;border-bottom:1px solid #222;background:#050505;
+    position:sticky;top:0;z-index:50;
+  }
+  h1{margin:0;font-size:20px;}
+  .sub{opacity:.75;font-size:12px;margin-top:2px;}
+  #addTaskBtn{
+    background:#1a73e8;color:#fff;border:none;border-radius:10px;
+    padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;
+  }
+  #addTaskBtn:hover{background:#2b7de9;}
+
+  .wrap{max-width:1200px;margin:auto;padding:18px;}
+
+  .note{
+    border:1px solid #2a2a2a;background:#0d0d0d;border-radius:12px;
+    padding:12px 14px;margin:0 0 14px;font-size:12px;line-height:1.45;opacity:.92;
+  }
+
+  /* ===== Savage Banner ===== */
+  #savageZone{display:none;margin:0 0 14px;}
+  .savage{
+    border:2px solid #7a0000;background:#2b0000;border-radius:12px;
+    padding:14px;
+  }
+  .savage h3{margin:0 0 6px;color:#ffb3b3;font-size:16px;}
+  .savage p{margin:6px 0;font-size:13px;line-height:1.4;}
+  .savage .meta{opacity:.85;font-size:12px;}
+  .savage .actions{margin-top:10px;}
+  .savage button{
+    background:#000;color:#fff;border:1px solid #555;border-radius:10px;
+    padding:7px 10px;margin-right:8px;cursor:pointer;font-size:12px;
+  }
+  .savage button:hover{border-color:#aaa;}
+
+  /* ===== Board ===== */
+  .tier{
+    border:1px solid #333;border-radius:14px;padding:14px;margin:0 0 16px;background:#111;
+  }
+  .tier h2{margin:0 0 10px;font-size:18px;}
+  .tier .tierHint{opacity:.75;font-size:12px;margin-bottom:10px;}
+  .row{
+    display:grid;
+    grid-template-columns: 28px 1fr 130px 230px 70px;
+    gap:26px;
+    align-items:center;
+    margin:8px 0;
+  }
+  input[type="checkbox"]{width:18px;height:18px;cursor:pointer;}
+  .taskText{
+    font-weight:600;font-size:13px;line-height:1.3;
+  }
+  .taskText.done{text-decoration:line-through;opacity:.45;}
+  .taskText.waiting{opacity:.70;font-style:italic;}
+
+  select, input[type="text"]{
+    background:#0f0f0f;color:#fff;border:1px solid #444;border-radius:10px;
+    padding:7px 10px;font-size:12px;
+  }
+
+  .status-ready{color:#ff4d4d;font-weight:800;}
+  .status-working{color:#4da6ff;font-weight:800;}
+  .status-waiting{color:#ffd24d;font-weight:800;}
+  .status-done{color:#5cff5c;font-weight:800;}
+
+  .btns{display:flex;gap:8px;justify-content:flex-end;}
+  .iconBtn{
+    background:#000;border:1px solid #555;color:#fff;border-radius:10px;
+    padding:7px 10px;cursor:pointer;font-size:12px;
+  }
+  .iconBtn:hover{border-color:#aaa;}
+  .danger:hover{border-color:#ff6b6b;}
+
+  /* ===== Hall of Shame ===== */
+  .hall{
+    border:1px solid #333;border-radius:14px;padding:12px;background:#0b0b0b;
+    margin-top:12px;
+  }
+  .hall h3{margin:0 0 10px;}
+  .log{font-size:11px;opacity:.92;border-bottom:1px solid #222;padding:7px 0;}
+  .pill{
+    display:inline-block;padding:2px 7px;border:1px solid #444;border-radius:999px;
+    font-size:10px;margin-right:6px;opacity:.95;
+  }
+
+  /* ===== Modal ===== */
+  #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;}
+  #modalBox{
+    width:390px;max-width:92vw;margin:110px auto;background:#111;border:1px solid #444;
+    border-radius:14px;padding:16px;
+  }
+  #modalBox h3{margin:0 0 12px;}
+  #modalBox label{display:block;font-size:12px;opacity:.85;margin:8px 0 6px;}
+  #modalBox .error{
+    display:none;color:#ff6b6b;font-size:12px;margin:0 0 6px;
+  }
+  #modalActions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
+  #modalActions button{
+    background:#000;color:#fff;border:1px solid #555;border-radius:10px;
+    padding:8px 12px;cursor:pointer;font-size:12px;
+  }
+  #modalActions button:hover{border-color:#aaa;}
+
+  /* Small screens */
+  @media(max-width:900px){
+    .row{grid-template-columns: 28px 1fr 120px 1fr 70px;}
+  }
+  @media(max-width:650px){
+    .row{grid-template-columns: 28px 1fr;}
+    .row > *:nth-child(3),
+    .row > *:nth-child(4),
+    .row > *:nth-child(5){grid-column:2;}
+    .btns{justify-content:flex-start;}
+  }
+
+
+*{box-sizing:border-box}:scope{background:#0b1019;color:#e8edf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}header{background:#101722;padding:20px 24px;border-color:#273244;gap:16px}h1{font-size:23px}.sub{line-height:1.5;color:#9aacc1}button{min-height:40px;cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid #60d5cd;outline-offset:3px}#addTaskBtn,#saveBtn{background:#3bc7bb;color:#062c29;border:0;font-weight:750}.wrap{max-width:1160px;padding:24px}.tracker-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.metric{padding:16px 18px;background:#131d2b;border:1px solid #29364a;border-radius:14px}.metric strong{display:block;font-size:27px}.metric span{font-size:12px;color:#a7b8ce}.tracker-tools{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}.tracker-tools input{flex:1;min-width:180px;padding:12px;background:#111c2a;border:1px solid #35445b;border-radius:10px;color:#fff}.filter-buttons{display:flex;gap:5px;flex-wrap:wrap}.filter-buttons button{background:#152132;color:#aebed2;border:1px solid #314056;padding:8px 12px;border-radius:9px}.filter-buttons button.active{background:#224943;color:#9ef4e9;border-color:#46b7a9}.note{background:#111a27;border-color:#29364a;color:#aabbd0;margin-top:16px}.note summary{cursor:pointer;font-weight:600}.note p{line-height:1.8}.tier{background:#111a27;border-color:#29364a;padding:0;overflow:hidden;scroll-margin-top:90px}.tier>summary{display:flex;align-items:center;gap:12px;cursor:pointer;padding:18px;list-style:none}.tier>summary:before{content:"›";font-size:22px;color:#93a9c2}.tier[open]>summary:before{transform:rotate(90deg)}.tier h2{font-size:15px;margin:0;flex:1}.tier-count{font-size:12px;border:1px solid #35445b;border-radius:20px;padding:3px 9px;color:#adc1d7}.tierHint{padding:0 18px;color:#869ab3}.row{grid-template-columns:24px minmax(180px,1fr) 120px 88px;gap:14px;margin:0;padding:16px 18px;border-top:1px solid #243146}.taskText{font-size:14px;font-weight:550;line-height:1.55;overflow-wrap:anywhere}.row select{width:100%;background:#172335;border-color:#34455d;padding:8px;font-size:11px}.row .move-tier{display:none}.iconBtn{background:#172335;border-color:#34455d;padding:7px 10px}.row input[type=checkbox]{accent-color:#3bc7bb}.empty-tier{padding:4px 18px 20px;color:#8297b1;font-size:13px}.empty-results{padding:36px;text-align:center;border:1px dashed #34455d;border-radius:14px}.hall{background:#111a27;border-color:#29364a;padding:16px}.hall summary{cursor:pointer;color:#aebed2;font-size:13px}.hall .log{padding:12px 0;line-height:1.7;border-color:#29364a}.savage{background:#2b2020;border:1px solid #7b5048}.savage .actions{display:flex;gap:8px;flex-wrap:wrap}.savage button{margin:0;background:#302729;border-color:#70504c}#modal{padding:24px;overflow:auto}#modalBox{margin:7vh auto;width:480px;max-width:100%;background:#142031;border-color:#3a4e69;padding:24px}#modalBox input,#modalBox select{width:100%;font-size:14px;padding:12px;background:#0d1623;border-color:#41536d}#modalBox label{margin-top:18px}#modalActions{margin-top:24px}#modalActions button{padding:10px 20px}
+@media(max-width:700px){header{padding:16px}.wrap{padding:14px}.tracker-summary{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:24px minmax(0,1fr) 88px;gap:10px;padding:14px}.row>*:nth-child(3){grid-column:2;grid-row:2;width:125px}.row>*:nth-child(5){grid-column:3;grid-row:1 / span 2}.row .btns{flex-direction:column}.taskText{grid-column:2}.sub{font-size:11px;max-width:230px}.tier h2{font-size:13px}.tracker-tools input{flex-basis:100%}.filter-buttons{width:100%}.filter-buttons button{flex:1;font-size:12px;padding:7px}}
+
+
+.sync-status{padding:12px 16px;margin-bottom:16px;border:1px solid #34465d;border-radius:10px;color:#aebed2;font-size:13px}.sync-status button{margin-left:12px;padding:4px 12px;background:#213348;border:1px solid #4f6d8c;border-radius:7px;color:#fff}.focus-dashboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}.focus-card{background:#142132;border:1px solid #34465d;border-radius:14px;padding:18px}.focus-card h2{font-size:14px;margin:0 0 12px;color:#72dfd1}.focus-card p{font-size:13px;line-height:1.6;color:#aebed2}.focus-card button{display:block;text-align:left;width:100%;padding:10px 0;background:none;border:0;border-bottom:1px solid #304052;color:#e8edf5;line-height:1.5;font-size:14px}.focus-card button:hover{color:#72dfd1}button:disabled,select:disabled,input[type=checkbox]:disabled{opacity:.45;cursor:wait}@media(max-width:700px){.focus-dashboard{grid-template-columns:1fr}}
+
+
+:scope.dashboard-only header,:scope.dashboard-only .tracker-tools,:scope.dashboard-only #board{display:none}
+:scope.dashboard-only .wrap{padding:16px}
+:scope.dashboard-only .focus-dashboard{margin-top:18px}
+}</style></head>
 <body data-th-page="plan-tracker">
 <div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-brand"><img class="th-auth-logo" src="tiszod-crest.svg" alt=""><span class="th-auth-name" id="th-auth-title">TisZod</span></div><button type="button" id="th-sign-in"><svg class="th-google-icon" aria-hidden="true" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.25 5.48-4.77 7.18l7.73 6C44.41 38.03 46.98 31.87 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.2A23.9 23.9 0 0 0 0 24c0 3.87.93 7.51 2.56 10.78z"/><path fill="#34A853" d="M24 48c6.48 0 11.92-2.13 15.89-5.8l-7.73-6C30.01 37.65 27.25 38.5 24 38.5c-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Sign in with Google</span></button><p id="th-auth-message" role="status" aria-live="polite"></p></div></div>
 <div class="th-app">
 <aside class="th-sidebar"><a class="th-brand" href="./"><span class="th-brand-mark" style="background:transparent;overflow:hidden"><img src="tiszod-crest.svg" alt="" style="width:100%;height:100%;object-fit:contain"></span><span>TisZod<small>Personal workspace</small></span></a><nav aria-label="TisZod pages"><div class="th-nav-label">Overview</div><a class="th-nav-link" href="./"><span class="th-nav-icon">⌂</span>Dashboard</a><div class="th-nav-label">Workspaces</div><a class="th-nav-link" href="finance.html"><span class="th-nav-icon" style="overflow:hidden"><img src="finance-mark.svg?v=1" alt="" style="display:block;width:100%;height:100%;object-fit:contain;border-radius:4px"></span>Finance</a><a class="th-nav-link" href="freebirds.html"><span class="th-nav-icon" style="overflow:hidden"><img src="freebirds-logo.svg" alt="" style="display:block;width:100%;height:100%;object-fit:contain;border-radius:4px;object-fit:cover;object-position:50% 72%"></span>Freebirds</a><a class="th-nav-link" href="vehicles.html"><span class="th-nav-icon ram-nav-icon" style="overflow:hidden;position:relative"><img src="ram-nav.webp" alt="" style="position:absolute;display:block;width:128px;height:72px;max-width:none;left:-7px;top:-20px"></span>Vehicles</a><a class="th-nav-link" href="equipment.html"><span class="th-nav-icon" style="overflow:hidden"><img src="husqvarna-mark.svg" alt="" style="display:block;width:100%;height:100%;object-fit:contain;border-radius:4px;background:#fff"></span>Equipment</a><a class="th-nav-link" href="watercraft.html"><span class="th-nav-icon" style="overflow:hidden"><img src="yamaha-mark.svg" alt="" style="display:block;width:100%;height:100%;object-fit:contain;border-radius:4px;background:#fff"></span>Watercraft</a><a class="th-nav-link" href="pets.html"><span class="th-nav-icon" style="overflow:hidden"><img src="pets-mark.svg" alt="" style="display:block;width:100%;height:100%;object-fit:contain;border-radius:4px"></span>Pets</a><div class="th-nav-label">System</div><a class="th-nav-link" href="admin.html"><span class="th-nav-icon">⚙</span>Administration</a></nav><div class="th-sidebar-foot">Private personal workspace</div></aside>
 <div class="th-app-main"><header class="th-app-topbar"><div><strong>Plan Tracker</strong><small id="today"></small></div><span class="th-connection" id="connectionStatus">Connecting…</span></header>
 <main class="dashboard plan-workspace">
-<div class="dash-heading"><div><span class="overline">TisZod / OVERVIEW</span><h1>Plan dashboard</h1><p>Your next actions, current work, and blocked tasks.</p></div><a class="refresh" href="https://th41plan2026.github.io/th41plan-Tracker/" target="_blank" rel="noopener">Open full screen ↗</a></div>
-<iframe id="planTracker" title="TH41 Plan Tracker — tasks and accountability" style="display:block;width:100%;height:calc(100dvh - 230px);min-height:620px;border:1px solid #293344;border-radius:14px;background:#000"></iframe>
+<div class="dash-heading"><div><span class="overline">TisZod / OVERVIEW</span><h1>Plan dashboard</h1><p>Your next actions, current work, and blocked tasks.</p></div><a class="refresh" href="tracker-tasks.html?v=3" target="_blank" rel="noopener">Open full screen ↗</a></div>
+<div class="tracker-native">
+<header>
+  <div>
+    <h1>Plan dashboard</h1>
+    <div class="sub">Choose a priority. Move one thing forward.</div>
+  </div>
+  <button id="addTaskBtn">Add Task</button>
+</header>
+
+<div class="wrap">
+
+<div id="syncStatus" class="sync-status" role="status">Loading saved tasks…</div><div id="focusDashboard" class="focus-dashboard"></div><div id="trackerSummary" class="tracker-summary" aria-live="polite"></div><div class="tracker-tools"><input id="taskSearch" type="search" aria-label="Search tasks" placeholder="Search your tasks…"><div class="filter-buttons"><button type="button" data-filter="all" class="active" aria-pressed="true">All</button><button type="button" data-filter="ready" class="" aria-pressed="false">Ready</button><button type="button" data-filter="working" class="" aria-pressed="false">Working</button><button type="button" data-filter="waiting" class="" aria-pressed="false">Waiting</button><button type="button" data-filter="done" class="" aria-pressed="false">Done</button></div></div>
+
+  <div id="board"></div>
+
+  
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="modal">
+  <div id="modalBox" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Add Task</h3>
+    <div id="modalError" class="error">Type something. Telepathy isn’t enabled.</div>
+
+    <label for="taskInput">Task</label>
+    <input id="taskInput" type="text" placeholder="Enter task here…" />
+
+    <label for="tierSelect">Tier</label>
+    <select id="tierSelect"></select>
+
+    <label for="statusSelect">Status</label>
+    <select id="statusSelect">
+      <option value="working">WORKING</option>
+      <option value="ready">READY</option>
+      <option value="waiting">WAITING</option>
+      <option value="done">DONE</option>
+    </select>
+
+    <div id="modalActions">
+      <button id="cancelBtn" type="button">Cancel</button>
+      <button id="saveBtn" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+</div>
 </main></div></div>
 <script>
 document.getElementById('today').textContent=new Intl.DateTimeFormat('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(new Date());
-window.thStart=async()=>{document.getElementById('planTracker').src='tracker-tasks.html?v=2';};
+
+/* =========================
+   OPTION B STORAGE (PERSIST)
+   ========================= */
+
+if(new URLSearchParams(location.search).get("view")==="dashboard")document.querySelector(".tracker-native").classList.add("dashboard-only");
+let sheetReady=false,loadingState=true;
+let taskFilter="all",taskSearch="",collapsedTiers={};
+document.getElementById("taskSearch").addEventListener("input",e=>{taskSearch=e.target.value;render();});
+document.querySelectorAll("[data-filter]").forEach(button=>button.addEventListener("click",()=>{taskFilter=button.dataset.filter;document.querySelectorAll("[data-filter]").forEach(b=>{b.classList.toggle("active",b===button);b.setAttribute("aria-pressed",String(b===button));});render();}));
+let tasks = [];
+let touched = {};
+let snoozeUntil = {};
+let naggedDate = {};
+let logs = [];
+let msgHist = {};
+  
+const STORAGE = {
+  TASKS:  "TH41_PLAN_TASKS_V1",
+  TOUCHED:"TH41_PLAN_TIER_TOUCHED_V1",
+  NAGGED:"TH41_PLAN_TIER_NAGGEDDATE_V1",
+  SNOOZE:"TH41_PLAN_TIER_SNOOZE_V1",
+  LOGS:  "TH41_PLAN_LOG_V1",
+  MSGHIST:"TH41_PLAN_MSG_HIST_V1"
+};
+
+// This is the separate Apps Script attached to Todd's personal TH41 Sheet.
+const TH41_BACKEND_URL = "https://script.google.com/macros/s/AKfycbx9nruVEhEGyygWwdAknNRRvDCC7vIVnTxtWUq44_NCqoV9t3sDhAVP3CMmEAsbYA2XTQ/exec";
+
+const DAY_MS = 24*60*60*1000;
+
+const TIERS = [
+  { id:"tier1", title:"🔴 Tier 1 — Critical / Must Do First", cadenceDays:1 },
+  { id:"tier2", title:"🟠 Tier 2 — High Impact Operations", cadenceDays:1 },
+  { id:"tier3", title:"🟡 Tier 3 — Revenue & Program Growth", cadenceDays:2 },
+  { id:"tier4", title:"🔵 Tier 4 — Brand / Identity", cadenceDays:2 },
+  { id:"tier5", title:"🟣 Tier 5 — Content / Nice-to-Have", cadenceDays:7 },
+  { id:"parked",title:"🟢 Done", cadenceDays:null }
+];
+
+// Todd's tracker begins empty. Add personal tasks with the Add Task button.
+const DEFAULT_TASKS = [];
+
+/* =========================
+   SAVAGE MESSAGE ENGINE
+   ========================= */
+function todayKey(){ return new Date().toDateString(); }
+function stamp(){
+  const d=new Date();
+  const p=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function randPick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* =========================
+   STATE LOAD
+   ========================= */
+function readStored(key, fallback){
+  try{
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch(err){
+    return fallback;
+  }
+}
+
+function applyState(state){
+  tasks = Array.isArray(state && state.tasks) ? state.tasks : [];
+  touched = (state && state.touched) || {};
+  naggedDate = (state && state.naggedDate) || {};
+  snoozeUntil = (state && state.snoozeUntil) || {};
+  logs = Array.isArray(state && state.logs) ? state.logs : [];
+  msgHist = (state && state.msgHist) || {};
+}
+
+function currentState(){
+  return { tasks, touched, naggedDate, snoozeUntil, logs, msgHist };
+}
+
+function loadLocal(){
+  applyState({
+    tasks: readStored(STORAGE.TASKS, []),
+    touched: readStored(STORAGE.TOUCHED, {}),
+    naggedDate: readStored(STORAGE.NAGGED, {}),
+    snoozeUntil: readStored(STORAGE.SNOOZE, {}),
+    logs: readStored(STORAGE.LOGS, []),
+    msgHist: readStored(STORAGE.MSGHIST, {})
+  });
+  render();
+}
+
+function syncStatus(message,retry=false){
+ const el=document.getElementById("syncStatus");el.textContent=message;
+ if(retry){const button=document.createElement("button");button.textContent="Retry connection";button.onclick=loadFromPersonalSheet;el.append(button);}
+}
+async function loadFromPersonalSheet(){
+ loadingState=true;sheetReady=false;render();syncStatus("Connecting to your saved task list…");
+ const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),12000);
+ try{
+  const response=await fetch(TH41_BACKEND_URL+"?action=getAll",{cache:"no-store",signal:controller.signal});
+  if(!response.ok)throw new Error("Task service returned "+response.status);
+  let state=await response.json();
+  if(state.data&&typeof state.data==="object")state=state.data;
+  if(!Array.isArray(state.tasks))throw new Error("The task service did not return a task list.");
+  applyState(state);saveLocal();sheetReady=true;loadingState=false;render();
+  syncStatus("Connected · "+tasks.length+" saved task"+(tasks.length===1?"":"s"));
+ }catch(error){
+  loadingState=false;render();
+  syncStatus(tasks.length?"Connection unavailable. Showing this device’s saved copy; editing is paused until reconnected.":"Your saved tasks could not be loaded. Nothing has been deleted. Retry the connection or open the original tracker.",true);
+ }finally{clearTimeout(timeout);}
+}
+
+function saveLocal(){
+  localStorage.setItem(STORAGE.TASKS, JSON.stringify(tasks));
+  localStorage.setItem(STORAGE.TOUCHED, JSON.stringify(touched));
+  localStorage.setItem(STORAGE.NAGGED, JSON.stringify(naggedDate));
+  localStorage.setItem(STORAGE.SNOOZE, JSON.stringify(snoozeUntil));
+  localStorage.setItem(STORAGE.LOGS, JSON.stringify(logs));
+  localStorage.setItem(STORAGE.MSGHIST, JSON.stringify(msgHist));
+}
+
+// Bootstrap tasks once if empty
+if(!tasks || !Array.isArray(tasks) || tasks.length === 0){
+  tasks = DEFAULT_TASKS.map((t, idx)=>({
+    id: "t_"+Date.now()+"_"+idx,
+    tier: t[0],
+    text: t[1],
+    status: "ready",
+    createdAt: Date.now()
+  }));
+}
+
+// Ensure touched exists for each tier (backdated so nags can work)
+(function initTouched(){
+  const now = Date.now();
+  TIERS.forEach(t=>{
+    if(t.cadenceDays == null) return;
+    if(!touched[t.id]){
+      touched[t.id] = now - (t.cadenceDays + 1)*DAY_MS;
+    }
+  });
+})();
+
+function saveAll(){
+  if(!sheetReady)return;
+  saveLocal();
+  fetch(TH41_BACKEND_URL, {
+    method: "POST",
+    body: new URLSearchParams({ data: JSON.stringify(currentState()) })
+  }).catch(error => console.warn("Could not save to personal TH41 Sheet.", error));
+}
+
+/* =========================
+   HELPERS
+   ========================= */
+function touchTier(tierId){
+  touched[tierId] = Date.now();
+  saveAll();
+}
+
+function statusClass(status){
+  if(status==="ready") return "status-ready";
+  if(status==="working") return "status-working";
+  if(status==="waiting") return "status-waiting";
+  return "status-done";
+}
+
+function taskTextClass(status){
+  if(status==="done") return "taskText done";
+  if(status==="waiting") return "taskText waiting";
+  return "taskText";
+}
+
+/* =========================
+   SAVAGE CHECK (PHASE 3 + 4)
+   ========================= */
+function tierHasActionableWork(tierId){
+  return tasks.some(t => t.tier===tierId && t.status==="ready");
+}
+
+function daysSince(ms){
+  return Math.floor((Date.now()-ms)/DAY_MS);
+}
+
+function recordLog(tierTitle, sinceDays, msg){
+  logs.unshift({
+    time: stamp(),
+    tier: tierTitle,
+    sinceDays,
+    msg
+  });
+  if(logs.length>250) logs = logs.slice(0,250);
+}
+
+function pickNonRepeatingMessage(tierId){
+  const pool = ROAST[tierId] || ["Do the thing."];
+  const hist = msgHist[tierId] || [];
+  // prefer a message not recently used
+  const candidates = pool.filter(m => !hist.includes(m));
+  const chosen = candidates.length ? randPick(candidates) : randPick(pool);
+  const nextHist = [chosen].concat(hist).slice(0,6);
+  msgHist[tierId] = nextHist;
+  return chosen;
+}
+
+/* =========================
+   RENDER BOARD
+   ========================= */
+function render(){
+
+  const counts=Object.fromEntries(["ready","working","waiting","done"].map(status=>[status,tasks.filter(t=>t.status===status).length]));
+  document.getElementById("trackerSummary").innerHTML=[["Open tasks",tasks.length-counts.done],["In progress",counts.working],["Waiting",counts.waiting],["Completed",counts.done]].map(([label,n])=>'<div class="metric"><strong>'+(loadingState?"—":n)+'</strong><span>'+label+'</span></div>').join("");
+  const focus=document.getElementById("focusDashboard");focus.replaceChildren();
+  [["Start here","ready"],["In progress","working"],["Waiting on","waiting"]].forEach(([title,status])=>{
+   const card=document.createElement("section");card.className="focus-card";const heading=document.createElement("h2");heading.textContent=title;card.append(heading);
+   const items=tasks.filter(t=>t.status===status).sort((a,b)=>TIERS.findIndex(t=>t.id===a.tier)-TIERS.findIndex(t=>t.id===b.tier)).slice(0,3);
+   if(items.length)items.forEach(t=>{const button=document.createElement("button");button.textContent=t.text;button.disabled=!sheetReady;button.onclick=()=>openModal("edit",t);card.append(button);});
+   else{const p=document.createElement("p");p.textContent=loadingState?"Loading…":sheetReady?"No tasks in this section.":"Waiting for saved tasks";card.append(p);}focus.append(card);
+  });
+  document.getElementById("addTaskBtn").disabled=!sheetReady;
+  const visible=tasks.filter(t=>(taskFilter==="all"||t.status===taskFilter)&&String(t.text).toLowerCase().includes(taskSearch.toLowerCase()));
+
+  const board = document.getElementById("board");
+  board.innerHTML="";
+
+  TIERS.forEach(tier=>{
+    const tierVisible=visible.filter(t=>t.tier===tier.id);
+    if((taskFilter!=="all"||taskSearch)&&!tierVisible.length)return;
+    const card = document.createElement("details");
+    card.className="tier";
+    card.open=Boolean(taskSearch||taskFilter!=="all"||(collapsedTiers[tier.id]===undefined?tierVisible.some(t=>t.status!=="done"):!collapsedTiers[tier.id]));
+    card.addEventListener("toggle",()=>{collapsedTiers[tier.id]=!card.open;});
+    card.id = tier.id;
+
+
+    card.innerHTML = `<summary><h2>${tier.title}</h2><span class="tier-count">${tierVisible.length}</span></summary>`;
+
+const tierTasks = visible
+  .filter(x => x.tier === tier.id)
+  .sort((a, b) => {
+    const order = { working: 0, ready: 1, waiting: 2, done: 3 };
+    return order[a.status] - order[b.status];
+  });
+    tierTasks.forEach(task=>{
+      const row = document.createElement("div");
+      row.className="row";
+
+      // Checkbox toggles DONE / READY
+      const cb = document.createElement("input");
+      cb.type="checkbox";
+      cb.setAttribute("aria-label","Complete "+task.text);
+      cb.checked = (task.status==="done");
+      cb.onchange = ()=>{
+        task.status = cb.checked ? "done" : "ready";
+        touchTier(task.tier);
+        saveAll();
+        render();
+      };
+
+      // Text
+      const text = document.createElement("div");
+      text.className = taskTextClass(task.status);
+      text.textContent = task.text;
+
+      // Status dropdown
+      const status = document.createElement("select");
+      ["working","ready","waiting","done"].forEach(s=>{
+        const opt=document.createElement("option");
+        opt.value=s;
+        opt.textContent=s.toUpperCase();
+        if(task.status===s) opt.selected=true;
+        status.appendChild(opt);
+      });
+      status.className = statusClass(task.status);
+      status.setAttribute("aria-label","Status for "+task.text);
+      status.onchange = ()=>{
+        task.status = status.value;
+        touchTier(task.tier);
+        saveAll();
+        render();
+      };
+
+      // Move tier dropdown
+      const move = document.createElement("select");
+      TIERS.forEach(tt=>{
+        const opt=document.createElement("option");
+        opt.value=tt.id;
+        opt.textContent=tt.title;
+        if(task.tier===tt.id) opt.selected=true;
+        move.appendChild(opt);
+      });
+      move.className="move-tier";
+      move.onchange = ()=>{
+        const oldTier = task.tier;
+        task.tier = move.value;
+        touchTier(oldTier);
+        touchTier(task.tier);
+        saveAll();
+        render();
+      };
+
+      // Edit / Delete buttons
+      const btnWrap = document.createElement("div");
+      btnWrap.className="btns";
+
+      const editBtn = document.createElement("button");
+      editBtn.className="iconBtn";
+      editBtn.type="button";
+      editBtn.textContent="✏️";
+      editBtn.title="Edit task";
+      editBtn.onclick=()=>openModal("edit", task);
+
+      const delBtn = document.createElement("button");
+      delBtn.className="iconBtn danger";
+      delBtn.type="button";
+      delBtn.textContent="🗑️";
+      delBtn.title="Delete task";
+      delBtn.onclick=()=>{
+        const ok = confirm("Delete this task?\n\n" + task.text);
+        if(!ok) return;
+        tasks = tasks.filter(x=>x.id !== task.id);
+        touchTier(task.tier);
+        saveAll();
+        render();
+      };
+
+      btnWrap.appendChild(editBtn);
+      btnWrap.appendChild(delBtn);
+
+      // Spacer (for grid alignment)
+      const spacer = document.createElement("div");
+
+      row.appendChild(cb);
+      row.appendChild(text);
+      row.appendChild(status);
+      row.appendChild(move);
+      row.appendChild(btnWrap);
+
+      card.appendChild(row);
+    });
+
+    if(!tierTasks.length){const empty=document.createElement("p");empty.className="empty-tier";empty.textContent="No tasks here. Add one when you’re ready.";card.appendChild(empty);}
+    board.appendChild(card);
+  });
+
+  if(!visible.length&&(taskSearch||taskFilter!=="all"))board.innerHTML='<div class="empty-results">No tasks match. Try another status or search.</div>';
+  board.querySelectorAll("input,select,button").forEach(el=>{el.disabled=!sheetReady;});
+
+}
+
+/* =========================
+   HALL OF SHAME
+   ========================= */
+
+/* =========================
+   ADD/EDIT MODAL + DELETE SUPPORT
+   ========================= */
+const modal = document.getElementById("modal");
+const modalTitle = document.getElementById("modalTitle");
+const modalError = document.getElementById("modalError");
+const taskInput = document.getElementById("taskInput");
+const tierSelect = document.getElementById("tierSelect");
+const statusSelect = document.getElementById("statusSelect");
+const cancelBtn = document.getElementById("cancelBtn");
+const saveBtn = document.getElementById("saveBtn");
+const addTaskBtn = document.getElementById("addTaskBtn");
+
+let modalMode = "add"; // add | edit
+let editTaskId = null;
+
+function fillTierOptions(){
+  tierSelect.innerHTML="";
+  TIERS.forEach(t=>{
+    const opt=document.createElement("option");
+    opt.value=t.id;
+    opt.textContent=t.title;
+    tierSelect.appendChild(opt);
+  });
+}
+fillTierOptions();
+
+function openModal(mode, task){
+  if(!sheetReady)return;
+  modalMode = mode;
+  modalError.style.display="none";
+
+  if(mode==="add"){
+    modalTitle.textContent="Add Task";
+    editTaskId = null;
+    taskInput.value="";
+    tierSelect.value="tier1";
+    statusSelect.value="ready";
+  } else {
+    modalTitle.textContent="Edit Task";
+    editTaskId = task.id;
+    taskInput.value = task.text;
+    tierSelect.value = task.tier;
+    statusSelect.value = task.status;
+  }
+
+  modal.style.display="block";
+  setTimeout(()=>taskInput.focus(), 50);
+}
+
+function closeModal(){
+  modal.style.display="none";
+}
+
+function saveModal(){
+  const text = (taskInput.value||"").trim();
+  if(!text){
+    modalError.textContent = "Type something. Telepathy isn’t enabled.";
+    modalError.style.display="block";
+    taskInput.focus();
+    return;
+  }
+
+  if(modalMode==="add"){
+    const newTask = {
+      id: "t_"+Date.now()+"_"+Math.floor(Math.random()*100000),
+      tier: tierSelect.value,
+      text,
+      status: statusSelect.value,
+      createdAt: Date.now()
+    };
+    tasks.push(newTask);
+    touchTier(newTask.tier);
+  } else {
+    const t = tasks.find(x=>x.id===editTaskId);
+    if(t){
+      const oldTier = t.tier;
+      t.text = text;
+      t.tier = tierSelect.value;
+      t.status = statusSelect.value;
+      touchTier(oldTier);
+      touchTier(t.tier);
+    }
+  }
+
+  saveAll();
+  closeModal();
+  render();
+
+  // Scroll to the relevant tier after save
+  const dest = document.getElementById(tierSelect.value);
+  if(dest && dest.scrollIntoView){dest.open=true;dest.scrollIntoView({behavior:"smooth"});}
+}
+
+addTaskBtn.onclick = ()=>openModal("add");
+cancelBtn.onclick = closeModal;
+saveBtn.onclick = saveModal;
+
+taskInput.addEventListener("keydown", (e)=>{
+  if(e.key==="Enter") saveModal();
+  if(e.key==="Escape") closeModal();
+});
+document.addEventListener("keydown",e=>{
+ if(modal.style.display!=="block")return;
+ if(e.key==="Escape")closeModal();
+ if(e.key==="Tab"){const nodes=[...modal.querySelectorAll('input,select,button')];const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+});
+modal.addEventListener("click", (e)=>{
+  if(e.target === modal) closeModal();
+});
+
+loadLocal();
+window.thStart=loadFromPersonalSheet;
+
+
+
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script><script src="portal.js?v=7"></script><script src="sheets.js?v=17"></script>
 </body></html>
