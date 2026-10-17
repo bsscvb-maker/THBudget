@@ -258,8 +258,20 @@ function readStored(key, fallback){
   }
 }
 
+function setTaskStatus(task,status){
+ const valid=tier=>TIERS.some(t=>t.id===tier&&t.id!=="parked");
+ if(status==="done"){
+  if(valid(task.tier))task.previousTier=task.tier;
+  task.tier="parked";
+ }else if(task.tier==="parked"){
+  task.tier=valid(task.previousTier)?task.previousTier:"tier1";
+ }
+ task.status=status;
+}
+
 function applyState(state){
-  tasks = Array.isArray(state && state.tasks) ? state.tasks : [];
+  tasks = Array.isArray(state && state.tasks) ? state.tasks.map(t=>({...t})) : [];
+  tasks.forEach(task=>setTaskStatus(task,task.status));
   touched = (state && state.touched) || {};
   naggedDate = (state && state.naggedDate) || {};
   snoozeUntil = (state && state.snoozeUntil) || {};
@@ -296,7 +308,8 @@ async function loadFromPersonalSheet(){
   let state=await response.json();
   if(state.data&&typeof state.data==="object")state=state.data;
   if(!Array.isArray(state.tasks))throw new Error("The task service did not return a task list.");
-  applyState(state);saveLocal();sheetReady=true;loadingState=false;render();
+  const needsMove=state.tasks.some(t=>t.status==="done"&&t.tier!=="parked");
+  applyState(state);saveLocal();sheetReady=true;if(needsMove)saveAll();loadingState=false;render();
   syncStatus("Connected · "+tasks.length+" saved task"+(tasks.length===1?"":"s"));
  }catch(error){
   loadingState=false;render();
@@ -445,7 +458,9 @@ const tierTasks = visible
       cb.setAttribute("aria-label","Complete "+task.text);
       cb.checked = (task.status==="done");
       cb.onchange = ()=>{
-        task.status = cb.checked ? "done" : "ready";
+        const oldTier=task.tier;
+        setTaskStatus(task,cb.checked ? "done" : "ready");
+        touchTier(oldTier);
         touchTier(task.tier);
         saveAll();
         render();
@@ -468,7 +483,9 @@ const tierTasks = visible
       status.className = statusClass(task.status);
       status.setAttribute("aria-label","Status for "+task.text);
       status.onchange = ()=>{
-        task.status = status.value;
+        const oldTier=task.tier;
+        setTaskStatus(task,status.value);
+        touchTier(oldTier);
         touchTier(task.tier);
         saveAll();
         render();
@@ -487,6 +504,7 @@ const tierTasks = visible
       move.onchange = ()=>{
         const oldTier = task.tier;
         task.tier = move.value;
+        setTaskStatus(task,move.value==="parked"?"done":task.status==="done"?"ready":task.status);
         touchTier(oldTier);
         touchTier(task.tier);
         saveAll();
@@ -617,6 +635,7 @@ function saveModal(){
       status: statusSelect.value,
       createdAt: Date.now()
     };
+    setTaskStatus(newTask,newTask.tier==="parked"?"done":newTask.status);
     tasks.push(newTask);
     touchTier(newTask.tier);
   } else {
@@ -625,7 +644,7 @@ function saveModal(){
       const oldTier = t.tier;
       t.text = text;
       t.tier = tierSelect.value;
-      t.status = statusSelect.value;
+      setTaskStatus(t,statusSelect.value);
       touchTier(oldTier);
       touchTier(t.tier);
     }
@@ -636,7 +655,7 @@ function saveModal(){
   render();
 
   // Scroll to the relevant tier after save
-  const dest = document.getElementById(tierSelect.value);
+  const dest = document.getElementById(statusSelect.value==="done"?"parked":(tasks.find(t=>t.id===editTaskId)?.tier||tierSelect.value));
   if(dest && dest.scrollIntoView){dest.open=true;dest.scrollIntoView({behavior:"smooth"});}
 }
 
