@@ -416,9 +416,9 @@ function pickNonRepeatingMessage(tierId){
 function render(){
 
   const counts=Object.fromEntries(["ready","working","waiting","done"].map(status=>[status,tasks.filter(t=>t.status===status).length]));
-  document.getElementById("trackerSummary").innerHTML=[["Open tasks",tasks.length-counts.done],["In progress",counts.working],["Waiting",counts.waiting],["Completed",counts.done]].map(([label,n])=>'<div class="metric"><strong>'+(loadingState?"—":n)+'</strong><span>'+label+'</span></div>').join("");
+  document.getElementById("trackerSummary").innerHTML=[["Open tasks",tasks.length-counts.done],["Working",counts.working],["Waiting",counts.waiting],["Done",counts.done]].map(([label,n])=>'<div class="metric"><strong>'+(loadingState?"—":n)+'</strong><span>'+label+'</span></div>').join("");
   const focus=document.getElementById("focusDashboard");focus.replaceChildren();
-  [["Start here","ready"],["In progress","working"],["Waiting on","waiting"]].forEach(([title,status])=>{
+  [["Ready","ready"],["Working","working"],["Waiting","waiting"]].forEach(([title,status])=>{
    const card=document.createElement("section");card.className="focus-card";const heading=document.createElement("h2");heading.textContent=title;card.append(heading);
    const items=tasks.filter(t=>t.status===status).sort((a,b)=>TIERS.findIndex(t=>t.id===a.tier)-TIERS.findIndex(t=>t.id===b.tier)).slice(0,3);
    if(items.length)items.forEach(t=>{const button=document.createElement("button");button.textContent=t.text;button.disabled=!sheetReady;button.onclick=()=>openModal("edit",t);card.append(button);});
