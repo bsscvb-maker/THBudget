@@ -128,6 +128,10 @@
 @media(max-width:700px){header{padding:16px}.wrap{padding:14px}.tracker-summary{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:24px minmax(0,1fr) 88px;gap:10px;padding:14px}.row>*:nth-child(3){grid-column:2;grid-row:2;width:125px}.row>*:nth-child(5){grid-column:3;grid-row:1 / span 2}.row .btns{flex-direction:column}.taskText{grid-column:2}.sub{font-size:11px;max-width:230px}.tier h2{font-size:13px}.tracker-tools input{flex-basis:100%}.filter-buttons{width:100%}.filter-buttons button{flex:1;font-size:12px;padding:7px}}
 </style><style>
 .sync-status{padding:12px 16px;margin-bottom:16px;border:1px solid #34465d;border-radius:10px;color:#aebed2;font-size:13px}.sync-status button{margin-left:12px;padding:4px 12px;background:#213348;border:1px solid #4f6d8c;border-radius:7px;color:#fff}.focus-dashboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}.focus-card{background:#142132;border:1px solid #34465d;border-radius:14px;padding:18px}.focus-card h2{font-size:14px;margin:0 0 12px;color:#72dfd1}.focus-card p{font-size:13px;line-height:1.6;color:#aebed2}.focus-card button{display:block;text-align:left;width:100%;padding:10px 0;background:none;border:0;border-bottom:1px solid #304052;color:#e8edf5;line-height:1.5;font-size:14px}.focus-card button:hover{color:#72dfd1}button:disabled,select:disabled,input[type=checkbox]:disabled{opacity:.45;cursor:wait}@media(max-width:700px){.focus-dashboard{grid-template-columns:1fr}}
+</style><style>
+body.dashboard-only header,body.dashboard-only .tracker-tools,body.dashboard-only #board{display:none}
+body.dashboard-only .wrap{padding:16px}
+body.dashboard-only .focus-dashboard{margin-top:18px}
 </style></head>
 
 <body>
@@ -141,11 +145,11 @@
 
 <div class="wrap">
 
-<div id="syncStatus" class="sync-status" role="status">Loading saved tasks…</div><div id="focusDashboard" class="focus-dashboard"></div><div id="trackerSummary" class="tracker-summary" aria-live="polite"></div><div class="tracker-tools"><input id="taskSearch" type="search" aria-label="Search tasks" placeholder="Search your tasks…"><div class="filter-buttons"><button type="button" data-filter="all" class="active" aria-pressed="true">All</button><button type="button" data-filter="ready" class="" aria-pressed="false">Ready</button><button type="button" data-filter="working" class="" aria-pressed="false">Working</button><button type="button" data-filter="waiting" class="" aria-pressed="false">Waiting</button><button type="button" data-filter="done" class="" aria-pressed="false">Done</button></div></div>  <div id="savageZone"></div>
+<div id="syncStatus" class="sync-status" role="status">Loading saved tasks…</div><div id="focusDashboard" class="focus-dashboard"></div><div id="trackerSummary" class="tracker-summary" aria-live="polite"></div><div class="tracker-tools"><input id="taskSearch" type="search" aria-label="Search tasks" placeholder="Search your tasks…"><div class="filter-buttons"><button type="button" data-filter="all" class="active" aria-pressed="true">All</button><button type="button" data-filter="ready" class="" aria-pressed="false">Ready</button><button type="button" data-filter="working" class="" aria-pressed="false">Working</button><button type="button" data-filter="waiting" class="" aria-pressed="false">Waiting</button><button type="button" data-filter="done" class="" aria-pressed="false">Done</button></div></div>
 
   <div id="board"></div>
 
-  <details class="hall"><summary>Accountability history</summary><div id="logs"></div></details>
+  
 </div>
 
 <!-- Add/Edit Modal -->
@@ -180,6 +184,7 @@
    OPTION B STORAGE (PERSIST)
    ========================= */
 
+if(new URLSearchParams(location.search).get("view")==="dashboard")document.body.classList.add("dashboard-only");
 let sheetReady=false,loadingState=true;
 let taskFilter="all",taskSearch="",collapsedTiers={};
 document.getElementById("taskSearch").addEventListener("input",e=>{taskSearch=e.target.value;render();});
@@ -220,36 +225,6 @@ const DEFAULT_TASKS = [];
 /* =========================
    SAVAGE MESSAGE ENGINE
    ========================= */
-const ROAST = {
-  tier1: [
-    "Tier 1 is still open. That’s not a vibe. That’s a problem.",
-    "Tier 1 overdue. Congratulations, you’ve invented chaos again.",
-    "This is critical. Pretending it’s fine does not count as progress.",
-    "Tier 1 ignored long enough to qualify as negligence."
-  ],
-  tier2: [
-    "Tier 2 is aging like milk. You gonna do anything or nah?",
-    "High-impact stuff doesn’t complete itself. Tragically.",
-    "Tier 2 is overdue. That’s how good systems become ‘later problems’."
-  ],
-  tier3: [
-    "Tier 3 called. Growth is not happening by vibes.",
-    "We should be arrested for this level of tomfoolery.",
-    "This is not blocked. This is being avoided professionally."
-  ],
-  tier4: [
-    "Tier 4 sitting there like a neglected haircut appointment.",
-    "Brand work ignored = redo everything later. Pick your pain.",
-    "Tier 4 overdue. This is how you end up with 'random branding.'"
-  ],
-  tier5: [
-    "Tier 5 has been ignored so long it’s basically a historical site.",
-    "Tier 5 overdue. This is peak nonsense. Elite procrastination.",
-    "Tier 5 is still waiting. Patient little thing, isn’t it?"
-  ]
-};
-
-
 function todayKey(){ return new Date().toDateString(); }
 function stamp(){
   const d=new Date();
@@ -409,82 +384,11 @@ function pickNonRepeatingMessage(tierId){
   return chosen;
 }
 
-function buildSavageBanner(){
-  const zone = document.getElementById("savageZone");
-  zone.innerHTML="";
-  zone.style.display="none";
-
-  const now = Date.now();
-  const today = todayKey();
-
-  // Build list of overdue tiers (excluding parked)
-  const overdue = [];
-  TIERS.forEach(t=>{
-    if(t.cadenceDays == null) return;
-    if(snoozeUntil[t.id] && snoozeUntil[t.id] > now) return;
-    if(!tierHasActionableWork(t.id)) return; // only nag if READY work exists
-    const last = touched[t.id] || 0;
-    const since = daysSince(last);
-    if(since >= t.cadenceDays){
-      overdue.push({ tier:t, since });
-    }
-  });
-
-  if(!overdue.length) return;
-
-  // Show one banner per load cycle, prefer the most overdue tier
-  overdue.sort((a,b)=> b.since - a.since);
-  const pick = overdue[0];
-  const tierId = pick.tier.id;
-
-  // Only fire a new “daily” nag once per tier per day (but still show banner if already nagged today)
-  let msg;
-  if(naggedDate[tierId] !== today){
-    msg = pickNonRepeatingMessage(tierId);
-    naggedDate[tierId] = today;
-    recordLog(pick.tier.title, pick.since, msg);
-    saveAll();
-  } else {
-    // already nagged today: still show something (use last used message if available)
-    const hist = msgHist[tierId] || [];
-    msg = hist[0] || pickNonRepeatingMessage(tierId);
-  }
-
-  zone.style.display="block";
-  const card = document.createElement("div");
-  card.className="savage";
-  card.innerHTML = `
-    <h3>Accountability Alert</h3>
-    <div class="meta"><b>${pick.tier.title}</b> • You haven’t touched this tier in <b>${pick.since}</b> day(s).</div>
-    <p>${msg}</p>
-    <div class="actions">
-      <button type="button" data-snooze="1">Snooze 1 day</button>
-      <button type="button" data-snooze="3">Snooze 3 days</button>
-      <button type="button" data-snooze="7">Snooze 7 days</button>
-      <button type="button" data-jump="1">Jump to Tier</button>
-    </div>
-  `;
-  card.querySelectorAll("button[data-snooze]").forEach(btn=>{
-    btn.onclick=()=>{
-      const d = Number(btn.getAttribute("data-snooze"));
-      snoozeUntil[tierId] = Date.now() + d*DAY_MS;
-      saveAll();
-      render();
-    };
-  });
-  card.querySelector("button[data-jump]").onclick=()=>{
-    const el = document.getElementById(tierId);
-    if(el && el.scrollIntoView){el.open=true;el.scrollIntoView({behavior:"smooth"});}
-  };
-
-  zone.appendChild(card);
-}
-
 /* =========================
    RENDER BOARD
    ========================= */
 function render(){
-  if(sheetReady)buildSavageBanner();
+
   const counts=Object.fromEntries(["ready","working","waiting","done"].map(status=>[status,tasks.filter(t=>t.status===status).length]));
   document.getElementById("trackerSummary").innerHTML=[["Open tasks",tasks.length-counts.done],["In progress",counts.working],["Waiting",counts.waiting],["Completed",counts.done]].map(([label,n])=>'<div class="metric"><strong>'+(loadingState?"—":n)+'</strong><span>'+label+'</span></div>').join("");
   const focus=document.getElementById("focusDashboard");focus.replaceChildren();
@@ -509,11 +413,8 @@ function render(){
     card.addEventListener("toggle",()=>{collapsedTiers[tier.id]=!card.open;});
     card.id = tier.id;
 
-    const hint = tier.cadenceDays==null
-      ? "Done items never trigger reminders."
-      : `Reminder cadence: every ${tier.cadenceDays} day(s) if READY work exists.`;
 
-    card.innerHTML = `<summary><h2>${tier.title}</h2><span class="tier-count">${tierVisible.length}</span></summary><div class="tierHint">${hint}</div>`;
+    card.innerHTML = `<summary><h2>${tier.title}</h2><span class="tier-count">${tierVisible.length}</span></summary>`;
 
 const tierTasks = visible
   .filter(x => x.tier === tier.id)
@@ -625,27 +526,12 @@ const tierTasks = visible
 
   if(!visible.length&&(taskSearch||taskFilter!=="all"))board.innerHTML='<div class="empty-results">No tasks match. Try another status or search.</div>';
   board.querySelectorAll("input,select,button").forEach(el=>{el.disabled=!sheetReady;});
-  renderLogs();
+
 }
 
 /* =========================
    HALL OF SHAME
    ========================= */
-function renderLogs(){
-  const el = document.getElementById("logs");
-  if(!logs.length){
-    el.innerHTML = `<div class="log">No shame logged yet. Suspiciously quiet.</div>`;
-    return;
-  }
-  el.innerHTML = logs.map(l=>{
-    return `<div class="log">
-      <span class="pill">${l.time}</span>
-      <span class="pill">${l.tier}</span>
-      <span class="pill">${l.sinceDays}d</span>
-      ${l.msg}
-    </div>`;
-  }).join("");
-}
 
 /* =========================
    ADD/EDIT MODAL + DELETE SUPPORT
@@ -758,13 +644,10 @@ modal.addEventListener("click", (e)=>{
   if(e.target === modal) closeModal();
 });
 
-/* =========================
-   REMINDER TICK (keep it alive)
-   ========================= */
 loadLocal();
 loadFromPersonalSheet();
-// Re-check every 60 seconds while the page is open
-setInterval(()=>{ if(sheetReady)buildSavageBanner(); }, 60000);
+
+
 </script>
 </body>
 </html>
