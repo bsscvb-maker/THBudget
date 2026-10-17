@@ -126,12 +126,14 @@
 <style>
 *{box-sizing:border-box}body{background:#0b1019;color:#e8edf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}header{background:#101722;padding:20px 24px;border-color:#273244;gap:16px}h1{font-size:23px}.sub{line-height:1.5;color:#9aacc1}button{min-height:40px;cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid #60d5cd;outline-offset:3px}#addTaskBtn,#saveBtn{background:#3bc7bb;color:#062c29;border:0;font-weight:750}.wrap{max-width:1160px;padding:24px}.tracker-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.metric{padding:16px 18px;background:#131d2b;border:1px solid #29364a;border-radius:14px}.metric strong{display:block;font-size:27px}.metric span{font-size:12px;color:#a7b8ce}.tracker-tools{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}.tracker-tools input{flex:1;min-width:180px;padding:12px;background:#111c2a;border:1px solid #35445b;border-radius:10px;color:#fff}.filter-buttons{display:flex;gap:5px;flex-wrap:wrap}.filter-buttons button{background:#152132;color:#aebed2;border:1px solid #314056;padding:8px 12px;border-radius:9px}.filter-buttons button.active{background:#224943;color:#9ef4e9;border-color:#46b7a9}.note{background:#111a27;border-color:#29364a;color:#aabbd0;margin-top:16px}.note summary{cursor:pointer;font-weight:600}.note p{line-height:1.8}.tier{background:#111a27;border-color:#29364a;padding:0;overflow:hidden;scroll-margin-top:90px}.tier>summary{display:flex;align-items:center;gap:12px;cursor:pointer;padding:18px;list-style:none}.tier>summary:before{content:"›";font-size:22px;color:#93a9c2}.tier[open]>summary:before{transform:rotate(90deg)}.tier h2{font-size:15px;margin:0;flex:1}.tier-count{font-size:12px;border:1px solid #35445b;border-radius:20px;padding:3px 9px;color:#adc1d7}.tierHint{padding:0 18px;color:#869ab3}.row{grid-template-columns:24px minmax(180px,1fr) 120px 88px;gap:14px;margin:0;padding:16px 18px;border-top:1px solid #243146}.taskText{font-size:14px;font-weight:550;line-height:1.55;overflow-wrap:anywhere}.row select{width:100%;background:#172335;border-color:#34455d;padding:8px;font-size:11px}.row .move-tier{display:none}.iconBtn{background:#172335;border-color:#34455d;padding:7px 10px}.row input[type=checkbox]{accent-color:#3bc7bb}.empty-tier{padding:4px 18px 20px;color:#8297b1;font-size:13px}.empty-results{padding:36px;text-align:center;border:1px dashed #34455d;border-radius:14px}.hall{background:#111a27;border-color:#29364a;padding:16px}.hall summary{cursor:pointer;color:#aebed2;font-size:13px}.hall .log{padding:12px 0;line-height:1.7;border-color:#29364a}.savage{background:#2b2020;border:1px solid #7b5048}.savage .actions{display:flex;gap:8px;flex-wrap:wrap}.savage button{margin:0;background:#302729;border-color:#70504c}#modal{padding:24px;overflow:auto}#modalBox{margin:7vh auto;width:480px;max-width:100%;background:#142031;border-color:#3a4e69;padding:24px}#modalBox input,#modalBox select{width:100%;font-size:14px;padding:12px;background:#0d1623;border-color:#41536d}#modalBox label{margin-top:18px}#modalActions{margin-top:24px}#modalActions button{padding:10px 20px}
 @media(max-width:700px){header{padding:16px}.wrap{padding:14px}.tracker-summary{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:24px minmax(0,1fr) 88px;gap:10px;padding:14px}.row>*:nth-child(3){grid-column:2;grid-row:2;width:125px}.row>*:nth-child(5){grid-column:3;grid-row:1 / span 2}.row .btns{flex-direction:column}.taskText{grid-column:2}.sub{font-size:11px;max-width:230px}.tier h2{font-size:13px}.tracker-tools input{flex-basis:100%}.filter-buttons{width:100%}.filter-buttons button{flex:1;font-size:12px;padding:7px}}
+</style><style>
+.sync-status{padding:12px 16px;margin-bottom:16px;border:1px solid #34465d;border-radius:10px;color:#aebed2;font-size:13px}.sync-status button{margin-left:12px;padding:4px 12px;background:#213348;border:1px solid #4f6d8c;border-radius:7px;color:#fff}.focus-dashboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}.focus-card{background:#142132;border:1px solid #34465d;border-radius:14px;padding:18px}.focus-card h2{font-size:14px;margin:0 0 12px;color:#72dfd1}.focus-card p{font-size:13px;line-height:1.6;color:#aebed2}.focus-card button{display:block;text-align:left;width:100%;padding:10px 0;background:none;border:0;border-bottom:1px solid #304052;color:#e8edf5;line-height:1.5;font-size:14px}.focus-card button:hover{color:#72dfd1}button:disabled,select:disabled,input[type=checkbox]:disabled{opacity:.45;cursor:wait}@media(max-width:700px){.focus-dashboard{grid-template-columns:1fr}}
 </style></head>
 
 <body>
 <header>
   <div>
-    <h1>Your tasks</h1>
+    <h1>Plan dashboard</h1>
     <div class="sub">Choose a priority. Move one thing forward.</div>
   </div>
   <button id="addTaskBtn">Add Task</button>
@@ -139,14 +141,11 @@
 
 <div class="wrap">
 
-<div id="trackerSummary" class="tracker-summary" aria-live="polite"></div><div class="tracker-tools"><input id="taskSearch" type="search" aria-label="Search tasks" placeholder="Search your tasks…"><div class="filter-buttons"><button type="button" data-filter="all" class="active" aria-pressed="true">All</button><button type="button" data-filter="ready" class="" aria-pressed="false">Ready</button><button type="button" data-filter="working" class="" aria-pressed="false">Working</button><button type="button" data-filter="waiting" class="" aria-pressed="false">Waiting</button><button type="button" data-filter="done" class="" aria-pressed="false">Done</button></div></div>  <div id="savageZone"></div>
+<div id="syncStatus" class="sync-status" role="status">Loading saved tasks…</div><div id="focusDashboard" class="focus-dashboard"></div><div id="trackerSummary" class="tracker-summary" aria-live="polite"></div><div class="tracker-tools"><input id="taskSearch" type="search" aria-label="Search tasks" placeholder="Search your tasks…"><div class="filter-buttons"><button type="button" data-filter="all" class="active" aria-pressed="true">All</button><button type="button" data-filter="ready" class="" aria-pressed="false">Ready</button><button type="button" data-filter="working" class="" aria-pressed="false">Working</button><button type="button" data-filter="waiting" class="" aria-pressed="false">Waiting</button><button type="button" data-filter="done" class="" aria-pressed="false">Done</button></div></div>  <div id="savageZone"></div>
 
   <div id="board"></div>
 
-  <div class="hall">
-    <h3>Hall of Shame</h3>
-    <div id="logs"></div>
-  </div>
+  <details class="hall"><summary>Accountability history</summary><div id="logs"></div></details>
 </div>
 
 <!-- Add/Edit Modal -->
@@ -181,6 +180,7 @@
    OPTION B STORAGE (PERSIST)
    ========================= */
 
+let sheetReady=false,loadingState=true;
 let taskFilter="all",taskSearch="",collapsedTiers={};
 document.getElementById("taskSearch").addEventListener("input",e=>{taskSearch=e.target.value;render();});
 document.querySelectorAll("[data-filter]").forEach(button=>button.addEventListener("click",()=>{taskFilter=button.dataset.filter;document.querySelectorAll("[data-filter]").forEach(b=>{b.classList.toggle("active",b===button);b.setAttribute("aria-pressed",String(b===button));});render();}));
@@ -295,17 +295,25 @@ function loadLocal(){
   render();
 }
 
+function syncStatus(message,retry=false){
+ const el=document.getElementById("syncStatus");el.textContent=message;
+ if(retry){const button=document.createElement("button");button.textContent="Retry connection";button.onclick=loadFromPersonalSheet;el.append(button);}
+}
 async function loadFromPersonalSheet(){
-  try{
-    const response = await fetch(TH41_BACKEND_URL + "?action=getAll", { cache: "no-store" });
-    const state = await response.json();
-    applyState(state);
-    saveLocal();
-    render();
-  } catch(error){
-    console.warn("Personal TH41 Sheet unavailable; using this device's saved copy.", error);
-    loadLocal();
-  }
+ loadingState=true;sheetReady=false;render();syncStatus("Connecting to your saved task list…");
+ const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),12000);
+ try{
+  const response=await fetch(TH41_BACKEND_URL+"?action=getAll",{cache:"no-store",signal:controller.signal});
+  if(!response.ok)throw new Error("Task service returned "+response.status);
+  let state=await response.json();
+  if(state.data&&typeof state.data==="object")state=state.data;
+  if(!Array.isArray(state.tasks))throw new Error("The task service did not return a task list.");
+  applyState(state);saveLocal();sheetReady=true;loadingState=false;render();
+  syncStatus("Connected · "+tasks.length+" saved task"+(tasks.length===1?"":"s"));
+ }catch(error){
+  loadingState=false;render();
+  syncStatus(tasks.length?"Connection unavailable. Showing this device’s saved copy; editing is paused until reconnected.":"Your saved tasks could not be loaded. Nothing has been deleted. Retry the connection or open the original tracker.",true);
+ }finally{clearTimeout(timeout);}
 }
 
 function saveLocal(){
@@ -340,6 +348,7 @@ if(!tasks || !Array.isArray(tasks) || tasks.length === 0){
 })();
 
 function saveAll(){
+  if(!sheetReady)return;
   saveLocal();
   fetch(TH41_BACKEND_URL, {
     method: "POST",
@@ -600,6 +609,7 @@ const tierTasks = visible
   });
 
   if(!visible.length&&(taskSearch||taskFilter!=="all"))board.innerHTML='<div class="empty-results">No tasks match. Try another status or search.</div>';
+  board.querySelectorAll("input,select,button").forEach(el=>{el.disabled=!sheetReady;});
   renderLogs();
 }
 
@@ -650,6 +660,7 @@ function fillTierOptions(){
 fillTierOptions();
 
 function openModal(mode, task){
+  if(!sheetReady)return;
   modalMode = mode;
   modalError.style.display="none";
 
@@ -735,9 +746,10 @@ modal.addEventListener("click", (e)=>{
 /* =========================
    REMINDER TICK (keep it alive)
    ========================= */
+loadLocal();
 loadFromPersonalSheet();
 // Re-check every 60 seconds while the page is open
-setInterval(()=>{ buildSavageBanner(); }, 60000);
+setInterval(()=>{ if(sheetReady)buildSavageBanner(); }, 60000);
 </script>
 </body>
 </html>
