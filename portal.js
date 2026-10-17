@@ -11,6 +11,26 @@
     const systemLabel = [...nav.querySelectorAll('.th-nav-label')].find(el => el.textContent.trim() === 'System');
     nav.insertBefore(link, systemLabel || null);
   }
+
+  if (nav && !nav.querySelector('[href="plan-tracker.html"]')) {
+    const link = document.createElement('a');
+    const current = location.pathname.endsWith('/plan-tracker.html');
+    link.className = 'th-nav-link' + (current ? ' active' : '');
+    link.href = 'plan-tracker.html';
+    if (current) link.setAttribute('aria-current', 'page');
+    link.innerHTML = '<span class="th-nav-icon" aria-hidden="true">✓</span>Plan Tracker';
+    const system = [...nav.querySelectorAll('.th-nav-label')].find(el => el.textContent.trim() === 'System');
+    nav.insertBefore(link, system || null);
+  }
+  const workspaces = document.querySelector('.panel.workspaces');
+  if (workspaces && !workspaces.querySelector('[href="plan-tracker.html"]')) {
+    const card = document.createElement('a');
+    card.className = 'workspace';
+    card.href = 'plan-tracker.html';
+    card.innerHTML = '<span class="workspace-icon" aria-hidden="true">✓</span><span><strong>Plan Tracker</strong><small>Tasks, priorities, and accountability</small></span><span class="workspace-arrow">↗</span>';
+    const admin = workspaces.querySelector('[href="admin.html"]');
+    workspaces.insertBefore(card, admin || null);
+  }
   const header = document.querySelector('.th-app-topbar');
   const status = document.querySelector('#th-connection, #connectionStatus');
   if (header && status) {
