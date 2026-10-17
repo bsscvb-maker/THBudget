@@ -484,14 +484,29 @@ function buildSavageBanner(){
    RENDER BOARD
    ========================= */
 function render(){
-  buildSavageBanner();
+  if(sheetReady)buildSavageBanner();
+  const counts=Object.fromEntries(["ready","working","waiting","done"].map(status=>[status,tasks.filter(t=>t.status===status).length]));
+  document.getElementById("trackerSummary").innerHTML=[["Open tasks",tasks.length-counts.done],["In progress",counts.working],["Waiting",counts.waiting],["Completed",counts.done]].map(([label,n])=>'<div class="metric"><strong>'+(loadingState?"—":n)+'</strong><span>'+label+'</span></div>').join("");
+  const focus=document.getElementById("focusDashboard");focus.replaceChildren();
+  [["Start here","ready"],["In progress","working"],["Waiting on","waiting"]].forEach(([title,status])=>{
+   const card=document.createElement("section");card.className="focus-card";const heading=document.createElement("h2");heading.textContent=title;card.append(heading);
+   const items=tasks.filter(t=>t.status===status).sort((a,b)=>TIERS.findIndex(t=>t.id===a.tier)-TIERS.findIndex(t=>t.id===b.tier)).slice(0,3);
+   if(items.length)items.forEach(t=>{const button=document.createElement("button");button.textContent=t.text;button.disabled=!sheetReady;button.onclick=()=>openModal("edit",t);card.append(button);});
+   else{const p=document.createElement("p");p.textContent=loadingState?"Loading…":sheetReady?"No tasks in this section.":"Waiting for saved tasks";card.append(p);}focus.append(card);
+  });
+  document.getElementById("addTaskBtn").disabled=!sheetReady;
+  const visible=tasks.filter(t=>(taskFilter==="all"||t.status===taskFilter)&&String(t.text).toLowerCase().includes(taskSearch.toLowerCase()));
 
   const board = document.getElementById("board");
   board.innerHTML="";
 
   TIERS.forEach(tier=>{
-    const card = document.createElement("div");
+    const tierVisible=visible.filter(t=>t.tier===tier.id);
+    if((taskFilter!=="all"||taskSearch)&&!tierVisible.length)return;
+    const card = document.createElement("details");
     card.className="tier";
+    card.open=Boolean(taskSearch||taskFilter!=="all"||(collapsedTiers[tier.id]===undefined?tierVisible.some(t=>t.status!=="done"):!collapsedTiers[tier.id]));
+    card.addEventListener("toggle",()=>{collapsedTiers[tier.id]=!card.open;});
     card.id = tier.id;
 
     const hint = tier.cadenceDays==null
