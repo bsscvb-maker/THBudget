@@ -135,6 +135,14 @@
 :scope.dashboard-only header,:scope.dashboard-only .tracker-tools,:scope.dashboard-only #board{display:none}
 :scope.dashboard-only .wrap{padding:16px}
 :scope.dashboard-only .focus-dashboard{margin-top:18px}
+}</style><style>@scope (.tracker-native){
+.focus-card[data-status="ready"]{border-top:3px solid #ff4d4d}
+.focus-card[data-status="working"]{border-top:3px solid #4da6ff}
+.focus-card[data-status="waiting"]{border-top:3px solid #ffd24d}
+.focus-card[data-status="ready"] h2,.metric[data-status="ready"] strong,.metric[data-status="ready"] span{color:#ff4d4d}
+.focus-card[data-status="working"] h2,.metric[data-status="working"] strong,.metric[data-status="working"] span{color:#4da6ff}
+.focus-card[data-status="waiting"] h2,.metric[data-status="waiting"] strong,.metric[data-status="waiting"] span{color:#ffd24d}
+.metric[data-status="done"] strong,.metric[data-status="done"] span{color:#5cff5c}
 }</style></head>
 <body data-th-page="plan-tracker">
 <div id="th-auth" role="dialog" aria-labelledby="th-auth-title"><div class="th-auth-card"><div class="th-auth-brand"><img class="th-auth-logo" src="tiszod-crest.svg" alt=""><span class="th-auth-name" id="th-auth-title">TisZod</span></div><button type="button" id="th-sign-in"><svg class="th-google-icon" aria-hidden="true" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.25 5.48-4.77 7.18l7.73 6C44.41 38.03 46.98 31.87 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.2A23.9 23.9 0 0 0 0 24c0 3.87.93 7.51 2.56 10.78z"/><path fill="#34A853" d="M24 48c6.48 0 11.92-2.13 15.89-5.8l-7.73-6C30.01 37.65 27.25 38.5 24 38.5c-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Sign in with Google</span></button><p id="th-auth-message" role="status" aria-live="polite"></p></div></div>
@@ -416,10 +424,10 @@ function pickNonRepeatingMessage(tierId){
 function render(){
 
   const counts=Object.fromEntries(["ready","working","waiting","done"].map(status=>[status,tasks.filter(t=>t.status===status).length]));
-  document.getElementById("trackerSummary").innerHTML=[["Open tasks",tasks.length-counts.done],["Working",counts.working],["Waiting",counts.waiting],["Done",counts.done]].map(([label,n])=>'<div class="metric"><strong>'+(loadingState?"—":n)+'</strong><span>'+label+'</span></div>').join("");
+  document.getElementById("trackerSummary").innerHTML=[["Ready",counts.ready],["Working",counts.working],["Waiting",counts.waiting],["Done",counts.done]].map(([label,n])=>'<div class="metric" data-status="'+label.toLowerCase()+'"><strong>'+(loadingState?"—":n)+'</strong><span>'+label+'</span></div>').join("");
   const focus=document.getElementById("focusDashboard");focus.replaceChildren();
   [["Ready","ready"],["Working","working"],["Waiting","waiting"]].forEach(([title,status])=>{
-   const card=document.createElement("section");card.className="focus-card";const heading=document.createElement("h2");heading.textContent=title;card.append(heading);
+   const card=document.createElement("section");card.className="focus-card";card.dataset.status=status;const heading=document.createElement("h2");heading.textContent=title;card.append(heading);
    const items=tasks.filter(t=>t.status===status).sort((a,b)=>TIERS.findIndex(t=>t.id===a.tier)-TIERS.findIndex(t=>t.id===b.tier)).slice(0,3);
    if(items.length)items.forEach(t=>{const button=document.createElement("button");button.textContent=t.text;button.disabled=!sheetReady;button.onclick=()=>openModal("edit",t);card.append(button);});
    else{const p=document.createElement("p");p.textContent=loadingState?"Loading…":sheetReady?"No tasks in this section.":"Waiting for saved tasks";card.append(p);}focus.append(card);
